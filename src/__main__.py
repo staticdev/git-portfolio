@@ -1,4 +1,3 @@
-import getpass
 import logging
 import sys
 from typing import Any
@@ -6,6 +5,9 @@ from typing import Dict
 
 import github
 import inquirer
+import requests
+
+import config_manager
 
 
 # starting log
@@ -36,21 +38,21 @@ def _ignore_if_not_confirmed(answers: Dict[str, Any]) -> bool:
 class Manager():
     def __init__(self):
         self.github_repos = []
-        self.selected_github_repos = []
-        self.github_username = getpass.getuser()
         self.github_connection = None
+        self.config_manager = config_manager.ConfigManager()
+        self.configs = self.config_manager.load_configs()
 
-    def issue_create(self) -> None:
+    def create_issues(self) -> None:
         questions = [
             inquirer.Text('title', message='Write an issue title', validate=_not_empty_validation),
             inquirer.Text('body', message='Write an issue body [optional]'),
             inquirer.Text('labels', message='Write issue labels separated by comma [optional]'),
-            inquirer.Confirm('correct',  message='Confirm creation of issue for the project(s) {}. Continue?'.format(self.selected_github_repos), default=False),
+            inquirer.Confirm('correct',  message='Confirm creation of issue for the project(s) {}. Continue?'.format(self.configs.github_selected_repos), default=False),
         ]
         answers = inquirer.prompt(questions)
-        labels = [label.strip() for label in answers['labels'].split(",")]
+        labels = [label.strip() for label in answers['labels'].split(",")] if answers['labels'] else []
         if answers['correct']:
-            for github_repo in self.selected_github_repos:
+            for github_repo in self.configs.github_selected_repos:
                 repo = self.github_connection.get_repo(github_repo)
                 try:
                     repo.create_issue(title=answers['title'], body=answers['body'], labels=labels)
@@ -61,7 +63,7 @@ class Manager():
                     else:
                         print("{}: {}.".format(github_repo, github_exception.data["message"]))
 
-    def pull_request_create(self) -> None:
+    def create_pull_requests(self) -> None:
         # TODO create issue for github to add labels to their API
         questions = [
             inquirer.Text('base', message='Write base branch name (destination)', default="master", validate=_not_empty_validation),
@@ -71,12 +73,12 @@ class Manager():
             inquirer.Confirm('draft',  message='Do you want to create a draft pull request?', default=False),
             inquirer.Confirm('confirmation',  message='Do you want to link pull request to issues by title?', default=False),
             inquirer.Text('link', message='Write issue title (or part of it)', validate=_not_empty_validation, ignore=_ignore_if_not_confirmed),
-            inquirer.Confirm('correct',  message='Confirm creation of pull request(s) for the project(s) {}. Continue?'.format(self.selected_github_repos), default=False)
+            inquirer.Confirm('correct',  message='Confirm creation of pull request(s) for the project(s) {}. Continue?'.format(self.configs.github_selected_repos), default=False)
         ]
         answers = inquirer.prompt(questions)
         if answers['correct']:
             body = answers['body']
-            for github_repo in self.selected_github_repos:
+            for github_repo in self.configs.github_selected_repos:
                 repo = self.github_connection.get_repo(github_repo)
                 # link issues
                 if answers['confirmation']:
@@ -100,14 +102,14 @@ class Manager():
                             extra += "Invalid field {}. ".format(error["field"])
                     print("{}: {}. {}".format(github_repo, github_exception.data["message"], extra))
 
-    def pull_request_merge(self) -> None:
+    def merge_pull_requests(self) -> None:
         """Merge pull request."""
         state = "open"
         questions = [
             inquirer.Text('base', message='Write base branch name (destination)', default="master", validate=_not_empty_validation),
             inquirer.Text('head', message='Write the head branch name (source)', validate=_not_empty_validation),
             inquirer.Text('prefix', message='Write base user or organization name from PR head', default=self.github_username, validate=_not_empty_validation),
-            inquirer.Confirm('correct',  message='Confirm merging of pull request(s) for the project(s) {}. Continue?'.format(self.selected_github_repos), default=False)
+            inquirer.Confirm('correct',  message='Confirm merging of pull request(s) for the project(s) {}. Continue?'.format(self.configs.github_selected_repos), default=False)
         ]
         answers = inquirer.prompt(questions)
         # Important note: base and head arguments have different import formats.
@@ -116,7 +118,7 @@ class Manager():
         head = "{}:{}".format(answers["prefix"], answers["head"])
 
         if answers['correct']:
-            for github_repo in self.selected_github_repos:
+            for github_repo in self.configs.github_selected_repos:
                 repo = self.github_connection.get_repo(github_repo)
                 pulls = repo.get_pulls(state=state, base=answers['base'], head=head)
                 if pulls.totalCount == 1:
@@ -132,14 +134,14 @@ class Manager():
                 else:
                     print("{}: no open PR found for {}:{}.".format(github_repo, answers['base'], answers['head']))
 
-    def branch_delete(self):
+    def delete_branches(self):
         questions = [
             inquirer.Text('branch', message='Write the branch name', validate=_not_empty_validation),
-            inquirer.Confirm('correct',  message='Confirm deleting of branch(es) for the project(s) {}. Continue?'.format(self.selected_github_repos), default=False)
+            inquirer.Confirm('correct',  message='Confirm deleting of branch(es) for the project(s) {}. Continue?'.format(self.configs.github_selected_repos), default=False)
         ]
         answers = inquirer.prompt(questions)
         if answers['correct']:
-            for github_repo in self.selected_github_repos:
+            for github_repo in self.configs.github_selected_repos:
                 repo = self.github_connection.get_repo(github_repo)
                 try:
                     branch = repo.get_branch(branch=answers['branch'])
@@ -148,37 +150,45 @@ class Manager():
                 except github.GithubException as github_exception:
                     print("{}: {}.".format(github_repo, github_exception.data["message"]))
 
-    def github_connect(self):
-        print("We are going to connect to GitHub")
+    def connect_github(self):
         questions = [
-            inquirer.Text('github_username', message='GitHub username', default=self.github_username, validate=_not_empty_validation),
-            inquirer.Password('github_access_token', message='GitHub access token', validate=_not_empty_validation),
+            # inquirer.Text('github_username', message='GitHub username', default=self.github_username, validate=_not_empty_validation),
+            inquirer.Password('github_access_token', message='GitHub access token', validate=_not_empty_validation, default=self.configs.github_access_token),
             inquirer.Text('github_hostname', message='GitHub hostname (change ONLY if you use GitHub Enterprise)'),
         ]
         answers = inquirer.prompt(questions)
-        self.github_username = answers["github_username"]
-        access_token = answers["github_access_token"].strip()
+        self.configs.github_access_token = answers["github_access_token"].strip()
         # GitHub Enterprise
         if answers["github_hostname"]:
             base_url = "https://{}/api/v3".format(answers["github_hostname"])
-            self.github_connection = github.Github(base_url=base_url, login_or_token=access_token)
+            self.github_connection = github.Github(base_url=base_url, login_or_token=self.configs.github_access_token)
         # GitHub.com
         else:
-            self.github_connection = github.Github(access_token)
+            self.github_connection = github.Github(self.configs.github_access_token)
         user = self.github_connection.get_user()
+        try:
+            self.github_username = user.login
+        except (github.BadCredentialsException, github.GithubException):
+            print("Wrong GitHub token/permissions. Please try again.")
+            return self.connect_github()
+        except requests.exceptions.ConnectionError:
+            sys.exit("Unable to reach server. Please check you network.")
         self.github_repos = user.get_repos()
-        self.github_repos_select()
+        self.select_github_repos()
 
-    def github_repos_select(self):
+    def select_github_repos(self) -> None:
+        if self.configs.github_selected_repos:
+            print("\nThe configured repos will be used:")
+            for repo in self.configs.github_selected_repos:
+                print(" *", repo)
+            answer = inquirer.prompt([inquirer.Confirm('', message="Deseja selecionar novas áreas de projeto?")])['']
+            if not answer:
+                return self.create_issues()
+
         try:
             repo_names = [repo.full_name for repo in self.github_repos]
-        except github.BadCredentialsException:
-            print("Wrong GitHub credentials. Please try again.")
-            return self.github_connect()
-        except github.GithubException as github_exception:
-            LOGGER.exception(github_exception)
-            print("Wrong GitHub token/permissions. Please try again.")
-            return self.github_connect()
+        except Exception as ex:
+            print(ex)
 
         while True:
             selected = inquirer.prompt([inquirer.Checkbox("github_repos",
@@ -190,13 +200,14 @@ class Manager():
             else:
                 break
 
-        self.selected_github_repos = selected
-        self.issue_create()
+        self.configs.github_selected_repos = selected
+        self.config_manager.save_configs(self.configs)
+        return self.create_issues()
 
 
 def main():
     manager = Manager()
-    manager.github_connect()
+    manager.connect_github()
 
 
 if __name__ == "__main__":
