@@ -18,7 +18,7 @@ class ConfigManager:
         if os.path.exists(os.path.join(self.CONFIG_FOLDER, self.CONFIG_FILE)):
             print("Loading previous configs\n")
             with open(os.path.join(self.CONFIG_FOLDER, self.CONFIG_FILE)) as config_file:
-                data = yaml.load(config_file)
+                data = yaml.load(config_file, Loader=yaml.FullLoader)
                 return Config(**data)
         os.system(f"mkdir -p {self.CONFIG_FOLDER}")
         return Config()
