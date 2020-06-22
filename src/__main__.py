@@ -46,7 +46,7 @@ class Manager():
         questions = [
             inquirer.Text('title', message='Write an issue title', validate=_not_empty_validation),
             inquirer.Text('body', message='Write an issue body [optional]'),
-            inquirer.Text('labels', message='Write issue labels separated by comma [optional]'),
+            inquirer.Text('labels', message='Write issue labels [optional, separated by comma]'),
             inquirer.Confirm('correct',  message='Confirm creation of issue for the project(s) {}. Continue?'.format(self.configs.github_selected_repos), default=False),
         ]
         answers = inquirer.prompt(questions)
@@ -68,14 +68,17 @@ class Manager():
         questions = [
             inquirer.Text('base', message='Write base branch name (destination)', default="master", validate=_not_empty_validation),
             inquirer.Text('head', message='Write the head branch name (source)', validate=_not_empty_validation),
-            inquirer.Text('title', message='Write an pull request title', validate=_not_empty_validation),
-            inquirer.Text('body', message='Write an pull request body [optional]'),
-            inquirer.Confirm('draft',  message='Do you want to create a draft pull request?', default=False),
+            inquirer.Text('title', message='Write a PR title', validate=_not_empty_validation),
+            inquirer.Text('body', message='Write an PR body [optional]'),
+            inquirer.Confirm('draft',  message='Do you want to create a draft PR?', default=False),
+            inquirer.Text('labels', message='Write PR labels [optional, separated by comma]'),
             inquirer.Confirm('confirmation',  message='Do you want to link pull request to issues by title?', default=False),
             inquirer.Text('link', message='Write issue title (or part of it)', validate=_not_empty_validation, ignore=_ignore_if_not_confirmed),
+            inquirer.Confirm('inherit_labels',  message='Do you want to add labels inherited from the issues?', default=True, ignore=_ignore_if_not_confirmed),
             inquirer.Confirm('correct',  message='Confirm creation of pull request(s) for the project(s) {}. Continue?'.format(self.configs.github_selected_repos), default=False)
         ]
         answers = inquirer.prompt(questions)
+        labels = set(label.strip() for label in answers['labels'].split(",")) if answers['labels'] else set()
         if answers['correct']:
             body = answers['body']
             for github_repo in self.configs.github_selected_repos:
@@ -87,12 +90,18 @@ class Manager():
                     for issue in issues:
                         if answers['link'] in issue.title:
                             closes += "#{} ".format(issue.number)
+                            if answers['inherit_labels']:
+                                issue_labels = [label.name for label in issue.get_labels()]
+                                labels.update(issue_labels)
                     closes = closes.strip()
                     if closes:
                         body += "\n\nCloses {}".format(closes)
                 try:
-                    repo.create_pull(title=answers['title'], body=body, head=answers['head'], base=answers['base'], draft=answers['draft'])
+                    pr = repo.create_pull(title=answers['title'], body=body, head=answers['head'], base=answers['base'], draft=answers['draft'])
                     print("{}: PR created successfully.".format(github_repo))
+                    # PyGithub does not support a list of strings for adding (only one str)
+                    for label in labels:
+                        pr.add_to_labels(label)
                 except github.GithubException as github_exception:
                     extra = ""
                     for error in github_exception.data["errors"]:
@@ -150,7 +159,7 @@ class Manager():
                 except github.GithubException as github_exception:
                     print("{}: {}.".format(github_repo, github_exception.data["message"]))
 
-    def connect_github(self):
+    def connect_github(self) -> None:
         questions = [
             # inquirer.Text('github_username', message='GitHub username', default=self.github_username, validate=_not_empty_validation),
             inquirer.Password('github_access_token', message='GitHub access token', validate=_not_empty_validation, default=self.configs.github_access_token),
@@ -183,7 +192,8 @@ class Manager():
                 print(" *", repo)
             answer = inquirer.prompt([inquirer.Confirm('', message="Deseja selecionar novas áreas de projeto?")])['']
             if not answer:
-                return self.create_issues()
+                print("gitp successfully configured.")
+                return self.create_pull_requests()
 
         try:
             repo_names = [repo.full_name for repo in self.github_repos]
@@ -202,7 +212,8 @@ class Manager():
 
         self.configs.github_selected_repos = selected
         self.config_manager.save_configs(self.configs)
-        return self.create_issues()
+        print("gitp successfully configured.")
+        return self.create_pull_requests()
 
 
 def main():
