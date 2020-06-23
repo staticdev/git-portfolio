@@ -140,15 +140,15 @@ class Manager:
             ),
         ]
         answers = inquirer.prompt(questions)
-        labels = (
-            set(label.strip() for label in answers["labels"].split(","))
-            if answers["labels"]
-            else set()
-        )
         if answers["correct"]:
-            body = answers["body"]
             for github_repo in self.configs.github_selected_repos:
                 repo = self.github_connection.get_repo(github_repo)
+                body = answers["body"]
+                labels = (
+                    set(label.strip() for label in answers["labels"].split(","))
+                    if answers["labels"]
+                    else set()
+                )
                 # link issues
                 if answers["confirmation"]:
                     issues = repo.get_issues(state="open")
