@@ -3,9 +3,9 @@ import logging
 import sys
 from typing import Any
 from typing import Dict
+from typing import Optional
 
 import github
-import inquirer
 import requests
 
 import config_manager
@@ -26,216 +26,126 @@ class Manager:
         self.config_manager = config_manager.ConfigManager()
         self.configs = self.config_manager.load_configs()
 
-    def create_issues(self) -> None:
-        questions = [
-            inquirer.Text(
-                "title", message="Write an issue title", validate=_not_empty_validation
-            ),
-            inquirer.Text("body", message="Write an issue body [optional]"),
-            inquirer.Text(
-                "labels", message="Write issue labels [optional, separated by comma]"
-            ),
-            inquirer.Confirm(
-                "correct",
-                message="Confirm creation of issue for the project(s) {}. Continue?".format(
-                    self.configs.github_selected_repos
-                ),
-                default=False,
-            ),
-        ]
-        answers = inquirer.prompt(questions)
+    def create_issues(self, issue: Optional[prompt.Issue] = None) -> None:
+        if not issue:
+            issue = prompt.create_issues(self.configs.github_selected_repos)
         labels = (
-            [label.strip() for label in answers["labels"].split(",")]
-            if answers["labels"]
+            [label.strip() for label in issue.labels.split(",")]
+            if issue.labels
             else []
         )
-        if answers["correct"]:
-            for github_repo in self.configs.github_selected_repos:
-                repo = self.github_connection.get_repo(github_repo)
-                try:
-                    repo.create_issue(
-                        title=answers["title"], body=answers["body"], labels=labels
-                    )
-                    print("{}: issue created successfully.".format(github_repo))
-                except github.GithubException as github_exception:
-                    if (
-                        github_exception.data["message"]
-                        == "Issues are disabled for this repo"
-                    ):
-                        print(
-                            "{}: {}. It may be a fork.".format(
-                                github_repo, github_exception.data["message"]
-                            )
+        for github_repo in self.configs.github_selected_repos:
+            repo = self.github_connection.get_repo(github_repo)
+            try:
+                repo.create_issue(
+                    title=issue.title, body=issue.body, labels=labels
+                )
+                print("{}: issue created successfully.".format(github_repo))
+            except github.GithubException as github_exception:
+                if (
+                    github_exception.data["message"]
+                    == "Issues are disabled for this repo"
+                ):
+                    print(
+                        "{}: {}. It may be a fork.".format(
+                            github_repo, github_exception.data["message"]
                         )
+                    )
+                else:
+                    print(
+                        "{}: {}.".format(
+                            github_repo, github_exception.data["message"]
+                        )
+                    )
+
+    def create_pull_requests(self, pr: Optional[prompt.PullRequest] = None) -> None:
+        if not pr:
+            pr = prompt.create_pull_requests(self.configs.github_selected_repos)
+
+        for github_repo in self.configs.github_selected_repos:
+            repo = self.github_connection.get_repo(github_repo)
+            body = pr.body
+            labels = (
+                set(label.strip() for label in pr.labels.split(","))
+                if pr.labels
+                else set()
+            )
+            # link issues
+            if pr.confirmation:
+                issues = repo.get_issues(state="open")
+                closes = ""
+                for issue in issues:
+                    if pr.link in issue.title:
+                        closes += "#{} ".format(issue.number)
+                        if pr.inherit_labels:
+                            issue_labels = [
+                                label.name for label in issue.get_labels()
+                            ]
+                            labels.update(issue_labels)
+                closes = closes.strip()
+                if closes:
+                    body += "\n\nCloses {}".format(closes)
+            try:
+                pr = repo.create_pull(
+                    title=pr.title,
+                    body=body,
+                    head=pr.head,
+                    base=pr.base,
+                    draft=pr.draft,
+                )
+                print("{}: PR created successfully.".format(github_repo))
+                # PyGithub does not support a list of strings for adding (only one str)
+                for label in labels:
+                    pr.add_to_labels(label)
+            except github.GithubException as github_exception:
+                extra = ""
+                for error in github_exception.data["errors"]:
+                    if "message" in error:
+                        extra += "{} ".format(error["message"])
                     else:
+                        extra += "Invalid field {}. ".format(error["field"])
+                print(
+                    "{}: {}. {}".format(
+                        github_repo, github_exception.data["message"], extra
+                    )
+                )
+
+    def merge_pull_requests(self) -> None:
+        """Merge pull request."""
+        state = "open"
+        pr_merge = prompt.merge_pull_requests()
+        # Important note: base and head arguments have different import formats.
+        # https://developer.github.com/v3/pulls/#list-pull-requests
+        # head needs format "user/org:branch"
+        head = "{}:{}".format(pr_merge.prefix, pr_merge.head)
+
+        for github_repo in self.configs.github_selected_repos:
+            repo = self.github_connection.get_repo(github_repo)
+            pulls = repo.get_pulls(state=state, base=pr_merge.base, head=head)
+            if pulls.totalCount == 1:
+                pull = pulls[0]
+                if pull.mergeable:
+                    try:
+                        pull.merge()
+                        print("{}: PR merged successfully.".format(github_repo))
+                    except github.GithubException as github_exception:
                         print(
                             "{}: {}.".format(
                                 github_repo, github_exception.data["message"]
                             )
                         )
-
-    def create_pull_requests(self) -> None:
-        # TODO create issue for github to add labels to their API
-        questions = [
-            inquirer.Text(
-                "base",
-                message="Write base branch name (destination)",
-                default="master",
-                validate=_not_empty_validation,
-            ),
-            inquirer.Text(
-                "head",
-                message="Write the head branch name (source)",
-                validate=_not_empty_validation,
-            ),
-            inquirer.Text(
-                "title", message="Write a PR title", validate=_not_empty_validation
-            ),
-            inquirer.Text("body", message="Write an PR body [optional]"),
-            inquirer.Confirm(
-                "draft", message="Do you want to create a draft PR?", default=False
-            ),
-            inquirer.Text(
-                "labels", message="Write PR labels [optional, separated by comma]"
-            ),
-            inquirer.Confirm(
-                "confirmation",
-                message="Do you want to link pull request to issues by title?",
-                default=False,
-            ),
-            inquirer.Text(
-                "link",
-                message="Write issue title (or part of it)",
-                validate=_not_empty_validation,
-                ignore=_ignore_if_not_confirmed,
-            ),
-            inquirer.Confirm(
-                "inherit_labels",
-                message="Do you want to add labels inherited from the issues?",
-                default=True,
-                ignore=_ignore_if_not_confirmed,
-            ),
-            inquirer.Confirm(
-                "correct",
-                message="Confirm creation of pull request(s) for the project(s) {}. Continue?".format(
-                    self.configs.github_selected_repos
-                ),
-                default=False,
-            ),
-        ]
-        answers = inquirer.prompt(questions)
-        if answers["correct"]:
-            for github_repo in self.configs.github_selected_repos:
-                repo = self.github_connection.get_repo(github_repo)
-                body = answers["body"]
-                labels = (
-                    set(label.strip() for label in answers["labels"].split(","))
-                    if answers["labels"]
-                    else set()
-                )
-                # link issues
-                if answers["confirmation"]:
-                    issues = repo.get_issues(state="open")
-                    closes = ""
-                    for issue in issues:
-                        if answers["link"] in issue.title:
-                            closes += "#{} ".format(issue.number)
-                            if answers["inherit_labels"]:
-                                issue_labels = [
-                                    label.name for label in issue.get_labels()
-                                ]
-                                labels.update(issue_labels)
-                    closes = closes.strip()
-                    if closes:
-                        body += "\n\nCloses {}".format(closes)
-                try:
-                    pr = repo.create_pull(
-                        title=answers["title"],
-                        body=body,
-                        head=answers["head"],
-                        base=answers["base"],
-                        draft=answers["draft"],
-                    )
-                    print("{}: PR created successfully.".format(github_repo))
-                    # PyGithub does not support a list of strings for adding (only one str)
-                    for label in labels:
-                        pr.add_to_labels(label)
-                except github.GithubException as github_exception:
-                    extra = ""
-                    for error in github_exception.data["errors"]:
-                        if "message" in error:
-                            extra += "{} ".format(error["message"])
-                        else:
-                            extra += "Invalid field {}. ".format(error["field"])
-                    print(
-                        "{}: {}. {}".format(
-                            github_repo, github_exception.data["message"], extra
-                        )
-                    )
-
-    def merge_pull_requests(self) -> None:
-        """Merge pull request."""
-        state = "open"
-        questions = [
-            inquirer.Text(
-                "base",
-                message="Write base branch name (destination)",
-                default="master",
-                validate=_not_empty_validation,
-            ),
-            inquirer.Text(
-                "head",
-                message="Write the head branch name (source)",
-                validate=_not_empty_validation,
-            ),
-            inquirer.Text(
-                "prefix",
-                message="Write base user or organization name from PR head",
-                default=self.github_username,
-                validate=_not_empty_validation,
-            ),
-            inquirer.Confirm(
-                "correct",
-                message="Confirm merging of pull request(s) for the project(s) {}. Continue?".format(
-                    self.configs.github_selected_repos
-                ),
-                default=False,
-            ),
-        ]
-        answers = inquirer.prompt(questions)
-        # Important note: base and head arguments have different import formats.
-        # https://developer.github.com/v3/pulls/#list-pull-requests
-        # head needs format "user/org:branch"
-        head = "{}:{}".format(answers["prefix"], answers["head"])
-
-        if answers["correct"]:
-            for github_repo in self.configs.github_selected_repos:
-                repo = self.github_connection.get_repo(github_repo)
-                pulls = repo.get_pulls(state=state, base=answers["base"], head=head)
-                if pulls.totalCount == 1:
-                    pull = pulls[0]
-                    if pull.mergeable:
-                        try:
-                            pull.merge()
-                            print("{}: PR merged successfully.".format(github_repo))
-                        except github.GithubException as github_exception:
-                            print(
-                                "{}: {}.".format(
-                                    github_repo, github_exception.data["message"]
-                                )
-                            )
-                    else:
-                        print(
-                            "{}: PR not mergeable, GitHub checks may be running.".format(
-                                github_repo
-                            )
-                        )
                 else:
                     print(
-                        "{}: no open PR found for {}:{}.".format(
-                            github_repo, answers["base"], answers["head"]
+                        "{}: PR not mergeable, GitHub checks may be running.".format(
+                            github_repo
                         )
                     )
+            else:
+                print(
+                    "{}: no open PR found for {}:{}.".format(
+                        github_repo, pr_merge.base, pr_merge.head
+                    )
+                )
 
     def delete_branches(self, branch="") -> None:
         if not branch:
@@ -280,35 +190,20 @@ class Manager:
             print("\nThe configured repos will be used:")
             for repo in self.configs.github_selected_repos:
                 print(" *", repo)
-            answer = prompt.new_repo()
-            if not answer:
+            new_repos = prompt.new_repos()
+            if not new_repos:
                 print("gitp successfully configured.")
-                return self.delete_branches()
+                return self.create_pull_requests()
 
         try:
             repo_names = [repo.full_name for repo in self.github_repos]
         except Exception as ex:
             print(ex)
 
-        while True:
-            selected = inquirer.prompt(
-                [
-                    inquirer.Checkbox(
-                        "github_repos",
-                        message="Which repos are you working on? (Select pressing space)",
-                        choices=repo_names,
-                    )
-                ]
-            )["github_repos"]
-            if len(selected) == 0:
-                print("Please select with `space` at least one repo.\n")
-            else:
-                break
-
-        self.configs.github_selected_repos = selected
+        self.configs.github_selected_repos = prompt.select_repos(repo_names)
         self.config_manager.save_configs(self.configs)
         print("gitp successfully configured.")
-        return self.create_pull_requests()
+        return self.create_issues()
 
 
 def main():
