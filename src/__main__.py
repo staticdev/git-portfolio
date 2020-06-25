@@ -1,3 +1,4 @@
+"""Command-line interface."""
 import logging
 import sys
 from typing import Any
@@ -8,6 +9,7 @@ import inquirer
 import requests
 
 import config_manager
+import prompt
 
 
 # starting log
@@ -15,24 +17,6 @@ FORMAT = "%(asctime)s %(message)s"
 DATE_FORMAT = "%d/%m/%Y %H:%M:%S"
 logging.basicConfig(level=logging.ERROR, format=FORMAT, datefmt=DATE_FORMAT)
 LOGGER = logging.getLogger(__name__)
-
-
-def _not_empty_validation(answers: Dict[str, Any], current: str) -> bool:
-    """Validade if current answer is not just spaces.
-
-    Args:
-        answers (Dict[str, Any]): answers to previous questions (ignored).
-        current (str): answer to current question.
-
-    Returns:
-        bool: if is valid output.
-    """
-    current_without_spaces = current.strip()
-    return True if current_without_spaces else False
-
-
-def _ignore_if_not_confirmed(answers: Dict[str, Any]) -> bool:
-    return not answers["confirmation"]
 
 
 class Manager:
@@ -253,53 +237,27 @@ class Manager:
                         )
                     )
 
-    def delete_branches(self):
-        questions = [
-            inquirer.Text(
-                "branch",
-                message="Write the branch name",
-                validate=_not_empty_validation,
-            ),
-            inquirer.Confirm(
-                "correct",
-                message="Confirm deleting of branch(es) for the project(s) {}. Continue?".format(
-                    self.configs.github_selected_repos
-                ),
-                default=False,
-            ),
-        ]
-        answers = inquirer.prompt(questions)
-        if answers["correct"]:
-            for github_repo in self.configs.github_selected_repos:
-                repo = self.github_connection.get_repo(github_repo)
-                try:
-                    branch = repo.get_branch(branch=answers["branch"])
+    def delete_branches(self, branch="") -> None:
+        if not branch:
+            branch = prompt.delete_branches(self.configs.github_selected_repos)
 
-                    print("{}: branch deleted successfully.".format(github_repo))
-                except github.GithubException as github_exception:
-                    print(
-                        "{}: {}.".format(github_repo, github_exception.data["message"])
-                    )
+        for github_repo in self.configs.github_selected_repos:
+            repo = self.github_connection.get_repo(github_repo)
+            try:
+                git_ref = repo.get_git_ref("heads/{}".format(branch))
+                git_ref.delete()
+                print("{}: branch deleted successfully.".format(github_repo))
+            except github.GithubException as github_exception:
+                print(
+                    "{}: {}.".format(github_repo, github_exception.data["message"])
+                )
 
     def connect_github(self) -> None:
-        questions = [
-            # inquirer.Text('github_username', message='GitHub username', default=self.github_username, validate=_not_empty_validation),
-            inquirer.Password(
-                "github_access_token",
-                message="GitHub access token",
-                validate=_not_empty_validation,
-                default=self.configs.github_access_token,
-            ),
-            inquirer.Text(
-                "github_hostname",
-                message="GitHub hostname (change ONLY if you use GitHub Enterprise)",
-            ),
-        ]
-        answers = inquirer.prompt(questions)
-        self.configs.github_access_token = answers["github_access_token"].strip()
+        answers = prompt.connect_github(self.configs.github_access_token)
+        self.configs.github_access_token = answers.github_access_token.strip()
         # GitHub Enterprise
-        if answers["github_hostname"]:
-            base_url = "https://{}/api/v3".format(answers["github_hostname"])
+        if answers.github_hostname:
+            base_url = "https://{}/api/v3".format(answers.github_hostname)
             self.github_connection = github.Github(
                 base_url=base_url, login_or_token=self.configs.github_access_token
             )
@@ -322,16 +280,10 @@ class Manager:
             print("\nThe configured repos will be used:")
             for repo in self.configs.github_selected_repos:
                 print(" *", repo)
-            answer = inquirer.prompt(
-                [
-                    inquirer.Confirm(
-                        "", message="Deseja selecionar novas áreas de projeto?"
-                    )
-                ]
-            )[""]
+            answer = prompt.new_repo()
             if not answer:
                 print("gitp successfully configured.")
-                return self.merge_pull_requests()
+                return self.delete_branches()
 
         try:
             repo_names = [repo.full_name for repo in self.github_repos]
