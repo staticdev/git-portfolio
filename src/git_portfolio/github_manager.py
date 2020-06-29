@@ -8,8 +8,8 @@ from typing import Optional
 import github
 import requests
 
-import config_manager
-import prompt
+import git_portfolio.config_manager
+import git_portfolio.prompt
 
 
 # starting log
@@ -19,16 +19,16 @@ logging.basicConfig(level=logging.ERROR, format=FORMAT, datefmt=DATE_FORMAT)
 LOGGER = logging.getLogger(__name__)
 
 
-class Manager:
+class GithubManager:
     def __init__(self):
         self.github_repos = []
         self.github_connection = None
-        self.config_manager = config_manager.ConfigManager()
+        self.config_manager = git_portfolio.config_manager.ConfigManager()
         self.configs = self.config_manager.load_configs()
 
-    def create_issues(self, issue: Optional[prompt.Issue] = None) -> None:
+    def create_issues(self, issue: Optional[git_portfolio.prompt.Issue] = None) -> None:
         if not issue:
-            issue = prompt.create_issues(self.configs.github_selected_repos)
+            issue = git_portfolio.prompt.create_issues(self.configs.github_selected_repos)
         labels = (
             [label.strip() for label in issue.labels.split(",")]
             if issue.labels
@@ -58,9 +58,9 @@ class Manager:
                         )
                     )
 
-    def create_pull_requests(self, pr: Optional[prompt.PullRequest] = None) -> None:
+    def create_pull_requests(self, pr: Optional[git_portfolio.prompt.PullRequest] = None) -> None:
         if not pr:
-            pr = prompt.create_pull_requests(self.configs.github_selected_repos)
+            pr = git_portfolio.prompt.create_pull_requests(self.configs.github_selected_repos)
 
         for github_repo in self.configs.github_selected_repos:
             repo = self.github_connection.get_repo(github_repo)
@@ -113,7 +113,7 @@ class Manager:
     def merge_pull_requests(self) -> None:
         """Merge pull request."""
         state = "open"
-        pr_merge = prompt.merge_pull_requests()
+        pr_merge = git_portfolio.prompt.merge_pull_requests()
         # Important note: base and head arguments have different import formats.
         # https://developer.github.com/v3/pulls/#list-pull-requests
         # head needs format "user/org:branch"
@@ -149,7 +149,7 @@ class Manager:
 
     def delete_branches(self, branch="") -> None:
         if not branch:
-            branch = prompt.delete_branches(self.configs.github_selected_repos)
+            branch = git_portfolio.prompt.delete_branches(self.configs.github_selected_repos)
 
         for github_repo in self.configs.github_selected_repos:
             repo = self.github_connection.get_repo(github_repo)
@@ -162,8 +162,8 @@ class Manager:
                     "{}: {}.".format(github_repo, github_exception.data["message"])
                 )
 
-    def connect_github(self) -> None:
-        answers = prompt.connect_github(self.configs.github_access_token)
+    def init_config(self) -> None:
+        answers = git_portfolio.prompt.connect_github(self.configs.github_access_token)
         self.configs.github_access_token = answers.github_access_token.strip()
         # GitHub Enterprise
         if answers.github_hostname:
@@ -190,26 +190,16 @@ class Manager:
             print("\nThe configured repos will be used:")
             for repo in self.configs.github_selected_repos:
                 print(" *", repo)
-            new_repos = prompt.new_repos()
+            new_repos = git_portfolio.prompt.new_repos()
             if not new_repos:
                 print("gitp successfully configured.")
-                return self.create_pull_requests()
+                return
 
         try:
             repo_names = [repo.full_name for repo in self.github_repos]
         except Exception as ex:
             print(ex)
 
-        self.configs.github_selected_repos = prompt.select_repos(repo_names)
+        self.configs.github_selected_repos = git_portfolio.prompt.select_repos(repo_names)
         self.config_manager.save_configs(self.configs)
         print("gitp successfully configured.")
-        return self.create_issues()
-
-
-def main():
-    manager = Manager()
-    manager.connect_github()
-
-
-if __name__ == "__main__":
-    main()
