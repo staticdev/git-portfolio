@@ -38,7 +38,7 @@ source = ["src", "*/site-packages"] # configure source tree layout
 
 [tool.coverage.run]
 branch = true # enable branch analysis
-source = ["toml_validator"] # configure package name
+source = ["git_portfolio"] # configure package name
 
 [tool.coverage.report]
 show_missing = true
