@@ -21,10 +21,13 @@ LOGGER = logging.getLogger(__name__)
 
 class GithubManager:
     def __init__(self):
-        self.github_repos = []
-        self.github_connection = None
         self.config_manager = git_portfolio.config_manager.ConfigManager()
         self.configs = self.config_manager.load_configs()
+        if self.configs.github_access_token:
+            self.github_connection = self.get_github_connection()
+            self.github_repos = self.get_github_repos()
+        else:
+            self.init_config()
 
     def create_issues(self, issue: Optional[git_portfolio.prompt.Issue] = None) -> None:
         if not issue:
@@ -162,28 +165,26 @@ class GithubManager:
                     "{}: {}.".format(github_repo, github_exception.data["message"])
                 )
 
-    def init_config(self) -> None:
-        answers = git_portfolio.prompt.connect_github(self.configs.github_access_token)
-        self.configs.github_access_token = answers.github_access_token.strip()
+    def get_github_connection(self) -> github.Github:
         # GitHub Enterprise
-        if answers.github_hostname:
-            base_url = "https://{}/api/v3".format(answers.github_hostname)
-            self.github_connection = github.Github(
+        if self.configs.github_hostname:
+            base_url = "https://{}/api/v3".format(self.configs.github_hostname)
+            return github.Github(
                 base_url=base_url, login_or_token=self.configs.github_access_token
             )
         # GitHub.com
-        else:
-            self.github_connection = github.Github(self.configs.github_access_token)
+        return github.Github(self.configs.github_access_token)
+
+    def get_github_repos(self) -> github.PaginatedList.PaginatedList:
         user = self.github_connection.get_user()
         try:
             self.github_username = user.login
         except (github.BadCredentialsException, github.GithubException):
             print("Wrong GitHub token/permissions. Please try again.")
-            return self.connect_github()
+            return self.init_config()
         except requests.exceptions.ConnectionError:
             sys.exit("Unable to reach server. Please check you network.")
-        self.github_repos = user.get_repos()
-        self.select_github_repos()
+        return user.get_repos()
 
     def select_github_repos(self) -> None:
         if self.configs.github_selected_repos:
@@ -203,3 +204,11 @@ class GithubManager:
         self.configs.github_selected_repos = git_portfolio.prompt.select_repos(repo_names)
         self.config_manager.save_configs(self.configs)
         print("gitp successfully configured.")
+
+    def init_config(self) -> None:
+        answers = git_portfolio.prompt.connect_github(self.configs.github_access_token)
+        self.configs.github_access_token = answers.github_access_token.strip()
+        self.configs.github_hostname = answers.github_hostname
+        self.github_connection = self.get_github_connection()
+        self.github_repos = self.get_github_repos()
+        self.select_github_repos()
