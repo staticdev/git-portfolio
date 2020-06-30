@@ -4,13 +4,13 @@ import sys
 from typing import Any
 from typing import Dict
 from typing import Optional
+from typing import Union
 
 import github
 import requests
 
-import config_manager
-import prompt
-
+import git_portfolio.config_manager as config_manager
+import git_portfolio.prompt as prompt
 
 # starting log
 FORMAT = "%(asctime)s %(message)s"
@@ -19,27 +19,25 @@ logging.basicConfig(level=logging.ERROR, format=FORMAT, datefmt=DATE_FORMAT)
 LOGGER = logging.getLogger(__name__)
 
 
-class Manager:
+class GithubManager:
     def __init__(self):
-        self.github_repos = []
-        self.github_connection = None
         self.config_manager = config_manager.ConfigManager()
         self.configs = self.config_manager.load_configs()
+        if self.configs.github_access_token:
+            self.github_setup()
+        else:
+            self.init_config()
 
     def create_issues(self, issue: Optional[prompt.Issue] = None) -> None:
         if not issue:
             issue = prompt.create_issues(self.configs.github_selected_repos)
         labels = (
-            [label.strip() for label in issue.labels.split(",")]
-            if issue.labels
-            else []
+            [label.strip() for label in issue.labels.split(",")] if issue.labels else []
         )
         for github_repo in self.configs.github_selected_repos:
             repo = self.github_connection.get_repo(github_repo)
             try:
-                repo.create_issue(
-                    title=issue.title, body=issue.body, labels=labels
-                )
+                repo.create_issue(title=issue.title, body=issue.body, labels=labels)
                 print("{}: issue created successfully.".format(github_repo))
             except github.GithubException as github_exception:
                 if (
@@ -53,9 +51,7 @@ class Manager:
                     )
                 else:
                     print(
-                        "{}: {}.".format(
-                            github_repo, github_exception.data["message"]
-                        )
+                        "{}: {}.".format(github_repo, github_exception.data["message"])
                     )
 
     def create_pull_requests(self, pr: Optional[prompt.PullRequest] = None) -> None:
@@ -78,9 +74,7 @@ class Manager:
                     if pr.link in issue.title:
                         closes += "#{} ".format(issue.number)
                         if pr.inherit_labels:
-                            issue_labels = [
-                                label.name for label in issue.get_labels()
-                            ]
+                            issue_labels = [label.name for label in issue.get_labels()]
                             labels.update(issue_labels)
                 closes = closes.strip()
                 if closes:
@@ -110,14 +104,19 @@ class Manager:
                     )
                 )
 
-    def merge_pull_requests(self) -> None:
+    def merge_pull_requests(
+        self, pr_merge: Optional[prompt.PullRequestMerge] = None
+    ) -> None:
         """Merge pull request."""
-        state = "open"
-        pr_merge = prompt.merge_pull_requests()
+        if not pr_merge:
+            pr_merge = prompt.merge_pull_requests(
+                self.github_username, self.configs.github_selected_repos
+            )
         # Important note: base and head arguments have different import formats.
         # https://developer.github.com/v3/pulls/#list-pull-requests
         # head needs format "user/org:branch"
         head = "{}:{}".format(pr_merge.prefix, pr_merge.head)
+        state = "open"
 
         for github_repo in self.configs.github_selected_repos:
             repo = self.github_connection.get_repo(github_repo)
@@ -158,32 +157,39 @@ class Manager:
                 git_ref.delete()
                 print("{}: branch deleted successfully.".format(github_repo))
             except github.GithubException as github_exception:
-                print(
-                    "{}: {}.".format(github_repo, github_exception.data["message"])
-                )
+                print("{}: {}.".format(github_repo, github_exception.data["message"]))
 
-    def connect_github(self) -> None:
-        answers = prompt.connect_github(self.configs.github_access_token)
-        self.configs.github_access_token = answers.github_access_token.strip()
+    def get_github_connection(self) -> github.Github:
         # GitHub Enterprise
-        if answers.github_hostname:
-            base_url = "https://{}/api/v3".format(answers.github_hostname)
-            self.github_connection = github.Github(
+        if self.configs.github_hostname:
+            base_url = "https://{}/api/v3".format(self.configs.github_hostname)
+            return github.Github(
                 base_url=base_url, login_or_token=self.configs.github_access_token
             )
         # GitHub.com
-        else:
-            self.github_connection = github.Github(self.configs.github_access_token)
-        user = self.github_connection.get_user()
+        return github.Github(self.configs.github_access_token)
+
+    def get_github_username(
+        self,
+        user: Union[
+            github.AuthenticatedUser.AuthenticatedUser, github.NamedUser.NamedUser
+        ],
+    ) -> str:
         try:
-            self.github_username = user.login
+            return user.login
         except (github.BadCredentialsException, github.GithubException):
             print("Wrong GitHub token/permissions. Please try again.")
-            return self.connect_github()
+            self.init_config()
         except requests.exceptions.ConnectionError:
             sys.exit("Unable to reach server. Please check you network.")
-        self.github_repos = user.get_repos()
-        self.select_github_repos()
+
+    def get_github_repos(
+        self,
+        user: Union[
+            github.AuthenticatedUser.AuthenticatedUser, github.NamedUser.NamedUser
+        ],
+    ) -> github.PaginatedList.PaginatedList:
+        return user.get_repos()
 
     def select_github_repos(self) -> None:
         if self.configs.github_selected_repos:
@@ -193,7 +199,7 @@ class Manager:
             new_repos = prompt.new_repos()
             if not new_repos:
                 print("gitp successfully configured.")
-                return self.create_pull_requests()
+                return
 
         try:
             repo_names = [repo.full_name for repo in self.github_repos]
@@ -203,13 +209,16 @@ class Manager:
         self.configs.github_selected_repos = prompt.select_repos(repo_names)
         self.config_manager.save_configs(self.configs)
         print("gitp successfully configured.")
-        return self.create_issues()
 
+    def github_setup(self) -> None:
+        self.github_connection = self.get_github_connection()
+        user = self.github_connection.get_user()
+        self.github_username = self.get_github_username(user)
+        self.github_repos = self.get_github_repos(user)
 
-def main():
-    manager = Manager()
-    manager.connect_github()
-
-
-if __name__ == "__main__":
-    main()
+    def init_config(self) -> None:
+        answers = prompt.connect_github(self.configs.github_access_token)
+        self.configs.github_access_token = answers.github_access_token.strip()
+        self.configs.github_hostname = answers.github_hostname
+        self.github_setup()
+        self.select_github_repos()

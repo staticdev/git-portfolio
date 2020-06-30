@@ -55,9 +55,7 @@ def create_issues(github_selected_repos):
 def delete_branches(github_selected_repos) -> str:
     questions = [
         inquirer.Text(
-            "branch",
-            message="Write the branch name",
-            validate=_not_empty_validation,
+            "branch", message="Write the branch name", validate=_not_empty_validation,
         ),
         inquirer.Confirm(
             "correct",
@@ -74,7 +72,20 @@ def delete_branches(github_selected_repos) -> str:
     return answers["branch"]
 
 
-PullRequest = collections.namedtuple("PullRequest", ["title", "body", "labels", "confirmation", "link", "inherit_labels", "head", "base", "draft"])
+PullRequest = collections.namedtuple(
+    "PullRequest",
+    [
+        "title",
+        "body",
+        "labels",
+        "confirmation",
+        "link",
+        "inherit_labels",
+        "head",
+        "base",
+        "draft",
+    ],
+)
 
 
 def create_pull_requests(github_selected_repos):
@@ -129,13 +140,25 @@ def create_pull_requests(github_selected_repos):
     while not correct:
         answers = inquirer.prompt(questions)
         correct = answers["correct"]
-    return PullRequest(answers["title"], answers["body"], answers["labels"], answers["confirmation"], answers["link"], answers["inherit_labels"], answers["head"], answers["base"], answers["draft"])
+    return PullRequest(
+        answers["title"],
+        answers["body"],
+        answers["labels"],
+        answers["confirmation"],
+        answers["link"],
+        answers["inherit_labels"],
+        answers["head"],
+        answers["base"],
+        answers["draft"],
+    )
 
 
-PullRequestMerge = collections.namedtuple("PullRequestMerge", ["base", "head", "prefix"])
+PullRequestMerge = collections.namedtuple(
+    "PullRequestMerge", ["base", "head", "prefix"]
+)
 
 
-def merge_pull_requests():
+def merge_pull_requests(github_username, github_selected_repos):
     questions = [
         inquirer.Text(
             "base",
@@ -151,13 +174,13 @@ def merge_pull_requests():
         inquirer.Text(
             "prefix",
             message="Write base user or organization name from PR head",
-            default=self.github_username,
+            default=github_username,
             validate=_not_empty_validation,
         ),
         inquirer.Confirm(
             "correct",
             message="Confirm merging of pull request(s) for the project(s) {}. Continue?".format(
-                self.configs.github_selected_repos
+                github_selected_repos
             ),
             default=False,
         ),
@@ -169,7 +192,9 @@ def merge_pull_requests():
     return PullRequestMerge(answers["base"], answers["head"], answers["prefix"])
 
 
-ConnectGithub = collections.namedtuple("ConnectGithub", ["github_access_token", "github_hostname"])
+ConnectGithub = collections.namedtuple(
+    "ConnectGithub", ["github_access_token", "github_hostname"]
+)
 
 
 def connect_github(github_access_token: str) -> ConnectGithub:
@@ -191,12 +216,8 @@ def connect_github(github_access_token: str) -> ConnectGithub:
 
 def new_repos() -> bool:
     answer = inquirer.prompt(
-                [
-                    inquirer.Confirm(
-                        "", message="Do you want to select new repositories?"
-                    )
-                ]
-            )[""]
+        [inquirer.Confirm("", message="Do you want to select new repositories?")]
+    )[""]
     return answer
 
 
