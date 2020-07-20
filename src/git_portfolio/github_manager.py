@@ -38,7 +38,7 @@ class GithubManager:
             repo = self.github_connection.get_repo(github_repo)
             try:
                 repo.create_issue(title=issue.title, body=issue.body, labels=labels)
-                print("{}: issue created successfully.".format(github_repo))
+                print(f"{github_repo}: issue created successfully.")
             except github.GithubException as github_exception:
                 if (
                     github_exception.data["message"]
@@ -72,25 +72,25 @@ class GithubManager:
                 closes = ""
                 for issue in issues:
                     if pr.link in issue.title:
-                        closes += "#{} ".format(issue.number)
+                        closes += f"#{issue.number} "
                         if pr.inherit_labels:
                             issue_labels = [label.name for label in issue.get_labels()]
                             labels.update(issue_labels)
                 closes = closes.strip()
                 if closes:
-                    body += "\n\nCloses {}".format(closes)
+                    body += f"\n\nCloses {closes}"
             try:
-                pr = repo.create_pull(
+                created_pr = repo.create_pull(
                     title=pr.title,
                     body=body,
                     head=pr.head,
                     base=pr.base,
                     draft=pr.draft,
                 )
-                print("{}: PR created successfully.".format(github_repo))
+                print(f"{github_repo}: PR created successfully.")
                 # PyGithub does not support a list of strings for adding (only one str)
                 for label in labels:
-                    pr.add_to_labels(label)
+                    created_pr.add_to_labels(label)
             except github.GithubException as github_exception:
                 extra = ""
                 for error in github_exception.data["errors"]:
@@ -115,7 +115,7 @@ class GithubManager:
         # Important note: base and head arguments have different import formats.
         # https://developer.github.com/v3/pulls/#list-pull-requests
         # head needs format "user/org:branch"
-        head = "{}:{}".format(pr_merge.prefix, pr_merge.head)
+        head = f"{pr_merge.prefix}:{pr_merge.head}"
         state = "open"
 
         for github_repo in self.configs.github_selected_repos:
@@ -126,7 +126,7 @@ class GithubManager:
                 if pull.mergeable:
                     try:
                         pull.merge()
-                        print("{}: PR merged successfully.".format(github_repo))
+                        print(f"{github_repo}: PR merged successfully.")
                     except github.GithubException as github_exception:
                         print(
                             "{}: {}.".format(
@@ -135,15 +135,11 @@ class GithubManager:
                         )
                 else:
                     print(
-                        "{}: PR not mergeable, GitHub checks may be running.".format(
-                            github_repo
-                        )
+                        f"{github_repo}: PR not mergeable, GitHub checks may be running."
                     )
             else:
                 print(
-                    "{}: no open PR found for {}:{}.".format(
-                        github_repo, pr_merge.base, pr_merge.head
-                    )
+                    f"{github_repo}: no open PR found for {pr_merge.base}:{pr_merge.head}."
                 )
 
     def delete_branches(self, branch="") -> None:
@@ -153,16 +149,16 @@ class GithubManager:
         for github_repo in self.configs.github_selected_repos:
             repo = self.github_connection.get_repo(github_repo)
             try:
-                git_ref = repo.get_git_ref("heads/{}".format(branch))
+                git_ref = repo.get_git_ref(f"heads/{branch}")
                 git_ref.delete()
-                print("{}: branch deleted successfully.".format(github_repo))
+                print(f"{github_repo}: branch deleted successfully.")
             except github.GithubException as github_exception:
                 print("{}: {}.".format(github_repo, github_exception.data["message"]))
 
     def get_github_connection(self) -> github.Github:
         # GitHub Enterprise
         if self.configs.github_hostname:
-            base_url = "https://{}/api/v3".format(self.configs.github_hostname)
+            base_url = f"https://{self.configs.github_hostname}/api/v3"
             return github.Github(
                 base_url=base_url, login_or_token=self.configs.github_access_token
             )

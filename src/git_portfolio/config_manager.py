@@ -1,5 +1,4 @@
 """Configuration manager module."""
-import collections
 import os
 import yaml
 from typing import List

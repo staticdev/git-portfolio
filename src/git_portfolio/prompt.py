@@ -88,7 +88,7 @@ PullRequest = collections.namedtuple(
 )
 
 
-def create_pull_requests(github_selected_repos):
+def create_pull_requests(github_selected_repos) -> PullRequest:
     questions = [
         inquirer.Text(
             "base",
