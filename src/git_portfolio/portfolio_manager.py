@@ -1,8 +1,6 @@
 """Command-line interface."""
 import logging
 import sys
-from typing import Any
-from typing import Dict
 from typing import Optional
 from typing import Union
 
@@ -19,14 +17,14 @@ logging.basicConfig(level=logging.ERROR, format=FORMAT, datefmt=DATE_FORMAT)
 LOGGER = logging.getLogger(__name__)
 
 
-class GithubManager:
+class PortfolioManager:
     def __init__(self):
         self.config_manager = config_manager.ConfigManager()
         self.configs = self.config_manager.load_configs()
         if self.configs.github_access_token:
             self.github_setup()
         else:
-            self.init_config()
+            self.config_ini()
 
     def create_issues(self, issue: Optional[prompt.Issue] = None) -> None:
         if not issue:
@@ -174,8 +172,7 @@ class GithubManager:
         try:
             return user.login
         except (github.BadCredentialsException, github.GithubException):
-            print("Wrong GitHub token/permissions. Please try again.")
-            self.init_config()
+            return ""
         except requests.exceptions.ConnectionError:
             sys.exit("Unable to reach server. Please check you network.")
 
@@ -187,7 +184,7 @@ class GithubManager:
     ) -> github.PaginatedList.PaginatedList:
         return user.get_repos()
 
-    def select_github_repos(self) -> None:
+    def config_repos(self) -> None:
         if self.configs.github_selected_repos:
             print("\nThe configured repos will be used:")
             for repo in self.configs.github_selected_repos:
@@ -197,24 +194,30 @@ class GithubManager:
                 print("gitp successfully configured.")
                 return
 
-        try:
-            repo_names = [repo.full_name for repo in self.github_repos]
-        except Exception as ex:
-            print(ex)
+        repo_names = [repo.full_name for repo in self.github_repos]
 
         self.configs.github_selected_repos = prompt.select_repos(repo_names)
         self.config_manager.save_configs(self.configs)
         print("gitp successfully configured.")
 
-    def github_setup(self) -> None:
+    def github_setup(self) -> bool:
+        """Setup Github connection properties."""
         self.github_connection = self.get_github_connection()
         user = self.github_connection.get_user()
         self.github_username = self.get_github_username(user)
+        if not self.github_username:
+            return False
         self.github_repos = self.get_github_repos(user)
+        return True
 
-    def init_config(self) -> None:
-        answers = prompt.connect_github(self.configs.github_access_token)
-        self.configs.github_access_token = answers.github_access_token.strip()
-        self.configs.github_hostname = answers.github_hostname
-        self.github_setup()
-        self.select_github_repos()
+    def config_ini(self) -> None:
+        # only config if gets a valid connection
+        valid = False
+        while not valid:
+            answers = prompt.connect_github(self.configs.github_access_token)
+            self.configs.github_access_token = answers.github_access_token.strip()
+            self.configs.github_hostname = answers.github_hostname
+            valid = self.github_setup()
+            if not valid:
+                print("Wrong GitHub token/permissions. Please try again.")
+        self.config_repos()
