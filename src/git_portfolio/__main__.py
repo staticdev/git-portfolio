@@ -78,5 +78,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # main(prog_name="gitp")  # pragma: no cover
-    pm.PortfolioManager().config_repos()
+    main(prog_name="gitp")  # pragma: no cover
