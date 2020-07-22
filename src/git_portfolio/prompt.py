@@ -194,7 +194,9 @@ def merge_pull_requests(github_username, github_selected_repos):
     while not correct:
         answers = inquirer.prompt(questions)
         correct = answers["correct"]
-    return PullRequestMerge(answers["base"], answers["head"], answers["prefix"], answers["delete_branch"])
+    return PullRequestMerge(
+        answers["base"], answers["head"], answers["prefix"], answers["delete_branch"]
+    )
 
 
 ConnectGithub = collections.namedtuple(

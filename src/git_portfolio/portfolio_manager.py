@@ -128,9 +128,7 @@ class PortfolioManager:
                         if pr_merge.delete_branch:
                             self.delete_branches(pr_merge.head, github_repo)
                     except github.GithubException as github_exception:
-                        print(
-                            f"{github_repo}: {github_exception.data['message']}."
-                        )
+                        print(f"{github_repo}: {github_exception.data['message']}.")
                 else:
                     print(
                         f"{github_repo}: PR not mergeable, GitHub checks may be running."
