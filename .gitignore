@@ -8,3 +8,8 @@
 /src/*.egg-info/
 __pycache__/
 
+# Pycharm
+.idea/
+
+# Visual Studio Code
+.vscode/
