@@ -125,11 +125,11 @@ class PortfolioManager:
                     try:
                         pull.merge()
                         print(f"{github_repo}: PR merged successfully.")
+                        if pr_merge.delete_branch:
+                            self.delete_branches(pr_merge.head, github_repo)
                     except github.GithubException as github_exception:
                         print(
-                            "{}: {}.".format(
-                                github_repo, github_exception.data["message"]
-                            )
+                            f"{github_repo}: {github_exception.data['message']}."
                         )
                 else:
                     print(
@@ -140,18 +140,24 @@ class PortfolioManager:
                     f"{github_repo}: no open PR found for {pr_merge.base}:{pr_merge.head}."
                 )
 
-    def delete_branches(self, branch="") -> None:
+    def delete_branches(self, branch="", github_repo="") -> None:
         if not branch:
             branch = prompt.delete_branches(self.configs.github_selected_repos)
 
-        for github_repo in self.configs.github_selected_repos:
-            repo = self.github_connection.get_repo(github_repo)
-            try:
-                git_ref = repo.get_git_ref(f"heads/{branch}")
-                git_ref.delete()
-                print(f"{github_repo}: branch deleted successfully.")
-            except github.GithubException as github_exception:
-                print("{}: {}.".format(github_repo, github_exception.data["message"]))
+        if github_repo:
+            self._delete_branch_from_repo(branch, github_repo)
+        else:
+            for github_repo in self.configs.github_selected_repos:
+                self._delete_branch_from_repo(branch, github_repo)
+
+    def _delete_branch_from_repo(self, branch, github_repo):
+        repo = self.github_connection.get_repo(github_repo)
+        try:
+            git_ref = repo.get_git_ref(f"heads/{branch}")
+            git_ref.delete()
+            print(f"{github_repo}: branch deleted successfully.")
+        except github.GithubException as github_exception:
+            print(f"{github_repo}: {github_exception.data['message']}.")
 
     def get_github_connection(self) -> github.Github:
         # GitHub Enterprise

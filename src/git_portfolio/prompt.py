@@ -154,7 +154,7 @@ def create_pull_requests(github_selected_repos) -> PullRequest:
 
 
 PullRequestMerge = collections.namedtuple(
-    "PullRequestMerge", ["base", "head", "prefix"]
+    "PullRequestMerge", ["base", "head", "prefix", "delete_branch"]
 )
 
 
@@ -178,6 +178,11 @@ def merge_pull_requests(github_username, github_selected_repos):
             validate=_not_empty_validation,
         ),
         inquirer.Confirm(
+            "delete_branch",
+            message="Do you want to delete head branch on merge?",
+            default=False,
+        ),
+        inquirer.Confirm(
             "correct",
             message="Confirm merging of pull request(s) for the project(s) {}. Continue?".format(
                 github_selected_repos
@@ -189,7 +194,7 @@ def merge_pull_requests(github_username, github_selected_repos):
     while not correct:
         answers = inquirer.prompt(questions)
         correct = answers["correct"]
-    return PullRequestMerge(answers["base"], answers["head"], answers["prefix"])
+    return PullRequestMerge(answers["base"], answers["head"], answers["prefix"], answers["delete_branch"])
 
 
 ConnectGithub = collections.namedtuple(
