@@ -39,9 +39,7 @@ def create_issues(github_selected_repos):
         ),
         inquirer.Confirm(
             "correct",
-            message="Confirm creation of issue for the project(s) {}. Continue?".format(
-                github_selected_repos
-            ),
+            message=f"Confirm creation of issue for the project(s) {github_selected_repos}. Continue?",
             default=False,
         ),
     ]
@@ -55,13 +53,11 @@ def create_issues(github_selected_repos):
 def delete_branches(github_selected_repos) -> str:
     questions = [
         inquirer.Text(
-            "branch", message="Write the branch name", validate=_not_empty_validation,
+            "branch", message="Write the branch name", validate=_not_empty_validation
         ),
         inquirer.Confirm(
             "correct",
-            message="Confirm deleting of branch(es) for the project(s) {}. Continue?".format(
-                github_selected_repos
-            ),
+            message=f"Confirm deleting of branch(es) for the project(s) {github_selected_repos}. Continue?",
             default=False,
         ),
     ]
@@ -130,9 +126,7 @@ def create_pull_requests(github_selected_repos) -> PullRequest:
         ),
         inquirer.Confirm(
             "correct",
-            message="Confirm creation of pull request(s) for the project(s) {}. Continue?".format(
-                github_selected_repos
-            ),
+            message=f"Confirm creation of pull request(s) for the project(s) {github_selected_repos}. Continue?",
             default=False,
         ),
     ]
@@ -184,9 +178,7 @@ def merge_pull_requests(github_username, github_selected_repos):
         ),
         inquirer.Confirm(
             "correct",
-            message="Confirm merging of pull request(s) for the project(s) {}. Continue?".format(
-                github_selected_repos
-            ),
+            message=f"Confirm merging of pull request(s) for the project(s) {github_selected_repos}. Continue?",
             default=False,
         ),
     ]
