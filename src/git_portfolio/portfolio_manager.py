@@ -43,14 +43,10 @@ class PortfolioManager:
                     == "Issues are disabled for this repo"
                 ):
                     print(
-                        "{}: {}. It may be a fork.".format(
-                            github_repo, github_exception.data["message"]
-                        )
+                        f"{github_repo}: {github_exception.data['message']}. It may be a fork."
                     )
                 else:
-                    print(
-                        "{}: {}.".format(github_repo, github_exception.data["message"])
-                    )
+                    print(f"{github_repo}: {github_exception.data['message']}.")
 
     def create_pull_requests(self, pr: Optional[prompt.PullRequest] = None) -> None:
         if not pr:
@@ -93,14 +89,10 @@ class PortfolioManager:
                 extra = ""
                 for error in github_exception.data["errors"]:
                     if "message" in error:
-                        extra += "{} ".format(error["message"])
+                        extra += f"{error['message']} "
                     else:
-                        extra += "Invalid field {}. ".format(error["field"])
-                print(
-                    "{}: {}. {}".format(
-                        github_repo, github_exception.data["message"], extra
-                    )
-                )
+                        extra += f"Invalid field {error['field']}. "
+                print(f"{github_repo}: {github_exception.data['message']}. {extra}")
 
     def merge_pull_requests(
         self, pr_merge: Optional[prompt.PullRequestMerge] = None
