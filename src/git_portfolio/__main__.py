@@ -5,63 +5,75 @@ import git_portfolio.portfolio_manager as pm
 
 
 @click.group("cli")
-def cli():
+def cli() -> None:
+    """Cli command group."""
     pass
 
 
 @click.group("config")
-def configure():
+def configure() -> None:
+    """Config command group."""
     pass
 
 
 @click.group("create")
-def create():
+def create() -> None:
+    """Create command group."""
     pass
 
 
 @click.group("merge")
-def merge():
+def merge() -> None:
+    """Merge command group."""
     pass
 
 
 # TODO
 # @click.group("close")
-# def close():
+# def close() -> None:
+#     """Close command group."""
 #     pass
 
 
 @click.group("delete")
-def delete():
+def delete() -> None:
+    """Delete command group."""
     pass
 
 
 @configure.command("init")
-def config_init():
+def config_init() -> None:
+    """Config init command."""
     pm.PortfolioManager()
 
 
 @configure.command("repos")
-def config_repos():
+def config_repos() -> None:
+    """Config repos command."""
     pm.PortfolioManager().config_repos()
 
 
 @create.command("issues")
-def create_issues():
+def create_issues() -> None:
+    """Create issues command."""
     pm.PortfolioManager().create_issues()
 
 
 @create.command("prs")
-def create_prs():
+def create_prs() -> None:
+    """Create prs command."""
     pm.PortfolioManager().create_pull_requests()
 
 
 @merge.command("prs")
-def merge_prs():
+def merge_prs() -> None:
+    """Merge prs command."""
     pm.PortfolioManager().merge_pull_requests()
 
 
 @delete.command("branches")
-def delete_branches():
+def delete_branches() -> None:
+    """Delete branches command."""
     pm.PortfolioManager().delete_branches()
 
 
