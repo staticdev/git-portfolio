@@ -18,7 +18,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PortfolioManager:
-    def __init__(self):
+    """Portfolio manager class."""
+
+    def __init__(self) -> None:
+        """Constructor."""
         self.config_manager = config_manager.ConfigManager()
         self.configs = self.config_manager.load_configs()
         if self.configs.github_access_token:
@@ -27,6 +30,7 @@ class PortfolioManager:
             self.config_ini()
 
     def create_issues(self, issue: Optional[prompt.Issue] = None) -> None:
+        """Create issues."""
         if not issue:
             issue = prompt.create_issues(self.configs.github_selected_repos)
         labels = (
@@ -49,6 +53,7 @@ class PortfolioManager:
                     print(f"{github_repo}: {github_exception.data['message']}.")
 
     def create_pull_requests(self, pr: Optional[prompt.PullRequest] = None) -> None:
+        """Create pull requests."""
         if not pr:
             pr = prompt.create_pull_requests(self.configs.github_selected_repos)
 
@@ -97,7 +102,7 @@ class PortfolioManager:
     def merge_pull_requests(
         self, pr_merge: Optional[prompt.PullRequestMerge] = None
     ) -> None:
-        """Merge pull request."""
+        """Merge pull requests."""
         if not pr_merge:
             pr_merge = prompt.merge_pull_requests(
                 self.github_username, self.configs.github_selected_repos
@@ -131,6 +136,7 @@ class PortfolioManager:
                 )
 
     def delete_branches(self, branch="", github_repo="") -> None:
+        """Delete branches."""
         if not branch:
             branch = prompt.delete_branches(self.configs.github_selected_repos)
 
@@ -141,6 +147,7 @@ class PortfolioManager:
                 self._delete_branch_from_repo(branch, github_repo)
 
     def _delete_branch_from_repo(self, branch, github_repo):
+        """Delete a branch from one reporitory."""
         repo = self.github_connection.get_repo(github_repo)
         try:
             git_ref = repo.get_git_ref(f"heads/{branch}")
@@ -150,6 +157,7 @@ class PortfolioManager:
             print(f"{github_repo}: {github_exception.data['message']}.")
 
     def get_github_connection(self) -> github.Github:
+        """Get Github connection."""
         # GitHub Enterprise
         if self.configs.github_hostname:
             base_url = f"https://{self.configs.github_hostname}/api/v3"
@@ -165,6 +173,7 @@ class PortfolioManager:
             github.AuthenticatedUser.AuthenticatedUser, github.NamedUser.NamedUser
         ],
     ) -> str:
+        """Get Github username."""
         try:
             return user.login
         except (github.BadCredentialsException, github.GithubException):
@@ -178,9 +187,11 @@ class PortfolioManager:
             github.AuthenticatedUser.AuthenticatedUser, github.NamedUser.NamedUser
         ],
     ) -> github.PaginatedList.PaginatedList:
+        """Get Github repos from user."""
         return user.get_repos()
 
     def config_repos(self) -> None:
+        """Configure repos in use."""
         if self.configs.github_selected_repos:
             print("\nThe configured repos will be used:")
             for repo in self.configs.github_selected_repos:
@@ -207,6 +218,7 @@ class PortfolioManager:
         return True
 
     def config_ini(self) -> None:
+        """Initialize app configuration."""
         # only config if gets a valid connection
         valid = False
         while not valid:

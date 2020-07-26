@@ -8,6 +8,7 @@ import inquirer
 
 
 def _ignore_if_not_confirmed(answers: Dict[str, Any]) -> bool:
+    """Ignore if not confirmed question."""
     return not answers["confirmation"]
 
 
@@ -29,6 +30,7 @@ Issue = collections.namedtuple("Issue", ["title", "body", "labels"])
 
 
 def create_issues(github_selected_repos):
+    """Prompt questions to create issues."""
     questions = [
         inquirer.Text(
             "title", message="Write an issue title", validate=_not_empty_validation
@@ -51,6 +53,7 @@ def create_issues(github_selected_repos):
 
 
 def delete_branches(github_selected_repos) -> str:
+    """Prompt questions to delete branches."""
     questions = [
         inquirer.Text(
             "branch", message="Write the branch name", validate=_not_empty_validation
@@ -85,6 +88,7 @@ PullRequest = collections.namedtuple(
 
 
 def create_pull_requests(github_selected_repos) -> PullRequest:
+    """Prompt questions to create pull requests."""
     questions = [
         inquirer.Text(
             "base",
@@ -153,6 +157,7 @@ PullRequestMerge = collections.namedtuple(
 
 
 def merge_pull_requests(github_username, github_selected_repos):
+    """Prompt questions to merge pull requests."""
     questions = [
         inquirer.Text(
             "base",
@@ -197,6 +202,7 @@ ConnectGithub = collections.namedtuple(
 
 
 def connect_github(github_access_token: str) -> ConnectGithub:
+    """Prompt questions to connect to Github."""
     questions = [
         inquirer.Password(
             "github_access_token",
@@ -214,6 +220,7 @@ def connect_github(github_access_token: str) -> ConnectGithub:
 
 
 def new_repos() -> bool:
+    """Prompt question to know if you want to select new repositories."""
     answer = inquirer.prompt(
         [inquirer.Confirm("", message="Do you want to select new repositories?")]
     )[""]
@@ -221,6 +228,7 @@ def new_repos() -> bool:
 
 
 def select_repos(repo_names) -> List[str]:
+    """Prompt questions to select new repositories."""
     while True:
         selected = inquirer.prompt(
             [

@@ -1,49 +1,58 @@
 [tool.poetry]
 name = "git-portfolio"
-version = "0.0.1"
-description = "Simple TOML file validator using Python."
+version = "0.0.0"
+description = "Git Portfolio"
 authors = ["Thiago Carvalho D'Ávila <thiagocavila@gmail.com>"]
 license = "LGPL-3.0-or-later"
-readme = "README.rst"
-repository = "https://github.com/staticdev/git-portfolio"
+readme = "README"
 homepage = "https://github.com/staticdev/git-portfolio"
+repository = "https://github.com/staticdev/git-portfolio"
+documentation = "https://git-portfolio.readthedocs.io"
+classifiers = [
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+
+[tool.poetry.urls]
+Changelog = "https://github.com/staticdev/git-portfolio/releases"
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
-click = "^7.1.2"
+python = "^3.7.0"
+click = "^7.0"
 pygithub = "^1.51"
 inquirer = "^2.7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.3"
-coverage = {extras = ["toml"], version = "^5.0.3"}
-black = "^19.10b0"
+coverage = {extras = ["toml"], version = "^5.2"}
+safety = "^1.9.0"
+mypy = "^0.782"
+typeguard = "^2.9.1"
+xdoctest = "^0.13.0"
+sphinx = "^3.1.2"
+sphinx-autobuild = "^0.7.1"
+pre-commit = "^2.6.0"
 flake8 = "^3.8.3"
+black = "^19.10b0"
 flake8-bandit = "^2.1.2"
 flake8-bugbear = "^20.1.4"
-safety = "^1.8.5"
-mypy = "^0.782"
-codecov = "^2.1.7"
-pytest-mock = "^3.1.1"
-typeguard = "^2.9.1"
-pre-commit = "^2.5.1"
-pygments = "^2.6.1"
-darglint = "^1.5.1"
 flake8-docstrings = "^1.5.0"
 flake8-rst-docstrings = "^0.0.13"
 pep8-naming = "^0.11.1"
-pre-commit-hooks = "^3.1.0"
+darglint = "^1.5.1"
 reorder-python-imports = "^2.3.1"
+pre-commit-hooks = "^3.1.0"
 
 [tool.poetry.scripts]
-gitp = "git_portfolio.__main__:main"
+git-portfolio = "git_portfolio.__main__:main"
 
 [tool.coverage.paths]
-source = ["src", "*/site-packages"] # configure source tree layout
+source = ["src", "*/site-packages"]
 
 [tool.coverage.run]
-branch = true # enable branch analysis
-source = ["git_portfolio"] # configure package name
+branch = true
+source = ["git_portfolio"]
 
 [tool.coverage.report]
 show_missing = true
