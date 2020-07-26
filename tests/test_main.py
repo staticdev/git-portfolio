@@ -11,7 +11,7 @@ def runner() -> CliRunner:
     return CliRunner()
 
 
-def test_main_succeeds(runner: CliRunner) -> None:
-    """It exits with a status code of zero."""
-    result = runner.invoke(__main__.main)
-    assert result.exit_code == 0
+def test_main_without_argument(runner: CliRunner) -> None:
+    """It exits with a status code of one."""
+    result = runner.invoke(__main__.main, prog_name="gitp")
+    assert result.exit_code == 1
