@@ -48,10 +48,9 @@ Features
 Requirements
 ------------
 
-* `Create an auth token for GitHub`_, with the `repo` privileges enabled.
-by clicking on Generate new token. You will be asked to select scopes for the token. Which scopes you choose will determine what information and actions you will be able to perform against the API. You should be careful with the ones prefixed with write:, delete: and admin: as these might be quite destructive. You can find description of each scope in docs here.
+* `Create an auth token for GitHub`_, with the `repo` privileges enabled by clicking on Generate new token. You will be asked to select scopes for the token. Which scopes you choose will determine what information and actions you will be able to perform against the API. You should be careful with the ones prefixed with write:, delete: and admin: as these might be quite destructive. You can find description of each scope in docs here.
 
-Safeguard your token (once created you want be able to see it again).
+Important: safeguard your token (once created you won't be able to see it again).
 
 
 Installation
@@ -67,7 +66,7 @@ You can install *Git Portfolio* via pip_ from PyPI_:
 Usage
 -----
 
-* TODO
+* TODO.
 
 
 Contributing
