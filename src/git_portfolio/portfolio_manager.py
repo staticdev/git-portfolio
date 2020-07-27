@@ -29,78 +29,95 @@ class PortfolioManager:
         else:
             self.config_ini()
 
-    def create_issues(self, issue: Optional[prompt.Issue] = None) -> None:
+    def create_issues(
+        self, issue: Optional[prompt.Issue] = None, github_repo=""
+    ) -> None:
         """Create issues."""
         if not issue:
             issue = prompt.create_issues(self.configs.github_selected_repos)
         labels = (
             [label.strip() for label in issue.labels.split(",")] if issue.labels else []
         )
-        for github_repo in self.configs.github_selected_repos:
-            repo = self.github_connection.get_repo(github_repo)
-            try:
-                repo.create_issue(title=issue.title, body=issue.body, labels=labels)
-                print(f"{github_repo}: issue created successfully.")
-            except github.GithubException as github_exception:
-                if (
-                    github_exception.data["message"]
-                    == "Issues are disabled for this repo"
-                ):
-                    print(
-                        f"{github_repo}: {github_exception.data['message']}. It may be a fork."
-                    )
-                else:
-                    print(f"{github_repo}: {github_exception.data['message']}.")
 
-    def create_pull_requests(self, pr: Optional[prompt.PullRequest] = None) -> None:
+        if github_repo:
+            self._create_issue_from_repo(github_repo, issue, labels)
+        else:
+            for github_repo in self.configs.github_selected_repos:
+                self._create_issue_from_repo(github_repo, issue, labels)
+
+    def _create_issue_from_repo(self, github_repo, issue, labels):
+        """Create issue from one repository."""
+        repo = self.github_connection.get_repo(github_repo)
+        try:
+            repo.create_issue(title=issue.title, body=issue.body, labels=labels)
+            print(f"{github_repo}: issue created successfully.")
+        except github.GithubException as github_exception:
+            if github_exception.data["message"] == "Issues are disabled for this repo":
+                print(
+                    (
+                        f"{github_repo}: {github_exception.data['message']}. "
+                        "It may be a fork."
+                    )
+                )
+            else:
+                print(f"{github_repo}: {github_exception.data['message']}.")
+
+    def create_pull_requests(
+        self, pr: Optional[prompt.PullRequest] = None, github_repo=""
+    ) -> None:
         """Create pull requests."""
         if not pr:
             pr = prompt.create_pull_requests(self.configs.github_selected_repos)
 
-        for github_repo in self.configs.github_selected_repos:
-            repo = self.github_connection.get_repo(github_repo)
-            body = pr.body
-            labels = (
-                set(label.strip() for label in pr.labels.split(","))
-                if pr.labels
-                else set()
+        if github_repo:
+            self._create_pull_request_from_repo(github_repo, pr)
+        else:
+            for github_repo in self.configs.github_selected_repos:
+                self._create_pull_request_from_repo(github_repo, pr)
+
+    def _create_pull_request_from_repo(self, github_repo, pr):
+        """Create pull request from one repository."""
+        repo = self.github_connection.get_repo(github_repo)
+        body = pr.body
+        labels = (
+            set(label.strip() for label in pr.labels.split(",")) if pr.labels else set()
+        )
+        if pr.confirmation:
+            body = self._link_issues(body, labels, pr, repo)
+        try:
+            created_pr = repo.create_pull(
+                title=pr.title, body=body, head=pr.head, base=pr.base, draft=pr.draft,
             )
-            # link issues
-            if pr.confirmation:
-                issues = repo.get_issues(state="open")
-                closes = ""
-                for issue in issues:
-                    if pr.link in issue.title:
-                        closes += f"#{issue.number} "
-                        if pr.inherit_labels:
-                            issue_labels = [label.name for label in issue.get_labels()]
-                            labels.update(issue_labels)
-                closes = closes.strip()
-                if closes:
-                    body += f"\n\nCloses {closes}"
-            try:
-                created_pr = repo.create_pull(
-                    title=pr.title,
-                    body=body,
-                    head=pr.head,
-                    base=pr.base,
-                    draft=pr.draft,
-                )
-                print(f"{github_repo}: PR created successfully.")
-                # PyGithub does not support a list of strings for adding (only one str)
-                for label in labels:
-                    created_pr.add_to_labels(label)
-            except github.GithubException as github_exception:
-                extra = ""
-                for error in github_exception.data["errors"]:
-                    if "message" in error:
-                        extra += f"{error['message']} "
-                    else:
-                        extra += f"Invalid field {error['field']}. "
-                print(f"{github_repo}: {github_exception.data['message']}. {extra}")
+            print(f"{github_repo}: PR created successfully.")
+            # PyGithub does not support a list of strings for adding (only one str)
+            for label in labels:
+                created_pr.add_to_labels(label)
+        except github.GithubException as github_exception:
+            extra = ""
+            for error in github_exception.data["errors"]:
+                if "message" in error:
+                    extra += f"{error['message']} "
+                else:
+                    extra += f"Invalid field {error['field']}. "
+            print(f"{github_repo}: {github_exception.data['message']}. {extra}")
+
+    def _link_issues(self, body, labels, pr, repo):
+        """Return body message linking issues."""
+        issues = repo.get_issues(state="open")
+        closes = ""
+        for issue in issues:
+            if pr.link in issue.title:
+                closes += f"#{issue.number} "
+                if pr.inherit_labels:
+                    issue_labels = [label.name for label in issue.get_labels()]
+                    labels.update(issue_labels)
+        closes = closes.strip()
+        if closes:
+            body += f"\n\nCloses {closes}"
+        return body
 
     def merge_pull_requests(
-        self, pr_merge: Optional[prompt.PullRequestMerge] = None
+        self, pr_merge: Optional[prompt.PullRequestMerge] = None, github_repo=""
     ) -> None:
         """Merge pull requests."""
         if not pr_merge:
@@ -113,27 +130,40 @@ class PortfolioManager:
         head = f"{pr_merge.prefix}:{pr_merge.head}"
         state = "open"
 
-        for github_repo in self.configs.github_selected_repos:
-            repo = self.github_connection.get_repo(github_repo)
-            pulls = repo.get_pulls(state=state, base=pr_merge.base, head=head)
-            if pulls.totalCount == 1:
-                pull = pulls[0]
-                if pull.mergeable:
-                    try:
-                        pull.merge()
-                        print(f"{github_repo}: PR merged successfully.")
-                        if pr_merge.delete_branch:
-                            self.delete_branches(pr_merge.head, github_repo)
-                    except github.GithubException as github_exception:
-                        print(f"{github_repo}: {github_exception.data['message']}.")
-                else:
-                    print(
-                        f"{github_repo}: PR not mergeable, GitHub checks may be running."
-                    )
+        if github_repo:
+            self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
+        else:
+            for github_repo in self.configs.github_selected_repos:
+                self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
+
+    def _merge_pull_request_from_repo(self, github_repo, head, pr_merge, state):
+        """Mergepartiu en pull request from one repository."""
+        repo = self.github_connection.get_repo(github_repo)
+        pulls = repo.get_pulls(state=state, base=pr_merge.base, head=head)
+        if pulls.totalCount == 1:
+            pull = pulls[0]
+            if pull.mergeable:
+                try:
+                    pull.merge()
+                    print(f"{github_repo}: PR merged successfully.")
+                    if pr_merge.delete_branch:
+                        self.delete_branches(pr_merge.head, github_repo)
+                except github.GithubException as github_exception:
+                    print(f"{github_repo}: {github_exception.data['message']}.")
             else:
                 print(
-                    f"{github_repo}: no open PR found for {pr_merge.base}:{pr_merge.head}."
+                    (
+                        f"{github_repo}: PR not mergeable, GitHub checks may be "
+                        "running."
+                    )
                 )
+        else:
+            print(
+                (
+                    f"{github_repo}: no open PR found for {pr_merge.base}:"
+                    f"{pr_merge.head}."
+                )
+            )
 
     def delete_branches(self, branch="", github_repo="") -> None:
         """Delete branches."""
@@ -141,13 +171,13 @@ class PortfolioManager:
             branch = prompt.delete_branches(self.configs.github_selected_repos)
 
         if github_repo:
-            self._delete_branch_from_repo(branch, github_repo)
+            self._delete_branch_from_repo(github_repo, branch)
         else:
             for github_repo in self.configs.github_selected_repos:
-                self._delete_branch_from_repo(branch, github_repo)
+                self._delete_branch_from_repo(github_repo, branch)
 
-    def _delete_branch_from_repo(self, branch, github_repo):
-        """Delete a branch from one reporitory."""
+    def _delete_branch_from_repo(self, github_repo, branch):
+        """Delete a branch from one repository."""
         repo = self.github_connection.get_repo(github_repo)
         try:
             git_ref = repo.get_git_ref(f"heads/{branch}")

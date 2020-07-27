@@ -1,5 +1,6 @@
 """Configuration manager module."""
 import os
+import pathlib
 from typing import List
 
 import yaml
@@ -10,9 +11,9 @@ class Config:
 
     def __init__(
         self,
-        github_hostname: str = "",
-        github_access_token: str = "",
-        github_selected_repos: List[str] = [],
+        github_hostname: str,
+        github_access_token: str,
+        github_selected_repos: List[str],
     ):
         """Constructor."""
         self.github_hostname = github_hostname
@@ -33,13 +34,13 @@ class ConfigManager:
             with open(
                 os.path.join(self.CONFIG_FOLDER, self.CONFIG_FILE)
             ) as config_file:
-                data = yaml.safe_load(config_file, Loader=yaml.FullLoader)
+                data = yaml.safe_load(config_file)
                 return Config(**data)
-        return Config()
+        return Config("", "", [])
 
     def save_configs(self, configs: Config):
         """Write config to YAML file."""
-        os.system(f"mkdir -p {self.CONFIG_FOLDER}")
+        pathlib.Path(self.CONFIG_FOLDER).mkdir(parents=True, exist_ok=True)
         configs_dict = vars(configs)
         with open(
             os.path.join(self.CONFIG_FOLDER, self.CONFIG_FILE), "w"
