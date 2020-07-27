@@ -17,7 +17,7 @@ Git Portfolio
    :target: https://pypi.org/project/git-portfolio
    :alt: Python Version
 .. |License| image:: https://img.shields.io/pypi/l/git-portfolio
-   :target: https://opensource.org/licenses/MIT
+   :target: https://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License
    :alt: License
 .. |Read the Docs| image:: https://img.shields.io/readthedocs/git-portfolio/latest.svg?label=Read%20the%20Docs
    :target: https://git-portfolio.readthedocs.io/
