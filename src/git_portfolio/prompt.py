@@ -41,7 +41,10 @@ def create_issues(github_selected_repos):
         ),
         inquirer.Confirm(
             "correct",
-            message=f"Confirm creation of issue for the project(s) {github_selected_repos}. Continue?",
+            message=(
+                f"Confirm creation of issue for the project(s) {github_selected_repos}"
+                ". Continue?"
+            ),
             default=False,
         ),
     ]
@@ -60,7 +63,10 @@ def delete_branches(github_selected_repos) -> str:
         ),
         inquirer.Confirm(
             "correct",
-            message=f"Confirm deleting of branch(es) for the project(s) {github_selected_repos}. Continue?",
+            message=(
+                "Confirm deleting of branch(es) for the project(s) "
+                f"{github_selected_repos}. Continue?"
+            ),
             default=False,
         ),
     ]
@@ -130,7 +136,10 @@ def create_pull_requests(github_selected_repos) -> PullRequest:
         ),
         inquirer.Confirm(
             "correct",
-            message=f"Confirm creation of pull request(s) for the project(s) {github_selected_repos}. Continue?",
+            message=(
+                "Confirm creation of pull request(s) for the project(s) "
+                f"{github_selected_repos}. Continue?"
+            ),
             default=False,
         ),
     ]
@@ -183,7 +192,10 @@ def merge_pull_requests(github_username, github_selected_repos):
         ),
         inquirer.Confirm(
             "correct",
-            message=f"Confirm merging of pull request(s) for the project(s) {github_selected_repos}. Continue?",
+            message=(
+                "Confirm merging of pull request(s) for the project(s) "
+                f"{github_selected_repos}. Continue?"
+            ),
             default=False,
         ),
     ]
