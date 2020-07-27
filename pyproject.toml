@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "git-portfolio"
-version = "0.0.0"
+version = "0.0.1"
 description = "Git Portfolio"
 authors = ["Thiago Carvalho D'Ávila <thiagocavila@gmail.com>"]
 license = "LGPL-3.0-only"
