@@ -137,7 +137,7 @@ class PortfolioManager:
                 self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
 
     def _merge_pull_request_from_repo(self, github_repo, head, pr_merge, state):
-        """Mergepartiu en pull request from one repository."""
+        """Merge pull request from one repository."""
         repo = self.github_connection.get_repo(github_repo)
         pulls = repo.get_pulls(state=state, base=pr_merge.base, head=head)
         if pulls.totalCount == 1:
