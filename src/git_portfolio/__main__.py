@@ -84,7 +84,7 @@ cli.add_command(merge)
 cli.add_command(delete)
 
 
-def main() -> None:
+def main(prog_name: str) -> None:
     """Git Portfolio."""
     cli()
 
