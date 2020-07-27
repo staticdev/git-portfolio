@@ -46,7 +46,7 @@ reorder-python-imports = "^2.3.1"
 pre-commit-hooks = "^3.1.0"
 
 [tool.poetry.scripts]
-git-portfolio = "git_portfolio.__main__:main"
+gitp = "git_portfolio.__main__:main"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
