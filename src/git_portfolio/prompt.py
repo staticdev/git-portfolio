@@ -29,7 +29,7 @@ def _not_empty_validation(answers: Dict[str, Any], current: str) -> bool:
 Issue = collections.namedtuple("Issue", ["title", "body", "labels"])
 
 
-def create_issues(github_selected_repos):
+def create_issues(github_selected_repos: List[str]) -> Issue:
     """Prompt questions to create issues."""
     questions = [
         inquirer.Text(
@@ -55,7 +55,7 @@ def create_issues(github_selected_repos):
     return Issue(answers["title"], answers["body"], answers["labels"])
 
 
-def delete_branches(github_selected_repos) -> str:
+def delete_branches(github_selected_repos: List[str]) -> Any:
     """Prompt questions to delete branches."""
     questions = [
         inquirer.Text(
@@ -93,7 +93,7 @@ PullRequest = collections.namedtuple(
 )
 
 
-def create_pull_requests(github_selected_repos) -> PullRequest:
+def create_pull_requests(github_selected_repos: List[str]) -> PullRequest:
     """Prompt questions to create pull requests."""
     questions = [
         inquirer.Text(
@@ -165,7 +165,9 @@ PullRequestMerge = collections.namedtuple(
 )
 
 
-def merge_pull_requests(github_username, github_selected_repos):
+def merge_pull_requests(
+    github_username: str, github_selected_repos: List[str]
+) -> PullRequestMerge:
     """Prompt questions to merge pull requests."""
     questions = [
         inquirer.Text(
@@ -231,7 +233,7 @@ def connect_github(github_access_token: str) -> ConnectGithub:
     return ConnectGithub(answers["github_access_token"], answers["github_hostname"])
 
 
-def new_repos() -> bool:
+def new_repos() -> Any:
     """Prompt question to know if you want to select new repositories."""
     answer = inquirer.prompt(
         [inquirer.Confirm("", message="Do you want to select new repositories?")]
@@ -239,7 +241,7 @@ def new_repos() -> bool:
     return answer
 
 
-def select_repos(repo_names) -> List[str]:
+def select_repos(repo_names: List[str]) -> Any:
     """Prompt questions to select new repositories."""
     while True:
         selected = inquirer.prompt(

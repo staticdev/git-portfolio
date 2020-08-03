@@ -13,5 +13,5 @@ def runner() -> CliRunner:
 
 def test_main_without_argument(runner: CliRunner) -> None:
     """It exits with a status code of one."""
-    result = runner.invoke(__main__.main, prog_name="gitp")
+    result = runner.invoke(__main__.main, prog_name="gitp")  # type: ignore
     assert result.exit_code == 1

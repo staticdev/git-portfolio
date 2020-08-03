@@ -38,7 +38,7 @@ class ConfigManager:
                 return Config(**data)
         return Config("", "", [])
 
-    def save_configs(self, configs: Config):
+    def save_configs(self, configs: Config) -> None:
         """Write config to YAML file."""
         pathlib.Path(self.CONFIG_FOLDER).mkdir(parents=True, exist_ok=True)
         configs_dict = vars(configs)

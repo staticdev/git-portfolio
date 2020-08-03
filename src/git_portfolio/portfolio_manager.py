@@ -1,7 +1,10 @@
 """Command-line interface."""
 import logging
 import sys
+from typing import Any
+from typing import List
 from typing import Optional
+from typing import Set
 from typing import Union
 
 import github
@@ -30,7 +33,7 @@ class PortfolioManager:
             self.config_ini()
 
     def create_issues(
-        self, issue: Optional[prompt.Issue] = None, github_repo=""
+        self, issue: Optional[prompt.Issue] = None, github_repo: str = ""
     ) -> None:
         """Create issues."""
         if not issue:
@@ -45,7 +48,9 @@ class PortfolioManager:
             for github_repo in self.configs.github_selected_repos:
                 self._create_issue_from_repo(github_repo, issue, labels)
 
-    def _create_issue_from_repo(self, github_repo, issue, labels):
+    def _create_issue_from_repo(
+        self, github_repo: str, issue: Any, labels: List[str]
+    ) -> None:
         """Create issue from one repository."""
         repo = self.github_connection.get_repo(github_repo)
         try:
@@ -63,7 +68,7 @@ class PortfolioManager:
                 print(f"{github_repo}: {github_exception.data['message']}.")
 
     def create_pull_requests(
-        self, pr: Optional[prompt.PullRequest] = None, github_repo=""
+        self, pr: Optional[prompt.PullRequest] = None, github_repo: str = ""
     ) -> None:
         """Create pull requests."""
         if not pr:
@@ -75,7 +80,7 @@ class PortfolioManager:
             for github_repo in self.configs.github_selected_repos:
                 self._create_pull_request_from_repo(github_repo, pr)
 
-    def _create_pull_request_from_repo(self, github_repo, pr):
+    def _create_pull_request_from_repo(self, github_repo: str, pr: Any) -> None:
         """Create pull request from one repository."""
         repo = self.github_connection.get_repo(github_repo)
         body = pr.body
@@ -96,12 +101,12 @@ class PortfolioManager:
             extra = ""
             for error in github_exception.data["errors"]:
                 if "message" in error:
-                    extra += f"{error['message']} "
+                    extra += f"{error['message']} "  # type: ignore
                 else:
-                    extra += f"Invalid field {error['field']}. "
+                    extra += f"Invalid field {error['field']}. "  # type: ignore
             print(f"{github_repo}: {github_exception.data['message']}. {extra}")
 
-    def _link_issues(self, body, labels, pr, repo):
+    def _link_issues(self, body: str, labels: Set[Any], pr: Any, repo: Any) -> Any:
         """Return body message linking issues."""
         issues = repo.get_issues(state="open")
         closes = ""
@@ -117,7 +122,7 @@ class PortfolioManager:
         return body
 
     def merge_pull_requests(
-        self, pr_merge: Optional[prompt.PullRequestMerge] = None, github_repo=""
+        self, pr_merge: Optional[prompt.PullRequestMerge] = None, github_repo: str = ""
     ) -> None:
         """Merge pull requests."""
         if not pr_merge:
@@ -136,7 +141,9 @@ class PortfolioManager:
             for github_repo in self.configs.github_selected_repos:
                 self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
 
-    def _merge_pull_request_from_repo(self, github_repo, head, pr_merge, state):
+    def _merge_pull_request_from_repo(
+        self, github_repo: str, head: str, pr_merge: Any, state: str
+    ) -> None:
         """Merge pull request from one repository."""
         repo = self.github_connection.get_repo(github_repo)
         pulls = repo.get_pulls(state=state, base=pr_merge.base, head=head)
@@ -165,7 +172,7 @@ class PortfolioManager:
                 )
             )
 
-    def delete_branches(self, branch="", github_repo="") -> None:
+    def delete_branches(self, branch: str = "", github_repo: str = "") -> None:
         """Delete branches."""
         if not branch:
             branch = prompt.delete_branches(self.configs.github_selected_repos)
@@ -176,7 +183,7 @@ class PortfolioManager:
             for github_repo in self.configs.github_selected_repos:
                 self._delete_branch_from_repo(github_repo, branch)
 
-    def _delete_branch_from_repo(self, github_repo, branch):
+    def _delete_branch_from_repo(self, github_repo: str, branch: str) -> None:
         """Delete a branch from one repository."""
         repo = self.github_connection.get_repo(github_repo)
         try:
@@ -216,7 +223,7 @@ class PortfolioManager:
         user: Union[
             github.AuthenticatedUser.AuthenticatedUser, github.NamedUser.NamedUser
         ],
-    ) -> github.PaginatedList.PaginatedList:
+    ) -> github.PaginatedList.PaginatedList[Any]:
         """Get Github repos from user."""
         return user.get_repos()
 
