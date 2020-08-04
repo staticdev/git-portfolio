@@ -223,7 +223,7 @@ class PortfolioManager:
         user: Union[
             github.AuthenticatedUser.AuthenticatedUser, github.NamedUser.NamedUser
         ],
-    ) -> github.PaginatedList.PaginatedList[Any]:
+    ) -> Any:
         """Get Github repos from user."""
         return user.get_repos()
 
