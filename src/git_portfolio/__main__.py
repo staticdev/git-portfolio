@@ -1,13 +1,40 @@
 """Command-line interface."""
+from typing import Tuple
+
 import click
 
+import git_portfolio.config_manager as cm
+import git_portfolio.local_manager as lm
 import git_portfolio.portfolio_manager as pm
 
 
 @click.group("cli")
-def cli() -> None:
-    """Cli command group."""
+def main() -> None:
+    """Git Portfolio."""
     pass
+
+
+@main.command("checkout")
+@click.argument("args", nargs=-1)
+def checkout(args: Tuple[str]) -> None:
+    """CLI `git checkout BRANCH` command."""
+    # TODO add -b option
+    config_manager = cm.ConfigManager()
+    configs = config_manager.load_configs()
+    if not configs.github_selected_repos:
+        click.secho(
+            "Error: no repos selected. Please run `gitp config init`.", fg="red",
+        )
+    elif len(args) != 1:
+        click.secho(
+            (
+                "Error: please put exactly one argument after checkout, eg.: "
+                "`gitp checkout BRANCH`."
+            ),
+            fg="red",
+        )
+    else:
+        click.secho(lm.LocalManager().checkout(configs.github_selected_repos, args))
 
 
 @click.group("config")
@@ -77,16 +104,11 @@ def delete_branches() -> None:
     pm.PortfolioManager().delete_branches()
 
 
-cli.add_command(configure)
-cli.add_command(create)
-# cli.add_command(close)
-cli.add_command(merge)
-cli.add_command(delete)
-
-
-def main(prog_name: str) -> None:
-    """Git Portfolio."""
-    cli()
+main.add_command(configure)
+main.add_command(create)
+# main.add_command(close)
+main.add_command(merge)
+main.add_command(delete)
 
 
 if __name__ == "__main__":
