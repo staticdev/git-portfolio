@@ -23,6 +23,7 @@ click = "^7.0"
 pygithub = "^1.51"
 inquirer = "^2.7.0"
 pyyaml = "^5.3.1"
+GitPython = "^3.1.7"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.0.1"
