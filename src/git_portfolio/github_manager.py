@@ -10,7 +10,7 @@ from typing import Union
 import github
 import requests
 
-import git_portfolio.config_manager as config_manager
+import git_portfolio.config_manager as cm
 import git_portfolio.prompt as prompt
 
 # starting log
@@ -20,15 +20,14 @@ logging.basicConfig(level=logging.ERROR, format=FORMAT, datefmt=DATE_FORMAT)
 LOGGER = logging.getLogger(__name__)
 
 
-class PortfolioManager:
-    """Portfolio manager class."""
+class GithubManager:
+    """Github manager class."""
 
-    def __init__(self) -> None:
+    def __init__(self, config: cm.Config) -> None:
         """Constructor."""
-        self.config_manager = config_manager.ConfigManager()
-        self.configs = self.config_manager.load_configs()
-        if self.configs.github_access_token:
-            self.github_setup()
+        self.config = config
+        if config.github_access_token:
+            self._github_setup()
         else:
             self.config_ini()
 
@@ -37,7 +36,7 @@ class PortfolioManager:
     ) -> None:
         """Create issues."""
         if not issue:
-            issue = prompt.create_issues(self.configs.github_selected_repos)
+            issue = prompt.create_issues(self.config.github_selected_repos)
         labels = (
             [label.strip() for label in issue.labels.split(",")] if issue.labels else []
         )
@@ -45,7 +44,7 @@ class PortfolioManager:
         if github_repo:
             self._create_issue_from_repo(github_repo, issue, labels)
         else:
-            for github_repo in self.configs.github_selected_repos:
+            for github_repo in self.config.github_selected_repos:
                 self._create_issue_from_repo(github_repo, issue, labels)
 
     def _create_issue_from_repo(
@@ -72,12 +71,12 @@ class PortfolioManager:
     ) -> None:
         """Create pull requests."""
         if not pr:
-            pr = prompt.create_pull_requests(self.configs.github_selected_repos)
+            pr = prompt.create_pull_requests(self.config.github_selected_repos)
 
         if github_repo:
             self._create_pull_request_from_repo(github_repo, pr)
         else:
-            for github_repo in self.configs.github_selected_repos:
+            for github_repo in self.config.github_selected_repos:
                 self._create_pull_request_from_repo(github_repo, pr)
 
     def _create_pull_request_from_repo(self, github_repo: str, pr: Any) -> None:
@@ -127,7 +126,7 @@ class PortfolioManager:
         """Merge pull requests."""
         if not pr_merge:
             pr_merge = prompt.merge_pull_requests(
-                self.github_username, self.configs.github_selected_repos
+                self.github_username, self.config.github_selected_repos
             )
         # Important note: base and head arguments have different import formats.
         # https://developer.github.com/v3/pulls/#list-pull-requests
@@ -138,7 +137,7 @@ class PortfolioManager:
         if github_repo:
             self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
         else:
-            for github_repo in self.configs.github_selected_repos:
+            for github_repo in self.config.github_selected_repos:
                 self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
 
     def _merge_pull_request_from_repo(
@@ -175,12 +174,12 @@ class PortfolioManager:
     def delete_branches(self, branch: str = "", github_repo: str = "") -> None:
         """Delete branches."""
         if not branch:
-            branch = prompt.delete_branches(self.configs.github_selected_repos)
+            branch = prompt.delete_branches(self.config.github_selected_repos)
 
         if github_repo:
             self._delete_branch_from_repo(github_repo, branch)
         else:
-            for github_repo in self.configs.github_selected_repos:
+            for github_repo in self.config.github_selected_repos:
                 self._delete_branch_from_repo(github_repo, branch)
 
     def _delete_branch_from_repo(self, github_repo: str, branch: str) -> None:
@@ -196,13 +195,13 @@ class PortfolioManager:
     def get_github_connection(self) -> github.Github:
         """Get Github connection."""
         # GitHub Enterprise
-        if self.configs.github_hostname:
-            base_url = f"https://{self.configs.github_hostname}/api/v3"
+        if self.config.github_hostname:
+            base_url = f"https://{self.config.github_hostname}/api/v3"
             return github.Github(
-                base_url=base_url, login_or_token=self.configs.github_access_token
+                base_url=base_url, login_or_token=self.config.github_access_token
             )
         # GitHub.com
-        return github.Github(self.configs.github_access_token)
+        return github.Github(self.config.github_access_token)
 
     def get_github_username(
         self,
@@ -216,9 +215,14 @@ class PortfolioManager:
         except (github.BadCredentialsException, github.GithubException):
             return ""
         except requests.exceptions.ConnectionError:
-            sys.exit("Unable to reach server. Please check you network.")
+            sys.exit(
+                (
+                    "Unable to reach server. Please check you network and credentials "
+                    "and try again."
+                )
+            )
 
-    def get_github_repos(
+    def _get_github_repos(
         self,
         user: Union[
             github.AuthenticatedUser.AuthenticatedUser, github.NamedUser.NamedUser
@@ -227,42 +231,36 @@ class PortfolioManager:
         """Get Github repos from user."""
         return user.get_repos()
 
-    def config_repos(self) -> None:
+    def config_ini(self) -> None:
+        """Initialize app configuration."""
+        # only config if gets a valid connection
+        valid = False
+        while not valid:
+            answers = prompt.connect_github(self.config.github_access_token)
+            self.config.github_access_token = answers.github_access_token.strip()
+            self.config.github_hostname = answers.github_hostname
+            valid = self._github_setup()
+            if not valid:
+                print("Wrong GitHub token/permissions. Please try again.")
+        self.config_repos()
+
+    def config_repos(self) -> Optional[cm.Config]:
         """Configure repos in use."""
-        if self.configs.github_selected_repos:
-            print("\nThe configured repos will be used:")
-            for repo in self.configs.github_selected_repos:
-                print(" *", repo)
-            new_repos = prompt.new_repos()
+        if self.config.github_selected_repos:
+            new_repos = prompt.new_repos(self.config.github_selected_repos)
             if not new_repos:
-                print("gitp successfully configured.")
-                return
+                return None
 
         repo_names = [repo.full_name for repo in self.github_repos]
+        self.config.github_selected_repos = prompt.select_repos(repo_names)
+        return self.config
 
-        self.configs.github_selected_repos = prompt.select_repos(repo_names)
-        self.config_manager.save_configs(self.configs)
-        print("gitp successfully configured.")
-
-    def github_setup(self) -> bool:
+    def _github_setup(self) -> bool:
         """Setup Github connection properties."""
         self.github_connection = self.get_github_connection()
         user = self.github_connection.get_user()
         self.github_username = self.get_github_username(user)
         if not self.github_username:
             return False
-        self.github_repos = self.get_github_repos(user)
+        self.github_repos = self._get_github_repos(user)
         return True
-
-    def config_ini(self) -> None:
-        """Initialize app configuration."""
-        # only config if gets a valid connection
-        valid = False
-        while not valid:
-            answers = prompt.connect_github(self.configs.github_access_token)
-            self.configs.github_access_token = answers.github_access_token.strip()
-            self.configs.github_hostname = answers.github_hostname
-            valid = self.github_setup()
-            if not valid:
-                print("Wrong GitHub token/permissions. Please try again.")
-        self.config_repos()

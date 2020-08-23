@@ -233,11 +233,13 @@ def connect_github(github_access_token: str) -> ConnectGithub:
     return ConnectGithub(answers["github_access_token"], answers["github_hostname"])
 
 
-def new_repos() -> Any:
+def new_repos(github_selected_repos: List[str]) -> Any:
     """Prompt question to know if you want to select new repositories."""
-    answer = inquirer.prompt(
-        [inquirer.Confirm("", message="Do you want to select new repositories?")]
-    )[""]
+    message = "\nThe configured repos will be used:"
+    for repo in github_selected_repos:
+        message += f" * {repo}\n"
+    message += "Do you want to select new repositories?"
+    answer = inquirer.prompt([inquirer.Confirm("", message=message)])[""]
     return answer
 
 

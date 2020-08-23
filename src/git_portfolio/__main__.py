@@ -1,11 +1,21 @@
 """Command-line interface."""
+import sys
 from typing import Tuple
 
 import click
 
 import git_portfolio.config_manager as cm
+import git_portfolio.github_manager as ghm
 import git_portfolio.local_manager as lm
-import git_portfolio.portfolio_manager as pm
+
+
+try:
+    CONFIG_MANAGER = cm.ConfigManager()
+except TypeError as type_error:
+    click.secho(
+        f"Error: {type_error}", fg="red", err=True,
+    )
+    sys.exit()
 
 
 @click.group("cli")
@@ -19,9 +29,7 @@ def main() -> None:
 def checkout(args: Tuple[str]) -> None:
     """CLI `git checkout BRANCH` command."""
     # TODO add -b option
-    config_manager = cm.ConfigManager()
-    configs = config_manager.load_configs()
-    if not configs.github_selected_repos:
+    if not CONFIG_MANAGER.config.github_selected_repos:
         click.secho(
             "Error: no repos selected. Please run `gitp config init`.", fg="red",
         )
@@ -34,7 +42,11 @@ def checkout(args: Tuple[str]) -> None:
             fg="red",
         )
     else:
-        click.secho(lm.LocalManager().checkout(configs.github_selected_repos, args))
+        click.secho(
+            lm.LocalManager().checkout(
+                CONFIG_MANAGER.config.github_selected_repos, args
+            )
+        )
 
 
 @click.group("config")
@@ -68,40 +80,52 @@ def delete() -> None:
     pass
 
 
+def _save_config(config: cm.Config) -> None:
+    """Save config with ConfigManager."""
+    CONFIG_MANAGER.config = config
+    CONFIG_MANAGER.save_config()
+    click.secho("gitp successfully configured.", fg="blue")
+
+
 @configure.command("init")
 def config_init() -> None:
     """Config init command."""
-    pm.PortfolioManager()
+    github_manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    _save_config(github_manager.config)
 
 
 @configure.command("repos")
 def config_repos() -> None:
     """Config repos command."""
-    pm.PortfolioManager().config_repos()
+    config = ghm.GithubManager(CONFIG_MANAGER.config).config_repos()
+    if config:
+        _save_config(config)
+    else:
+        click.secho("Error: no config found, please run `gitp config init`.", fg="red")
 
 
 @create.command("issues")
 def create_issues() -> None:
     """Create issues command."""
-    pm.PortfolioManager().create_issues()
+    ghm.GithubManager(CONFIG_MANAGER.config).create_issues()
 
 
 @create.command("prs")
 def create_prs() -> None:
     """Create prs command."""
-    pm.PortfolioManager().create_pull_requests()
+    ghm.GithubManager(CONFIG_MANAGER.config).create_pull_requests()
 
 
 @merge.command("prs")
 def merge_prs() -> None:
     """Merge prs command."""
-    pm.PortfolioManager().merge_pull_requests()
+    ghm.GithubManager(CONFIG_MANAGER.config).merge_pull_requests()
 
 
 @delete.command("branches")
 def delete_branches() -> None:
     """Delete branches command."""
-    pm.PortfolioManager().delete_branches()
+    ghm.GithubManager(CONFIG_MANAGER.config).delete_branches()
 
 
 main.add_command(configure)

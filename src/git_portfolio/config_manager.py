@@ -24,25 +24,37 @@ class Config:
 class ConfigManager:
     """Configuration manager class."""
 
-    CONFIG_FOLDER = os.path.join(os.path.expanduser("~"), ".gitp")
-    CONFIG_FILE = "config.yaml"
+    def __init__(self, config_file: str = "config.yaml") -> None:
+        """Load config if it exists."""
+        self.config_folder = os.path.join(os.path.expanduser("~"), ".gitp")
+        self.config_path = os.path.join(self.config_folder, config_file)
 
-    def load_configs(self) -> Config:
-        """Get configs if it exists."""
-        if os.path.exists(os.path.join(self.CONFIG_FOLDER, self.CONFIG_FILE)):
-            print("Loading previous configs\n")
-            with open(
-                os.path.join(self.CONFIG_FOLDER, self.CONFIG_FILE)
-            ) as config_file:
-                data = yaml.safe_load(config_file)
-                return Config(**data)
-        return Config("", "", [])
+        if os.path.exists(self.config_path):
+            print("Loading previous config...\n")
+            with open(self.config_path) as config_file:
+                try:
+                    data = yaml.safe_load(config_file)
+                except yaml.scanner.ScannerError:
+                    raise TypeError("Invalid YAML file.")
+                if data:
+                    try:
+                        self.config = Config(**data)
+                        return
+                    except TypeError:
+                        raise TypeError("Invalid config file.")
+        self.config = Config("", "", [])
 
-    def save_configs(self, configs: Config) -> None:
+    def _config_is_empty(self) -> bool:
+        if self.config.github_selected_repos and self.config.github_access_token:
+            return False
+        return True
+
+    def save_config(self) -> None:
         """Write config to YAML file."""
-        pathlib.Path(self.CONFIG_FOLDER).mkdir(parents=True, exist_ok=True)
-        configs_dict = vars(configs)
-        with open(
-            os.path.join(self.CONFIG_FOLDER, self.CONFIG_FILE), "w"
-        ) as config_file:
-            yaml.dump(configs_dict, config_file)
+        if not self._config_is_empty():
+            pathlib.Path(self.config_folder).mkdir(parents=True, exist_ok=True)
+            config_dict = vars(self.config)
+            with open(self.config_path, "w") as config_file:
+                yaml.dump(config_dict, config_file)
+        else:
+            raise AttributeError
