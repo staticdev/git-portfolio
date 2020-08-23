@@ -1,4 +1,4 @@
-"""Test cases for the local_manager module."""
+"""Test cases for the local manager module."""
 from unittest.mock import Mock
 from unittest.mock import patch
 
