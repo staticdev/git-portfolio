@@ -24,10 +24,10 @@ class Config:
 class ConfigManager:
     """Configuration manager class."""
 
-    def __init__(self, config_file: str = "config.yaml") -> None:
+    def __init__(self, config_filename: str = "config.yaml") -> None:
         """Load config if it exists."""
         self.config_folder = os.path.join(os.path.expanduser("~"), ".gitp")
-        self.config_path = os.path.join(self.config_folder, config_file)
+        self.config_path = os.path.join(self.config_folder, config_filename)
 
         if os.path.exists(self.config_path):
             print("Loading previous config...\n")
