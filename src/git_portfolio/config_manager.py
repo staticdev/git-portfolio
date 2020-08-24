@@ -44,14 +44,15 @@ class ConfigManager:
                     config_file.truncate(0)
         self.config = Config("", "", [])
 
-    def _config_is_empty(self) -> bool:
+    def config_is_empty(self) -> bool:
+        """Check if config is empty."""
         if self.config.github_selected_repos and self.config.github_access_token:
             return False
         return True
 
     def save_config(self) -> None:
         """Write config to YAML file."""
-        if not self._config_is_empty():
+        if not self.config_is_empty():
             pathlib.Path(self.config_folder).mkdir(parents=True, exist_ok=True)
             config_dict = vars(self.config)
             with open(self.config_path, "w") as config_file:

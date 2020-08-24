@@ -60,18 +60,35 @@ def test_config_init(
     mock_github_manager.assert_called_once()
 
 
-@patch("git_portfolio.__main__.CONFIG_MANAGER")
+@patch("git_portfolio.__main__.CONFIG_MANAGER", autospec=True)
 @patch("git_portfolio.github_manager.GithubManager", autospec=True)
-def test_config_repos(
+def test_config_repos_success(
     mock_github_manager: Mock, mock_configmanager: Mock, runner: CliRunner
 ) -> None:
     """It call config_repos from pm.GithubManager."""
+    mock_configmanager.config_is_empty.return_value = False
     result = runner.invoke(
         git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
     )
     mock_github_manager.assert_called_once()
     mock_github_manager.return_value.config_repos.assert_called_once()
     assert result.output == "gitp successfully configured.\n"
+
+
+@patch("git_portfolio.__main__.CONFIG_MANAGER", autospec=True)
+@patch("git_portfolio.github_manager.GithubManager", autospec=True)
+def test_config_repos_do_not_change(
+    mock_github_manager: Mock, mock_configmanager: Mock, runner: CliRunner
+) -> None:
+    """It does not change config file."""
+    mock_configmanager.config_is_empty.return_value = False
+    mock_github_manager.return_value.config_repos.return_value = None
+    result = runner.invoke(
+        git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
+    )
+    mock_github_manager.assert_called_once()
+    mock_github_manager.return_value.config_repos.assert_called_once()
+    assert "gitp successfully configured.\n" not in result.output
 
 
 @patch("git_portfolio.__main__.CONFIG_MANAGER")
@@ -84,8 +101,6 @@ def test_config_repos_no_config(
     result = runner.invoke(
         git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
     )
-    mock_github_manager.assert_called_once()
-    mock_github_manager.return_value.config_repos.assert_called_once()
     assert "Error" in result.output
 
 
