@@ -90,11 +90,12 @@ def config_init() -> None:
 @configure.command("repos")
 def config_repos() -> None:
     """Config repos command."""
-    config = ghm.GithubManager(CONFIG_MANAGER.config).config_repos()
-    if config:
-        _save_config(config)
-    else:
+    if CONFIG_MANAGER.config_is_empty():
         click.secho("Error: no config found, please run `gitp config init`.", fg="red")
+    else:
+        config = ghm.GithubManager(CONFIG_MANAGER.config).config_repos()
+        if config:
+            _save_config(config)
 
 
 @create.command("issues")
