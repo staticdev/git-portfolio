@@ -13,7 +13,7 @@ class LocalManager:
         """Batch `git checkout` command.
 
         Args:
-            github_selected_repos: list of configured repo names.
+            git_selected_repos: list of configured repo names.
             args (Tuple[str]): command arguments.
 
         Returns:
