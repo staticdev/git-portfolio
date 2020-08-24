@@ -31,17 +31,17 @@ class ConfigManager:
 
         if os.path.exists(self.config_path):
             print("Loading previous config...\n")
-            with open(self.config_path) as config_file:
+            with open(self.config_path, "r+") as config_file:
                 try:
                     data = yaml.safe_load(config_file)
+                    if data:
+                        try:
+                            self.config = Config(**data)
+                            return
+                        except TypeError:
+                            config_file.truncate(0)
                 except yaml.scanner.ScannerError:
-                    raise TypeError("Invalid YAML file.")
-                if data:
-                    try:
-                        self.config = Config(**data)
-                        return
-                    except TypeError:
-                        raise TypeError("Invalid config file.")
+                    config_file.truncate(0)
         self.config = Config("", "", [])
 
     def _config_is_empty(self) -> bool:

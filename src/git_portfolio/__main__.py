@@ -1,5 +1,4 @@
 """Command-line interface."""
-import sys
 from typing import Tuple
 
 import click
@@ -9,13 +8,7 @@ import git_portfolio.github_manager as ghm
 import git_portfolio.local_manager as lm
 
 
-try:
-    CONFIG_MANAGER = cm.ConfigManager()
-except TypeError as type_error:
-    click.secho(
-        f"Error: {type_error}", fg="red", err=True,
-    )
-    sys.exit()
+CONFIG_MANAGER = cm.ConfigManager()
 
 
 @click.group("cli")
