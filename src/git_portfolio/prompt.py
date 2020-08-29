@@ -235,7 +235,7 @@ def connect_github(github_access_token: str) -> ConnectGithub:
 
 def new_repos(github_selected_repos: List[str]) -> Any:
     """Prompt question to know if you want to select new repositories."""
-    message = "\nThe configured repos will be used:"
+    message = "\nThe configured repos will be used:\n"
     for repo in github_selected_repos:
         message += f" * {repo}\n"
     message += "Do you want to select new repositories?"

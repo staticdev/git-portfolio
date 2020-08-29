@@ -15,15 +15,15 @@ def runner() -> CliRunner:
 
 
 @patch("git_portfolio.__main__.CONFIG_MANAGER")
-@patch("git_portfolio.local_manager.LocalManager", autospec=True)
+@patch("git_portfolio.git_command.GitCommand", autospec=True)
 def test_checkout_success(
-    mock_lm_localmanager: Mock, mock_configmanager: Mock, runner: CliRunner
+    mock_git_command: Mock, mock_configmanager: Mock, runner: CliRunner
 ) -> None:
     """It calls checkout with master."""
     mock_configmanager.config.github_selected_repos = ["staticdev/omg"]
     runner.invoke(git_portfolio.__main__.main, ["checkout", "master"], prog_name="gitp")
-    mock_lm_localmanager.return_value.checkout.assert_called_once_with(
-        ["staticdev/omg"], ("master",)
+    mock_git_command.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], "checkout", ("master",)
     )
 
 
@@ -38,14 +38,16 @@ def test_checkout_no_repos(mock_configmanager: Mock, runner: CliRunner) -> None:
 
 
 @patch("git_portfolio.__main__.CONFIG_MANAGER")
-@patch("git_portfolio.local_manager.LocalManager", autospec=True)
-def test_checkout_two_arguments(
-    mock_lm_localmanager: Mock, mock_configmanager: Mock, runner: CliRunner
+@patch("git_portfolio.git_command.GitCommand", autospec=True)
+def test_checkout_max_arguments(
+    mock_git_command: Mock, mock_configmanager: Mock, runner: CliRunner
 ) -> None:
     """It outputs error."""
     mock_configmanager.config.github_selected_repos = ["staticdev/omg"]
     result = runner.invoke(
-        git_portfolio.__main__.main, ["checkout", "master", "master"], prog_name="gitp"
+        git_portfolio.__main__.main,
+        ["checkout", "master", "master", "master"],
+        prog_name="gitp",
     )
     assert "Error" in result.output
 
