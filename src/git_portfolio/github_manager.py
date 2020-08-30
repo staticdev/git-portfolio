@@ -90,7 +90,11 @@ class GithubManager:
             body = self._link_issues(body, labels, pr, repo)
         try:
             created_pr = repo.create_pull(
-                title=pr.title, body=body, head=pr.head, base=pr.base, draft=pr.draft,
+                title=pr.title,
+                body=body,
+                head=pr.head,
+                base=pr.base,
+                draft=pr.draft,
             )
             print(f"{github_repo}: PR created successfully.")
             # PyGithub does not support a list of strings for adding (only one str)

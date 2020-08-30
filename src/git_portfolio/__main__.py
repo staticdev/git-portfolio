@@ -35,7 +35,8 @@ def checkout(args: Tuple[str]) -> None:
     max_args = 2
     if not CONFIG_MANAGER.config.github_selected_repos:
         click.secho(
-            "Error: no repos selected. Please run `gitp config init`.", fg="red",
+            "Error: no repos selected. Please run `gitp config init`.",
+            fg="red",
         )
     elif len(args) > max_args:
         click.secho(
