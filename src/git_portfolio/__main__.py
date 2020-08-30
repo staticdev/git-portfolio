@@ -1,11 +1,14 @@
 """Command-line interface."""
+from typing import cast
 from typing import Tuple
+from typing import Union
 
 import click
 
 import git_portfolio.config_manager as cm
 import git_portfolio.git_command as gc
 import git_portfolio.github_manager as ghm
+import git_portfolio.response_objects as res
 
 
 CONFIG_MANAGER = cm.ConfigManager()
@@ -17,11 +20,12 @@ def main() -> None:
     pass
 
 
-def _echo_outputs(output: str, error: str) -> None:
-    if error:
-        click.secho(error, fg="red")
+def _echo_outputs(response: Union[res.ResponseFailure, res.ResponseSuccess]) -> None:
+    if bool(response):
+        success = cast(res.ResponseSuccess, response)
+        click.secho(success.value)
     else:
-        click.secho(output)
+        click.secho(f"Error: {response.value['message']}", fg="red")
 
 
 @main.command("checkout")
@@ -42,10 +46,10 @@ def checkout(args: Tuple[str]) -> None:
             fg="red",
         )
     else:
-        stdout, err = gc.GitCommand().execute(
+        response = gc.GitCommand().execute(
             CONFIG_MANAGER.config.github_selected_repos, "checkout", args
         )
-        _echo_outputs(stdout, err)
+        _echo_outputs(response)
 
 
 @click.group("config")

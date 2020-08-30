@@ -6,6 +6,7 @@ import pytest
 from click.testing import CliRunner
 
 import git_portfolio.__main__
+import git_portfolio.response_objects as res
 
 
 @pytest.fixture
@@ -25,6 +26,26 @@ def test_checkout_success(
     mock_git_command.return_value.execute.assert_called_once_with(
         ["staticdev/omg"], "checkout", ("master",)
     )
+
+
+@patch("git_portfolio.__main__.CONFIG_MANAGER")
+@patch("git_portfolio.git_command.GitCommand", autospec=True)
+def test_checkout_execute_error(
+    mock_git_command: Mock, mock_configmanager: Mock, runner: CliRunner
+) -> None:
+    """It calls checkout with master and gets an error response."""
+    mock_configmanager.config.github_selected_repos = ["staticdev/omg"]
+    mock_git_command().execute.return_value = res.ResponseFailure.build_system_error(
+        "some error msg"
+    )
+    result = runner.invoke(
+        git_portfolio.__main__.main, ["checkout", "master"], prog_name="gitp"
+    )
+
+    mock_git_command.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], "checkout", ("master",)
+    )
+    assert "Error: some error msg" in result.output
 
 
 @patch("git_portfolio.__main__.CONFIG_MANAGER")

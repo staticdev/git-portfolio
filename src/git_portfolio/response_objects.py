@@ -1,8 +1,8 @@
 """Response objects."""
 from __future__ import annotations
 
+from typing import Any
 from typing import Dict
-from typing import List
 from typing import Optional
 from typing import Union
 
@@ -72,7 +72,7 @@ class ResponseSuccess:
 
     SUCCESS = "Success"
 
-    def __init__(self, value: Optional[Dict[str, List[str]]] = None) -> None:
+    def __init__(self, value: Any = None) -> None:
         """Constructor."""
         self.type = self.SUCCESS
         self.value = value

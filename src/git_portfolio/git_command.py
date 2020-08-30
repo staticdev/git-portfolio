@@ -4,6 +4,9 @@ import pathlib
 import subprocess  # noqa: S404
 from typing import List
 from typing import Tuple
+from typing import Union
+
+import git_portfolio.response_objects as res
 
 
 class GitCommand:
@@ -15,17 +18,18 @@ class GitCommand:
 
     @staticmethod
     def _check_git_install() -> str:
-        popen = subprocess.Popen(  # noqa: S603, S607
-            "git", stdout=subprocess.DEVNULL, stderr=subprocess.PIPE
-        )
-        _, error = popen.communicate()
-        if error:
+        try:
+            popen = subprocess.Popen(  # noqa: S603, S607
+                "git", stdout=subprocess.DEVNULL, stderr=subprocess.PIPE
+            )
+            popen.communicate()
+        except FileNotFoundError:
             return "This command requires Git executable installed and on system path."
         return ""
 
     def execute(
         self, git_selected_repos: List[str], command: str, args: Tuple[str]
-    ) -> Tuple[str, str]:
+    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
         """Batch `git` command.
 
         Args:
@@ -38,7 +42,7 @@ class GitCommand:
             str: error output.
         """
         if self.err_output:
-            return "", self.err_output
+            return res.ResponseFailure.build_system_error(self.err_output)
         output = ""
         cwd = pathlib.Path().absolute()
         for repo_name in git_selected_repos:
@@ -60,6 +64,4 @@ class GitCommand:
                     output += f"{error_str}"
             except FileNotFoundError as fnf_error:
                 output += f"{fnf_error}\n"
-            except Exception as ex:
-                print(ex)
-        return output, ""
+        return res.ResponseSuccess(output)
