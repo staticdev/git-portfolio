@@ -1,11 +1,14 @@
 """Command-line interface."""
+from typing import cast
 from typing import Tuple
+from typing import Union
 
 import click
 
 import git_portfolio.config_manager as cm
+import git_portfolio.git_command as gc
 import git_portfolio.github_manager as ghm
-import git_portfolio.local_manager as lm
+import git_portfolio.response_objects as res
 
 
 CONFIG_MANAGER = cm.ConfigManager()
@@ -17,29 +20,36 @@ def main() -> None:
     pass
 
 
+def _echo_outputs(response: Union[res.ResponseFailure, res.ResponseSuccess]) -> None:
+    if bool(response):
+        success = cast(res.ResponseSuccess, response)
+        click.secho(success.value)
+    else:
+        click.secho(f"Error: {response.value['message']}", fg="red")
+
+
 @main.command("checkout")
 @click.argument("args", nargs=-1)
 def checkout(args: Tuple[str]) -> None:
     """CLI `git checkout BRANCH` command."""
-    # TODO add -b option
+    max_args = 2
     if not CONFIG_MANAGER.config.github_selected_repos:
         click.secho(
             "Error: no repos selected. Please run `gitp config init`.", fg="red",
         )
-    elif len(args) != 1:
+    elif len(args) > max_args:
         click.secho(
             (
-                "Error: please put exactly one argument after checkout, eg.: "
-                "`gitp checkout BRANCH`."
+                "Error: please provide maximum of {max_args} arguments after checkout,"
+                " eg.: `gitp checkout BRANCH`."
             ),
             fg="red",
         )
     else:
-        click.secho(
-            lm.LocalManager().checkout(
-                CONFIG_MANAGER.config.github_selected_repos, args
-            )
+        response = gc.GitCommand().execute(
+            CONFIG_MANAGER.config.github_selected_repos, "checkout", args
         )
+        _echo_outputs(response)
 
 
 @click.group("config")
