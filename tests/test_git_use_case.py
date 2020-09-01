@@ -1,11 +1,11 @@
-"""Test cases for the git command module."""
+"""Test cases for the git use case module."""
 from typing import Any
 from unittest.mock import Mock
 
 import pytest
 from pytest_mock import MockerFixture
 
-from git_portfolio import git_command as gc
+from git_portfolio import git_use_case as guc
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def mock_popen(mocker: MockerFixture) -> Any:
 
 def test_execute_success(mock_popen: MockerFixture) -> None:
     """It returns success messages."""
-    response = gc.GitCommand().execute(
+    response = guc.GitUseCase().execute(
         ["staticdev/omg", "staticdev/omg2"], "checkout", ("xx",)
     )
 
@@ -32,7 +32,7 @@ def test_execute_success(mock_popen: MockerFixture) -> None:
 def test_execute_git_not_installed(mock_popen: MockerFixture) -> None:
     """It returns failure with git not installed message."""
     mock_popen.side_effect = FileNotFoundError
-    response = gc.GitCommand().execute(["staticdev/notcloned"], "checkout", ("xx",))
+    response = guc.GitUseCase().execute(["staticdev/notcloned"], "checkout", ("xx",))
 
     assert bool(response) is False
     assert (
@@ -44,7 +44,7 @@ def test_execute_git_not_installed(mock_popen: MockerFixture) -> None:
 def test_execute_no_folder(mock_popen: MockerFixture) -> None:
     """It returns that file does not exist."""
     mock_popen.side_effect = [Mock(), FileNotFoundError("No such file or directory")]
-    response = gc.GitCommand().execute(["staticdev/notcloned"], "checkout", ("xx",))
+    response = guc.GitUseCase().execute(["staticdev/notcloned"], "checkout", ("xx",))
 
     assert bool(response) is True
     assert response.value == "notcloned: No such file or directory\n"
@@ -56,7 +56,7 @@ def test_execute_error_during_execution(mock_popen: MockerFixture) -> None:
         b"",
         b"error: pathspec 'xyz' did not match any file(s) known to git",
     )
-    response = gc.GitCommand().execute(["staticdev/notcloned"], "checkout", ("xyz",))
+    response = guc.GitUseCase().execute(["staticdev/notcloned"], "checkout", ("xyz",))
 
     assert bool(response) is True
     assert (

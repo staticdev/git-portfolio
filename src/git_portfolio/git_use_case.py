@@ -1,4 +1,4 @@
-"""Local git commands."""
+"""Local git use case."""
 import os
 import pathlib
 import subprocess  # noqa: S404
@@ -9,8 +9,8 @@ from typing import Union
 import git_portfolio.response_objects as res
 
 
-class GitCommand:
-    """Execution of git commands."""
+class GitUseCase:
+    """Execution of git use case."""
 
     def __init__(self) -> None:
         """Constructor."""

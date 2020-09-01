@@ -1,4 +1,7 @@
 """Command-line interface."""
+import functools
+from typing import Any
+from typing import Callable
 from typing import cast
 from typing import Tuple
 from typing import Union
@@ -6,12 +9,32 @@ from typing import Union
 import click
 
 import git_portfolio.config_manager as cm
-import git_portfolio.git_command as gc
+import git_portfolio.git_use_case as guc
 import git_portfolio.github_manager as ghm
 import git_portfolio.response_objects as res
 
 
 CONFIG_MANAGER = cm.ConfigManager()
+
+
+def git_command(func: Callable[[Any], None]) -> Callable[[Any], None]:
+    """Validate if there are selected repos and outputs success."""
+
+    @functools.wraps(func)
+    def wrapper(
+        *args: Any, **kwargs: Any
+    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+        if not CONFIG_MANAGER.config.github_selected_repos:
+            click.secho(
+                "Error: no repos selected. Please run `gitp config init`.",
+                fg="red",
+            )
+        else:
+            value = func(*args, **kwargs)
+            _echo_outputs(value)
+            return value
+
+    return wrapper
 
 
 @click.group("cli")
@@ -30,27 +53,42 @@ def _echo_outputs(response: Union[res.ResponseFailure, res.ResponseSuccess]) -> 
 
 @main.command("checkout")
 @click.argument("args", nargs=-1)
-def checkout(args: Tuple[str]) -> None:
+@git_command
+def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """CLI `git checkout BRANCH` command."""
-    max_args = 2
-    if not CONFIG_MANAGER.config.github_selected_repos:
-        click.secho(
-            "Error: no repos selected. Please run `gitp config init`.",
-            fg="red",
-        )
-    elif len(args) > max_args:
-        click.secho(
-            (
-                "Error: please provide maximum of {max_args} arguments after checkout,"
-                " eg.: `gitp checkout BRANCH`."
-            ),
-            fg="red",
-        )
-    else:
-        response = gc.GitCommand().execute(
-            CONFIG_MANAGER.config.github_selected_repos, "checkout", args
-        )
-        _echo_outputs(response)
+    return guc.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "checkout", args
+    )
+
+
+@main.command("pull")
+@click.argument("args", nargs=-1)
+@git_command
+def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """CLI `git pull` command."""
+    return guc.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "pull", args
+    )
+
+
+@main.command("push")
+@click.argument("args", nargs=-1)
+@git_command
+def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """CLI `git push` command."""
+    return guc.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "push", args
+    )
+
+
+@main.command("status")
+@click.argument("args", nargs=-1)
+@git_command
+def status(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """CLI `git status` command."""
+    return guc.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "status", args
+    )
 
 
 @click.group("config")
