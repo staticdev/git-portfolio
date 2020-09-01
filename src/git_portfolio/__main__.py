@@ -4,6 +4,7 @@ from typing import Any
 from typing import Callable
 from typing import cast
 from typing import Tuple
+from typing import TypeVar
 from typing import Union
 
 import click
@@ -13,17 +14,15 @@ import git_portfolio.git_use_case as guc
 import git_portfolio.github_manager as ghm
 import git_portfolio.response_objects as res
 
-
+F = TypeVar("F", bound=Callable[..., Any])
 CONFIG_MANAGER = cm.ConfigManager()
 
 
-def git_command(func: Callable[[Any], None]) -> Callable[[Any], None]:
+def git_command(func: F) -> F:
     """Validate if there are selected repos and outputs success."""
 
     @functools.wraps(func)
-    def wrapper(
-        *args: Any, **kwargs: Any
-    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         if not CONFIG_MANAGER.config.github_selected_repos:
             click.secho(
                 "Error: no repos selected. Please run `gitp config init`.",
@@ -34,7 +33,7 @@ def git_command(func: Callable[[Any], None]) -> Callable[[Any], None]:
             _echo_outputs(value)
             return value
 
-    return wrapper
+    return cast(F, wrapper)
 
 
 @click.group("cli")
