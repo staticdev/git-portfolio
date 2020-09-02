@@ -15,8 +15,10 @@ def runner() -> CliRunner:
     return CliRunner()
 
 
-def test_git_command_success(runner: CliRunner) -> None:
+@patch("git_portfolio.__main__.CONFIG_MANAGER")
+def test_git_command_success(mock_configmanager: Mock, runner: CliRunner) -> None:
     """It outputs success message."""
+    mock_configmanager.config.github_selected_repos = ["staticdev/omg"]
 
     @git_portfolio.__main__.main.command("test")
     @git_portfolio.__main__.git_command
@@ -28,8 +30,10 @@ def test_git_command_success(runner: CliRunner) -> None:
     assert "success message" in result.output
 
 
-def test_git_command_execute_error(runner: CliRunner) -> None:
+@patch("git_portfolio.__main__.CONFIG_MANAGER")
+def test_git_command_execute_error(mock_configmanager: Mock, runner: CliRunner) -> None:
     """It calls a command an error response."""
+    mock_configmanager.config.github_selected_repos = ["staticdev/omg"]
 
     @git_portfolio.__main__.main.command("test")
     @git_portfolio.__main__.git_command
