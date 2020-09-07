@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import pytest
 from pytest_mock import MockerFixture
 
-from git_portfolio import git_use_case as guc
+from git_portfolio.use_cases import git_use_case as guc
 
 
 @pytest.fixture

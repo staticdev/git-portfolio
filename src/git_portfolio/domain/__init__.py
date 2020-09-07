@@ -1,0 +1,1 @@
+"""Git portfolio domain models."""
