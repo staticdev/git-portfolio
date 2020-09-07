@@ -4,20 +4,69 @@ import sys
 from typing import Any
 from typing import List
 from typing import Optional
-from typing import Set
 from typing import Union
 
 import github
+import inquirer
 import requests
 
 import git_portfolio.config_manager as cm
-import git_portfolio.prompt as prompt
+import git_portfolio.prompt_validation as val
+from git_portfolio.domain.gh_connection_settings import GhConnectionSettings
 
 # starting log
 FORMAT = "%(asctime)s %(message)s"
 DATE_FORMAT = "%d/%m/%Y %H:%M:%S"
 logging.basicConfig(level=logging.ERROR, format=FORMAT, datefmt=DATE_FORMAT)
 LOGGER = logging.getLogger(__name__)
+
+
+def prompt_connect_github(github_access_token: str) -> GhConnectionSettings:
+    """Prompt questions to connect to Github."""
+    questions = [
+        inquirer.Password(
+            "github_access_token",
+            message="GitHub access token",
+            validate=val.not_empty_validation,
+            default=github_access_token,
+        ),
+        inquirer.Text(
+            "github_hostname",
+            message="GitHub hostname (change ONLY if you use GitHub Enterprise)",
+        ),
+    ]
+    answers = inquirer.prompt(questions)
+    return GhConnectionSettings(
+        answers["github_access_token"], answers["github_hostname"]
+    )
+
+
+def prompt_new_repos(github_selected_repos: List[str]) -> Any:
+    """Prompt question to know if you want to select new repositories."""
+    message = "\nThe configured repos will be used:\n"
+    for repo in github_selected_repos:
+        message += f" * {repo}\n"
+    message += "Do you want to select new repositories?"
+    answer = inquirer.prompt([inquirer.Confirm("", message=message)])[""]
+    return answer
+
+
+def prompt_select_repos(repo_names: List[str]) -> Any:
+    """Prompt questions to select new repositories."""
+    while True:
+        selected = inquirer.prompt(
+            [
+                inquirer.Checkbox(
+                    "github_repos",
+                    message="Which repos are you working on? (Select pressing space)",
+                    choices=repo_names,
+                )
+            ]
+        )["github_repos"]
+        if selected:
+            return selected
+        else:
+            print("Please select with `space` at least one repo.\n")
 
 
 class GithubManager:
@@ -30,171 +79,6 @@ class GithubManager:
             self._github_setup()
         else:
             self.config_ini()
-
-    def create_issues(
-        self, issue: Optional[prompt.Issue] = None, github_repo: str = ""
-    ) -> None:
-        """Create issues."""
-        if not issue:
-            issue = prompt.create_issues(self.config.github_selected_repos)
-        labels = (
-            [label.strip() for label in issue.labels.split(",")] if issue.labels else []
-        )
-
-        if github_repo:
-            self._create_issue_from_repo(github_repo, issue, labels)
-        else:
-            for github_repo in self.config.github_selected_repos:
-                self._create_issue_from_repo(github_repo, issue, labels)
-
-    def _create_issue_from_repo(
-        self, github_repo: str, issue: Any, labels: List[str]
-    ) -> None:
-        """Create issue from one repository."""
-        repo = self.github_connection.get_repo(github_repo)
-        try:
-            repo.create_issue(title=issue.title, body=issue.body, labels=labels)
-            print(f"{github_repo}: issue created successfully.")
-        except github.GithubException as github_exception:
-            if github_exception.data["message"] == "Issues are disabled for this repo":
-                print(
-                    (
-                        f"{github_repo}: {github_exception.data['message']}. "
-                        "It may be a fork."
-                    )
-                )
-            else:
-                print(f"{github_repo}: {github_exception.data['message']}.")
-
-    def create_pull_requests(
-        self, pr: Optional[prompt.PullRequest] = None, github_repo: str = ""
-    ) -> None:
-        """Create pull requests."""
-        if not pr:
-            pr = prompt.create_pull_requests(self.config.github_selected_repos)
-
-        if github_repo:
-            self._create_pull_request_from_repo(github_repo, pr)
-        else:
-            for github_repo in self.config.github_selected_repos:
-                self._create_pull_request_from_repo(github_repo, pr)
-
-    def _create_pull_request_from_repo(self, github_repo: str, pr: Any) -> None:
-        """Create pull request from one repository."""
-        repo = self.github_connection.get_repo(github_repo)
-        body = pr.body
-        labels = (
-            set(label.strip() for label in pr.labels.split(",")) if pr.labels else set()
-        )
-        if pr.confirmation:
-            body = self._link_issues(body, labels, pr, repo)
-        try:
-            created_pr = repo.create_pull(
-                title=pr.title,
-                body=body,
-                head=pr.head,
-                base=pr.base,
-                draft=pr.draft,
-            )
-            print(f"{github_repo}: PR created successfully.")
-            # PyGithub does not support a list of strings for adding (only one str)
-            for label in labels:
-                created_pr.add_to_labels(label)
-        except github.GithubException as github_exception:
-            extra = ""
-            for error in github_exception.data["errors"]:
-                if "message" in error:
-                    extra += f"{error['message']} "  # type: ignore
-                else:
-                    extra += f"Invalid field {error['field']}. "  # type: ignore
-            print(f"{github_repo}: {github_exception.data['message']}. {extra}")
-
-    def _link_issues(self, body: str, labels: Set[Any], pr: Any, repo: Any) -> Any:
-        """Return body message linking issues."""
-        issues = repo.get_issues(state="open")
-        closes = ""
-        for issue in issues:
-            if pr.link in issue.title:
-                closes += f"#{issue.number} "
-                if pr.inherit_labels:
-                    issue_labels = [label.name for label in issue.get_labels()]
-                    labels.update(issue_labels)
-        closes = closes.strip()
-        if closes:
-            body += f"\n\nCloses {closes}"
-        return body
-
-    def merge_pull_requests(
-        self, pr_merge: Optional[prompt.PullRequestMerge] = None, github_repo: str = ""
-    ) -> None:
-        """Merge pull requests."""
-        if not pr_merge:
-            pr_merge = prompt.merge_pull_requests(
-                self.github_username, self.config.github_selected_repos
-            )
-        # Important note: base and head arguments have different import formats.
-        # https://developer.github.com/v3/pulls/#list-pull-requests
-        # head needs format "user/org:branch"
-        head = f"{pr_merge.prefix}:{pr_merge.head}"
-        state = "open"
-
-        if github_repo:
-            self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
-        else:
-            for github_repo in self.config.github_selected_repos:
-                self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
-
-    def _merge_pull_request_from_repo(
-        self, github_repo: str, head: str, pr_merge: Any, state: str
-    ) -> None:
-        """Merge pull request from one repository."""
-        repo = self.github_connection.get_repo(github_repo)
-        pulls = repo.get_pulls(state=state, base=pr_merge.base, head=head)
-        if pulls.totalCount == 1:
-            pull = pulls[0]
-            if pull.mergeable:
-                try:
-                    pull.merge()
-                    print(f"{github_repo}: PR merged successfully.")
-                    if pr_merge.delete_branch:
-                        self.delete_branches(pr_merge.head, github_repo)
-                except github.GithubException as github_exception:
-                    print(f"{github_repo}: {github_exception.data['message']}.")
-            else:
-                print(
-                    (
-                        f"{github_repo}: PR not mergeable, GitHub checks may be "
-                        "running."
-                    )
-                )
-        else:
-            print(
-                (
-                    f"{github_repo}: no open PR found for {pr_merge.base}:"
-                    f"{pr_merge.head}."
-                )
-            )
-
-    def delete_branches(self, branch: str = "", github_repo: str = "") -> None:
-        """Delete branches."""
-        if not branch:
-            branch = prompt.delete_branches(self.config.github_selected_repos)
-
-        if github_repo:
-            self._delete_branch_from_repo(github_repo, branch)
-        else:
-            for github_repo in self.config.github_selected_repos:
-                self._delete_branch_from_repo(github_repo, branch)
-
-    def _delete_branch_from_repo(self, github_repo: str, branch: str) -> None:
-        """Delete a branch from one repository."""
-        repo = self.github_connection.get_repo(github_repo)
-        try:
-            git_ref = repo.get_git_ref(f"heads/{branch}")
-            git_ref.delete()
-            print(f"{github_repo}: branch deleted successfully.")
-        except github.GithubException as github_exception:
-            print(f"{github_repo}: {github_exception.data['message']}.")
 
     def get_github_connection(self) -> github.Github:
         """Get Github connection."""
@@ -240,7 +124,7 @@ class GithubManager:
         # only config if gets a valid connection
         valid = False
         while not valid:
-            answers = prompt.connect_github(self.config.github_access_token)
+            answers = prompt_connect_github(self.config.github_access_token)
             self.config.github_access_token = answers.github_access_token.strip()
             self.config.github_hostname = answers.github_hostname
             valid = self._github_setup()
@@ -251,12 +135,12 @@ class GithubManager:
     def config_repos(self) -> Optional[cm.Config]:
         """Configure repos in use."""
         if self.config.github_selected_repos:
-            new_repos = prompt.new_repos(self.config.github_selected_repos)
+            new_repos = prompt_new_repos(self.config.github_selected_repos)
             if not new_repos:
                 return None
 
         repo_names = [repo.full_name for repo in self.github_repos]
-        self.config.github_selected_repos = prompt.select_repos(repo_names)
+        self.config.github_selected_repos = prompt_select_repos(repo_names)
         return self.config
 
     def _github_setup(self) -> bool:

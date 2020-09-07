@@ -10,9 +10,13 @@ from typing import Union
 import click
 
 import git_portfolio.config_manager as cm
-import git_portfolio.git_use_case as guc
 import git_portfolio.github_manager as ghm
 import git_portfolio.response_objects as res
+import git_portfolio.use_cases.gh_create_issue_use_case as ci
+import git_portfolio.use_cases.gh_create_pr_use_case as cpr
+import git_portfolio.use_cases.gh_delete_branch_use_case as dbr
+import git_portfolio.use_cases.gh_merge_pr_use_case as mpr
+import git_portfolio.use_cases.git_use_case as guc
 
 F = TypeVar("F", bound=Callable[..., Any])
 CONFIG_MANAGER = cm.ConfigManager()
@@ -149,25 +153,29 @@ def config_repos() -> None:
 @create.command("issues")
 def create_issues() -> None:
     """Create issues command."""
-    ghm.GithubManager(CONFIG_MANAGER.config).create_issues()
+    manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    ci.GhCreateIssueUseCase(manager).execute()
 
 
 @create.command("prs")
 def create_prs() -> None:
     """Create prs command."""
-    ghm.GithubManager(CONFIG_MANAGER.config).create_pull_requests()
+    manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    cpr.GhCreatePrUseCase(manager).execute()
 
 
 @merge.command("prs")
 def merge_prs() -> None:
     """Merge prs command."""
-    ghm.GithubManager(CONFIG_MANAGER.config).merge_pull_requests()
+    manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    mpr.GhMergePrUseCase(manager).execute()
 
 
 @delete.command("branches")
 def delete_branches() -> None:
     """Delete branches command."""
-    ghm.GithubManager(CONFIG_MANAGER.config).delete_branches()
+    manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    dbr.GhDeleteBranchUseCase(manager).execute()
 
 
 main.add_command(configure)
