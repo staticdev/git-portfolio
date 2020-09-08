@@ -129,17 +129,17 @@ class GhCreatePrUseCase:
                     extra += f"Invalid field {error['field']}. "  # type: ignore
             print(f"{github_repo}: {github_exception.data['message']}. {extra}")
 
-    def _link_issues(self, body: str, labels: Set[Any], pr: Any, repo: Any) -> Any:
+    @staticmethod
+    def _link_issues(body: str, labels: Set[Any], pr: Any, repo: Any) -> Any:
         """Return body message linking issues."""
         issues = repo.get_issues(state="open")
         closes = ""
         for issue in issues:
             if pr.link in issue.title:
-                closes += f"#{issue.number} "
+                closes += f"Closes #{issue.number}\n"
                 if pr.inherit_labels:
                     issue_labels = [label.name for label in issue.get_labels()]
                     labels.update(issue_labels)
-        closes = closes.strip()
         if closes:
-            body += f"\n\nCloses {closes}"
+            body += f"\n\n{closes}"
         return body
