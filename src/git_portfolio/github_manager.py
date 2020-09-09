@@ -46,8 +46,10 @@ def prompt_new_repos(github_selected_repos: List[str]) -> Any:
     message = "\nThe configured repos will be used:\n"
     for repo in github_selected_repos:
         message += f" * {repo}\n"
-    message += "Do you want to select new repositories?"
-    answer = inquirer.prompt([inquirer.Confirm("", message=message)])[""]
+    print(message)
+    answer = inquirer.prompt(
+        [inquirer.Confirm("", message="Do you want to select new repositories?")]
+    )[""]
     return answer
 
 
