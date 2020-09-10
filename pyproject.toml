@@ -58,7 +58,7 @@ source = ["git_portfolio"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 20
+fail_under = 50
 
 [build-system]
 requires = ["poetry>=0.12"]
