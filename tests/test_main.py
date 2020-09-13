@@ -31,7 +31,9 @@ def mock_github_manager(mocker: MockerFixture) -> MockerFixture:
 @pytest.fixture
 def mock_git_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GitUseCase."""
-    return mocker.patch("git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True)
+    return mocker.patch(
+        "git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True
+    )
 
 
 def test_git_command_success(
@@ -81,7 +83,7 @@ def test_git_command_no_repos(mock_config_manager: Mock, runner: CliRunner) -> N
 
 
 def test_checkout_success(
-    mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
     """It calls checkout with master."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -93,7 +95,7 @@ def test_checkout_success(
 
 
 def test_commit_success(
-    mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
     """It calls commit with message."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -107,7 +109,7 @@ def test_commit_success(
 
 
 def test_pull_success(
-    mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
     """It calls pull."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -119,7 +121,7 @@ def test_pull_success(
 
 
 def test_push_success(
-    mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
     """It calls push with origin master."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -133,7 +135,7 @@ def test_push_success(
 
 
 def test_push_with_extra_arguments(
-    mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
     """It calls push with --set-upstream origin new-branch."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -149,7 +151,7 @@ def test_push_with_extra_arguments(
 
 
 def test_status_success(
-    mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
     """It calls status."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]

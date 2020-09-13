@@ -5,12 +5,9 @@
 # from git_portfolio import config_manager as cm
 
 
-class TestGithubManager:
-    """GithubManager test class."""
-
-    def test_config_repos_dont_select(self) -> None:
-        """It does nothing."""
-        # config = Mock()
-        # github_manager = ghm.GithubManager(config)
-        # github_manager.config_repos(["staticdev/omg"])
-        pass
+def test_config_repos_dont_select() -> None:
+    """It does nothing."""
+    # config = Mock()
+    # github_manager = ghm.GithubManager(config)
+    # github_manager.config_repos(["staticdev/omg"])
+    pass
