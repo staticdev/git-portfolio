@@ -18,14 +18,20 @@ def runner() -> CliRunner:
 
 @pytest.fixture
 def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for packing CONFIG_MANAGER."""
+    """Fixture for mocking CONFIG_MANAGER."""
     return mocker.patch("git_portfolio.__main__.CONFIG_MANAGER")
 
 
 @pytest.fixture
 def mock_github_manager(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for packing GithubManager."""
+    """Fixture for mocking GithubManager."""
     return mocker.patch("git_portfolio.github_manager.GithubManager", autospec=True)
+
+
+@pytest.fixture
+def mock_git_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GitUseCase."""
+    return mocker.patch("git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True)
 
 
 def test_git_command_success(
@@ -74,7 +80,6 @@ def test_git_command_no_repos(mock_config_manager: Mock, runner: CliRunner) -> N
     assert result.output.startswith("Error: no repos selected.")
 
 
-@patch("git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True)
 def test_checkout_success(
     mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
@@ -87,7 +92,20 @@ def test_checkout_success(
     )
 
 
-@patch("git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True)
+def test_commit_success(
+    mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
+) -> None:
+    """It calls commit with message."""
+    mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
+    runner.invoke(
+        git_portfolio.__main__.main, ["commit", "-m", "message"], prog_name="gitp"
+    )
+
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], "commit", ("-m", "message")
+    )
+
+
 def test_pull_success(
     mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
@@ -100,7 +118,6 @@ def test_pull_success(
     )
 
 
-@patch("git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True)
 def test_push_success(
     mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
 ) -> None:
@@ -115,7 +132,22 @@ def test_push_success(
     )
 
 
-@patch("git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True)
+def test_push_with_extra_arguments(
+    mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
+) -> None:
+    """It calls push with --set-upstream origin new-branch."""
+    mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
+    runner.invoke(
+        git_portfolio.__main__.main,
+        ["push", "--set-upstream", "origin", "new-branch"],
+        prog_name="gitp",
+    )
+
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], "push", ("--set-upstream", "origin", "new-branch")
+    )
+
+
 def test_status_success(
     mock_git_use_case: Mock, mock_config_manager: Mock, runner: CliRunner
 ) -> None:

@@ -64,6 +64,16 @@ def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess
     )
 
 
+@main.command("commit", context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+@git_command
+def commit(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """CLI `git commit` command."""
+    return guc.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "commit", args
+    )
+
+
 @main.command("pull")
 @click.argument("args", nargs=-1)
 @git_command
@@ -74,7 +84,7 @@ def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     )
 
 
-@main.command("push")
+@main.command("push", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @git_command
 def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
