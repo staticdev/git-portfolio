@@ -1,7 +1,4 @@
 """Test cases for the __main__ module."""
-from unittest.mock import Mock
-from unittest.mock import patch
-
 import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
@@ -33,6 +30,42 @@ def mock_git_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GitUseCase."""
     return mocker.patch(
         "git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True
+    )
+
+
+@pytest.fixture
+def mock_gh_create_issue_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GhCreateIssueUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.gh_create_issue_use_case.GhCreateIssueUseCase",
+        autospec=True,
+    )
+
+
+@pytest.fixture
+def mock_gh_create_pr_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GhCreatePrUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.gh_create_pr_use_case.GhCreatePrUseCase",
+        autospec=True,
+    )
+
+
+@pytest.fixture
+def mock_gh_merge_pr_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GhMergePrUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.gh_merge_pr_use_case.GhMergePrUseCase",
+        autospec=True,
+    )
+
+
+@pytest.fixture
+def mock_gh_delete_branch_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GhDeleteBranchUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.gh_delete_branch_use_case.GhDeleteBranchUseCase",
+        autospec=True,
     )
 
 
@@ -68,7 +101,9 @@ def test_git_command_execute_error(
     assert "Error: some error msg" in result.output
 
 
-def test_git_command_no_repos(mock_config_manager: Mock, runner: CliRunner) -> None:
+def test_git_command_no_repos(
+    mock_config_manager: MockerFixture, runner: CliRunner
+) -> None:
     """It outputs no repos selected error message."""
 
     @git_portfolio.__main__.main.command("test")
@@ -83,7 +118,9 @@ def test_git_command_no_repos(mock_config_manager: Mock, runner: CliRunner) -> N
 
 
 def test_checkout_success(
-    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It calls checkout with master."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -95,7 +132,9 @@ def test_checkout_success(
 
 
 def test_commit_success(
-    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It calls commit with message."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -109,7 +148,9 @@ def test_commit_success(
 
 
 def test_pull_success(
-    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It calls pull."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -121,7 +162,9 @@ def test_pull_success(
 
 
 def test_push_success(
-    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It calls push with origin master."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -135,7 +178,9 @@ def test_push_success(
 
 
 def test_push_with_extra_arguments(
-    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It calls push with --set-upstream origin new-branch."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -151,7 +196,9 @@ def test_push_with_extra_arguments(
 
 
 def test_status_success(
-    mock_git_use_case: MockerFixture, mock_config_manager: Mock, runner: CliRunner
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It calls status."""
     mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
@@ -163,7 +210,9 @@ def test_status_success(
 
 
 def test_config_init(
-    mock_github_manager: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_github_manager: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It creates pm.GithubManager."""
     runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
@@ -172,20 +221,25 @@ def test_config_init(
 
 
 def test_config_repos_success(
-    mock_github_manager: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_github_manager: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It call config_repos from pm.GithubManager."""
     mock_config_manager.config_is_empty.return_value = False
     result = runner.invoke(
         git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
     )
+
     mock_github_manager.assert_called_once()
     mock_github_manager.return_value.config_repos.assert_called_once()
     assert result.output == "gitp successfully configured.\n"
 
 
 def test_config_repos_do_not_change(
-    mock_github_manager: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_github_manager: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It does not change config file."""
     mock_config_manager.config_is_empty.return_value = False
@@ -193,28 +247,28 @@ def test_config_repos_do_not_change(
     result = runner.invoke(
         git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
     )
+
     mock_github_manager.assert_called_once()
     mock_github_manager.return_value.config_repos.assert_called_once()
     assert "gitp successfully configured.\n" not in result.output
 
 
 def test_config_repos_no_config(
-    mock_github_manager: Mock, mock_config_manager: Mock, runner: CliRunner
+    mock_github_manager: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
 ) -> None:
     """It returns error message."""
     mock_github_manager.return_value.config_repos.return_value = None
     result = runner.invoke(
         git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
     )
+
     assert "Error" in result.output
 
 
-@patch(
-    "git_portfolio.use_cases.gh_create_issue_use_case.GhCreateIssueUseCase",
-    autospec=True,
-)
 def test_create_issues(
-    mock_gh_create_issue_use_case: Mock,
+    mock_gh_create_issue_use_case: MockerFixture,
     mock_github_manager: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
@@ -226,12 +280,8 @@ def test_create_issues(
     mock_gh_create_issue_use_case(manager).execute.assert_called_once()
 
 
-@patch(
-    "git_portfolio.use_cases.gh_create_pr_use_case.GhCreatePrUseCase",
-    autospec=True,
-)
 def test_create_prs(
-    mock_gh_create_pr_use_case: Mock,
+    mock_gh_create_pr_use_case: MockerFixture,
     mock_github_manager: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
@@ -243,12 +293,8 @@ def test_create_prs(
     mock_gh_create_pr_use_case(manager).execute.assert_called_once()
 
 
-@patch(
-    "git_portfolio.use_cases.gh_merge_pr_use_case.GhMergePrUseCase",
-    autospec=True,
-)
 def test_merge_prs(
-    mock_gh_merge_pr_use_case: Mock,
+    mock_gh_merge_pr_use_case: MockerFixture,
     mock_github_manager: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
@@ -260,12 +306,8 @@ def test_merge_prs(
     mock_gh_merge_pr_use_case(manager).execute.assert_called_once()
 
 
-@patch(
-    "git_portfolio.use_cases.gh_delete_branch_use_case.GhDeleteBranchUseCase",
-    autospec=True,
-)
 def test_delete_branches(
-    mock_gh_delete_branch_use_case: Mock,
+    mock_gh_delete_branch_use_case: MockerFixture,
     mock_github_manager: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,

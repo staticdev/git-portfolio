@@ -1,7 +1,6 @@
 """Test cases for the config manager module."""
-from unittest.mock import Mock
-
 import pytest
+from _pytest.tmpdir import Path
 from pytest_mock import MockerFixture
 
 from git_portfolio import config_manager as cm
@@ -19,7 +18,7 @@ def mock_yaml_dump(mocker: MockerFixture) -> MockerFixture:
     return mocker.patch("yaml.dump")
 
 
-def test_init_invalid_config(tmp_path: Mock, mock_os_join_path: MockerFixture) -> None:
+def test_init_invalid_config(tmp_path: Path, mock_os_join_path: MockerFixture) -> None:
     """It trucantes the file."""
     filename = "config1.yaml"
     d = tmp_path
@@ -30,7 +29,7 @@ def test_init_invalid_config(tmp_path: Mock, mock_os_join_path: MockerFixture) -
     # os_truncate.assert_called_once_with(0)
 
 
-def test_save_invalid_yaml(tmp_path: Mock, mock_os_join_path: MockerFixture) -> None:
+def test_save_invalid_yaml(tmp_path: Path, mock_os_join_path: MockerFixture) -> None:
     """It trucantes the file."""
     filename = "config.yaml"
     content = (
@@ -47,7 +46,7 @@ def test_save_invalid_yaml(tmp_path: Mock, mock_os_join_path: MockerFixture) -> 
     # os_truncate.assert_called_once_with(0)
 
 
-def test_save_config_no_file(tmp_path: Mock, mock_os_join_path: MockerFixture) -> None:
+def test_save_config_no_file(tmp_path: Path, mock_os_join_path: MockerFixture) -> None:
     """It raises AttributeError."""
     d = tmp_path
     mock_os_join_path.side_effect = [str(d), str(d / "config.yaml")]
@@ -57,7 +56,7 @@ def test_save_config_no_file(tmp_path: Mock, mock_os_join_path: MockerFixture) -
 
 
 def test_save_config_empty_file(
-    tmp_path: Mock, mock_os_join_path: MockerFixture
+    tmp_path: Path, mock_os_join_path: MockerFixture
 ) -> None:
     """It raises AttributeError."""
     filename = "config2.yaml"
@@ -71,7 +70,9 @@ def test_save_config_empty_file(
 
 
 def test_save_config_success(
-    tmp_path: Mock, mock_yaml_dump: MockerFixture, mock_os_join_path: MockerFixture
+    tmp_path: Path,
+    mock_yaml_dump: MockerFixture,
+    mock_os_join_path: MockerFixture,
 ) -> None:
     """It dumps yaml config file."""
     filename = "config.yaml"
