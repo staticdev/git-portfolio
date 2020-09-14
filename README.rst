@@ -62,12 +62,29 @@ You can install *Git Portfolio* via pip_ from PyPI_:
    $ pip install git-portfolio
 
 
-Usage
------
+.. basic-usage
 
-.. click:: git_portfolio.__main__:main
-   :prog: gitp
-   :nested: full
+Basic usage
+-----------
+
+1. Create initial configuration with:
+
+.. code:: console
+
+   $ gitp config init
+
+
+2. Execute all the commands you want. Eg.:
+
+.. code:: console
+
+   $ gitp create issues  # create same issue for all projects
+   $ gitp checkout -b new-branch  # checks out new branch new-branch in all projects
+
+
+.. end-basic-usage
+
+Complete instructions can be found at `git-portfolio.readthedocs.io`_.
 
 
 Contributing
@@ -106,5 +123,6 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _Hypermodern Python Cookiecutter: https://github.com/cjolowicz/cookiecutter-hypermodern-python
 .. _file an issue: https://github.com/staticdev/git-portfolio/issues
 .. _pip: https://pip.pypa.io/
+.. _git-portfolio.readthedocs.io: https://git-portfolio.readthedocs.io
 .. github-only
 .. _Contributor Guide: CONTRIBUTING.rst
