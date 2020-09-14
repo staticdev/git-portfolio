@@ -39,10 +39,9 @@ Git Portfolio
 Features
 --------
 
-* Mass create issues.
-* Mass create pull requests.
-* Mass merge pull requests.
-* Mass delete branches by name.
+* Configure multiple working repositories.
+* Batch `git checkout`, `git commit`, `git pull`, `git push` and `git status`.
+* Batch creation of issues, creation of pull requests, merge of pull requests and deletion branches by name on GitHub.
 
 
 Requirements
@@ -66,7 +65,9 @@ You can install *Git Portfolio* via pip_ from PyPI_:
 Usage
 -----
 
-* TODO.
+.. click:: git_portfolio.__main__:main
+   :prog: gitp
+   :nested: full
 
 
 Contributing

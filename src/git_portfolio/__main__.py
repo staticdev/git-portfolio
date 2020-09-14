@@ -58,7 +58,7 @@ def _echo_outputs(response: Union[res.ResponseFailure, res.ResponseSuccess]) -> 
 @click.argument("args", nargs=-1)
 @git_command
 def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
-    """CLI `git checkout BRANCH` command."""
+    """Batch `git checkout` command."""
     return guc.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "checkout", args
     )
@@ -68,7 +68,7 @@ def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess
 @click.argument("args", nargs=-1)
 @git_command
 def commit(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
-    """CLI `git commit` command."""
+    """Batch `git commit` command."""
     return guc.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "commit", args
     )
@@ -78,7 +78,7 @@ def commit(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @click.argument("args", nargs=-1)
 @git_command
 def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
-    """CLI `git pull` command."""
+    """Batch `git pull` command."""
     return guc.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "pull", args
     )
@@ -88,7 +88,7 @@ def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @click.argument("args", nargs=-1)
 @git_command
 def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
-    """CLI `git push` command."""
+    """Batch `git push` command."""
     return guc.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "push", args
     )
@@ -98,7 +98,7 @@ def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @click.argument("args", nargs=-1)
 @git_command
 def status(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
-    """CLI `git status` command."""
+    """Batch `git status` command."""
     return guc.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "status", args
     )
@@ -144,14 +144,14 @@ def _save_config(config: cm.Config) -> None:
 
 @configure.command("init")
 def config_init() -> None:
-    """Config init command."""
+    """Initialize `gitp` config."""
     github_manager = ghm.GithubManager(CONFIG_MANAGER.config)
     _save_config(github_manager.config)
 
 
 @configure.command("repos")
 def config_repos() -> None:
-    """Config repos command."""
+    """Configure current working `gitp` repositories."""
     if CONFIG_MANAGER.config_is_empty():
         click.secho("Error: no config found, please run `gitp config init`.", fg="red")
     else:
@@ -162,28 +162,28 @@ def config_repos() -> None:
 
 @create.command("issues")
 def create_issues() -> None:
-    """Create issues command."""
+    """Batch creation of issues on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
     ci.GhCreateIssueUseCase(manager).execute()
 
 
 @create.command("prs")
 def create_prs() -> None:
-    """Create prs command."""
+    """Batch creation of pull requests on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
     cpr.GhCreatePrUseCase(manager).execute()
 
 
 @merge.command("prs")
 def merge_prs() -> None:
-    """Merge prs command."""
+    """Batch merge of pull requests on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
     mpr.GhMergePrUseCase(manager).execute()
 
 
 @delete.command("branches")
 def delete_branches() -> None:
-    """Delete branches command."""
+    """Batch deletion of branches on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
     dbr.GhDeleteBranchUseCase(manager).execute()
 
