@@ -145,6 +145,27 @@ def test_checkout_success(
     )
 
 
+def test_checkout_new_branch(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls checkout with master."""
+    mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
+    runner.invoke(
+        git_portfolio.__main__.main, ["checkout", "-b", "new-branch"], prog_name="gitp"
+    )
+
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"],
+        "checkout",
+        (
+            "-b",
+            "new-branch",
+        ),
+    )
+
+
 def test_commit_success(
     mock_git_use_case: MockerFixture,
     mock_config_manager: MockerFixture,
