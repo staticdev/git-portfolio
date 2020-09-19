@@ -104,6 +104,16 @@ def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     )
 
 
+@main.command("reset", context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+@git_command
+def reset(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """Batch `git reset` command."""
+    return guc.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "reset", args
+    )
+
+
 @main.command("status")
 @click.argument("args", nargs=-1)
 @git_command
