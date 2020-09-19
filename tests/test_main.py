@@ -117,6 +117,20 @@ def test_git_command_no_repos(
     assert result.output.startswith("Error: no repos selected.")
 
 
+def test_add_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls add with '.'."""
+    mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
+    runner.invoke(git_portfolio.__main__.main, ["add", "."], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], "add", (".",)
+    )
+
+
 def test_checkout_success(
     mock_git_use_case: MockerFixture,
     mock_config_manager: MockerFixture,

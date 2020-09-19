@@ -56,12 +56,16 @@ class GitUseCase:
                     cwd=os.path.join(cwd, folder_name),
                 )
                 stdout, error = popen.communicate()
-                if stdout:
-                    stdout_str = stdout.decode("utf-8")
-                    output += f"{stdout_str}"
-                if error:
-                    error_str = error.decode("utf-8")
-                    output += f"{error_str}"
+                # case of commands that outputs nothing on success such as `git add .`
+                if not stdout and not error:
+                    output += "success.\n"
+                else:
+                    if stdout:
+                        stdout_str = stdout.decode("utf-8")
+                        output += f"{stdout_str}"
+                    if error:
+                        error_str = error.decode("utf-8")
+                        output += f"{error_str}"
             except FileNotFoundError as fnf_error:
                 output += f"{fnf_error}\n"
         return res.ResponseSuccess(output)

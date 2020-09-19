@@ -29,6 +29,17 @@ def test_execute_success(mock_popen: MockerFixture) -> None:
     )
 
 
+def test_execute_success_no_output(mock_popen: MockerFixture) -> None:
+    """It returns success message."""
+    mock_popen.return_value.communicate.return_value = (b"", b"")
+    response = guc.GitUseCase().execute(
+        ["staticdev/omg", "staticdev/omg2"], "add", (".",)
+    )
+
+    assert bool(response) is True
+    assert response.value == "omg: success.\nomg2: success.\n"
+
+
 def test_execute_git_not_installed(mock_popen: MockerFixture) -> None:
     """It returns failure with git not installed message."""
     mock_popen.side_effect = FileNotFoundError
