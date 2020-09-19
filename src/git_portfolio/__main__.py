@@ -64,7 +64,7 @@ def add(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     )
 
 
-@main.command("checkout")
+@main.command("checkout", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @git_command
 def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
