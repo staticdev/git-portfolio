@@ -209,6 +209,36 @@ def test_push_with_extra_arguments(
     )
 
 
+def test_reset_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls reset with HEAD^."""
+    mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
+    runner.invoke(git_portfolio.__main__.main, ["reset", "HEAD^"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], "reset", ("HEAD^",)
+    )
+
+
+def test_reset_success_with_hard(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls reset with --hard HEAD^."""
+    mock_config_manager.config.github_selected_repos = ["staticdev/omg"]
+    runner.invoke(
+        git_portfolio.__main__.main, ["reset", "--hard", "HEAD^"], prog_name="gitp"
+    )
+
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], "reset", ("--hard", "HEAD^")
+    )
+
+
 def test_status_success(
     mock_git_use_case: MockerFixture,
     mock_config_manager: MockerFixture,
