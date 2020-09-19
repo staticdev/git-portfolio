@@ -54,6 +54,16 @@ def _echo_outputs(response: Union[res.ResponseFailure, res.ResponseSuccess]) -> 
         click.secho(f"Error: {response.value['message']}", fg="red")
 
 
+@main.command("add")
+@click.argument("args", nargs=-1)
+@git_command
+def add(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """Batch `git add` command."""
+    return guc.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "add", args
+    )
+
+
 @main.command("checkout")
 @click.argument("args", nargs=-1)
 @git_command
