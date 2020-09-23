@@ -1,4 +1,4 @@
-"""Test cases for the git use case module."""
+"""Test cases for the git use case."""
 from typing import Any
 from unittest.mock import Mock
 

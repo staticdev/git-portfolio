@@ -4,37 +4,10 @@ from typing import List
 from typing import Optional
 
 import github
-import inquirer
 
 import git_portfolio.github_manager as ghm
-import git_portfolio.prompt_validation as val
+import git_portfolio.prompt as p
 from git_portfolio.domain.issue import Issue
-
-
-def prompt_create_issues(github_selected_repos: List[str]) -> Issue:
-    """Prompt questions to create issues."""
-    questions = [
-        inquirer.Text(
-            "title", message="Write an issue title", validate=val.not_empty_validation
-        ),
-        inquirer.Text("body", message="Write an issue body [optional]"),
-        inquirer.Text(
-            "labels", message="Write issue labels [optional, separated by comma]"
-        ),
-        inquirer.Confirm(
-            "correct",
-            message=(
-                f"Confirm creation of issue for the project(s) {github_selected_repos}"
-                ". Continue?"
-            ),
-            default=False,
-        ),
-    ]
-    correct = False
-    while not correct:
-        answers = inquirer.prompt(questions)
-        correct = answers["correct"]
-    return Issue(answers["title"], answers["body"], answers["labels"])
 
 
 class GhCreateIssueUseCase:
@@ -47,9 +20,7 @@ class GhCreateIssueUseCase:
     def execute(self, issue: Optional[Issue] = None, github_repo: str = "") -> None:
         """Create issues."""
         if not issue:
-            issue = prompt_create_issues(
-                self.github_manager.config.github_selected_repos
-            )
+            issue = p.create_issues(self.github_manager.config.github_selected_repos)
         labels = (
             [label.strip() for label in issue.labels.split(",")] if issue.labels else []
         )

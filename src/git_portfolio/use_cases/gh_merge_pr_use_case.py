@@ -1,60 +1,13 @@
 """Merge pull request on Github use case."""
 from typing import Any
-from typing import List
 from typing import Optional
 
 import github
-import inquirer
 
 import git_portfolio.github_manager as ghm
-import git_portfolio.prompt_validation as val
+import git_portfolio.prompt as p
 import git_portfolio.use_cases.gh_delete_branch_use_case as dbr
 from git_portfolio.domain.pull_request_merge import PullRequestMerge
-
-
-def prompt_merge_pull_requests(
-    github_username: str, github_selected_repos: List[str]
-) -> PullRequestMerge:
-    """Prompt questions to merge pull requests."""
-    questions = [
-        inquirer.Text(
-            "base",
-            message="Write base branch name (destination)",
-            default="master",
-            validate=val.not_empty_validation,
-        ),
-        inquirer.Text(
-            "head",
-            message="Write the head branch name (source)",
-            validate=val.not_empty_validation,
-        ),
-        inquirer.Text(
-            "prefix",
-            message="Write base user or organization name from PR head",
-            default=github_username,
-            validate=val.not_empty_validation,
-        ),
-        inquirer.Confirm(
-            "delete_branch",
-            message="Do you want to delete head branch on merge?",
-            default=False,
-        ),
-        inquirer.Confirm(
-            "correct",
-            message=(
-                "Confirm merging of pull request(s) for the project(s) "
-                f"{github_selected_repos}. Continue?"
-            ),
-            default=False,
-        ),
-    ]
-    correct = False
-    while not correct:
-        answers = inquirer.prompt(questions)
-        correct = answers["correct"]
-    return PullRequestMerge(
-        answers["base"], answers["head"], answers["prefix"], answers["delete_branch"]
-    )
 
 
 class GhMergePrUseCase:
@@ -69,7 +22,7 @@ class GhMergePrUseCase:
     ) -> None:
         """Merge pull requests."""
         if not pr_merge:
-            pr_merge = prompt_merge_pull_requests(
+            pr_merge = p.merge_pull_requests(
                 self.github_manager.github_username,
                 self.github_manager.config.github_selected_repos,
             )

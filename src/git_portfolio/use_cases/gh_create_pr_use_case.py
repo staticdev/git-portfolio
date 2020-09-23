@@ -1,82 +1,13 @@
 """Create pull request on Github use case."""
 from typing import Any
-from typing import List
 from typing import Optional
 from typing import Set
 
 import github
-import inquirer
 
 import git_portfolio.github_manager as ghm
-import git_portfolio.prompt_validation as val
+import git_portfolio.prompt as p
 from git_portfolio.domain.pull_request import PullRequest
-
-
-def prompt_create_pull_requests(github_selected_repos: List[str]) -> PullRequest:
-    """Prompt questions to create pull requests."""
-    questions = [
-        inquirer.Text(
-            "base",
-            message="Write base branch name (destination)",
-            default="master",
-            validate=val.not_empty_validation,
-        ),
-        inquirer.Text(
-            "head",
-            message="Write the head branch name (source)",
-            validate=val.not_empty_validation,
-        ),
-        inquirer.Text(
-            "title", message="Write a PR title", validate=val.not_empty_validation
-        ),
-        inquirer.Text("body", message="Write an PR body [optional]"),
-        inquirer.Confirm(
-            "draft", message="Do you want to create a draft PR?", default=False
-        ),
-        inquirer.Text(
-            "labels", message="Write PR labels [optional, separated by comma]"
-        ),
-        inquirer.Confirm(
-            "confirmation",
-            message="Do you want to link pull request to issues by title?",
-            default=False,
-        ),
-        inquirer.Text(
-            "link",
-            message="Write issue title (or part of it)",
-            validate=val.not_empty_validation,
-            ignore=val.ignore_if_not_confirmed,
-        ),
-        inquirer.Confirm(
-            "inherit_labels",
-            message="Do you want to add labels inherited from the issues?",
-            default=True,
-            ignore=val.ignore_if_not_confirmed,
-        ),
-        inquirer.Confirm(
-            "correct",
-            message=(
-                "Confirm creation of pull request(s) for the project(s) "
-                f"{github_selected_repos}. Continue?"
-            ),
-            default=False,
-        ),
-    ]
-    correct = False
-    while not correct:
-        answers = inquirer.prompt(questions)
-        correct = answers["correct"]
-    return PullRequest(
-        answers["title"],
-        answers["body"],
-        answers["labels"],
-        answers["confirmation"],
-        answers["link"],
-        answers["inherit_labels"],
-        answers["head"],
-        answers["base"],
-        answers["draft"],
-    )
 
 
 class GhCreatePrUseCase:
@@ -89,7 +20,7 @@ class GhCreatePrUseCase:
     def execute(self, pr: Optional[PullRequest] = None, github_repo: str = "") -> None:
         """Create pull requests."""
         if not pr:
-            pr = prompt_create_pull_requests(
+            pr = p.create_pull_requests(
                 self.github_manager.config.github_selected_repos
             )
 
