@@ -1,24 +1,10 @@
 """Configuration manager module."""
 import os
 import pathlib
-from typing import List
 
 import yaml
 
-
-class Config:
-    """Config class."""
-
-    def __init__(
-        self,
-        github_hostname: str,
-        github_access_token: str,
-        github_selected_repos: List[str],
-    ):
-        """Constructor."""
-        self.github_hostname = github_hostname
-        self.github_access_token = github_access_token
-        self.github_selected_repos = github_selected_repos
+import git_portfolio.domain.config as c
 
 
 class ConfigManager:
@@ -36,13 +22,13 @@ class ConfigManager:
                     data = yaml.safe_load(config_file)
                     if data:
                         try:
-                            self.config = Config(**data)
+                            self.config = c.Config(**data)
                             return
                         except TypeError:
                             config_file.truncate(0)
                 except yaml.scanner.ScannerError:
                     config_file.truncate(0)
-        self.config = Config("", "", [])
+        self.config = c.Config("", "", [])
 
     def config_is_empty(self) -> bool:
         """Check if config is empty."""

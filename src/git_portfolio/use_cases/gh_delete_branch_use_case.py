@@ -1,34 +1,8 @@
 """Delete branch on Github use case."""
-from typing import Any
-from typing import List
-
 import github
-import inquirer
 
 import git_portfolio.github_manager as ghm
-import git_portfolio.prompt_validation as val
-
-
-def prompt_delete_branches(github_selected_repos: List[str]) -> Any:
-    """Prompt questions to delete branches."""
-    questions = [
-        inquirer.Text(
-            "branch", message="Write the branch name", validate=val.not_empty_validation
-        ),
-        inquirer.Confirm(
-            "correct",
-            message=(
-                "Confirm deleting of branch(es) for the project(s) "
-                f"{github_selected_repos}. Continue?"
-            ),
-            default=False,
-        ),
-    ]
-    correct = False
-    while not correct:
-        answers = inquirer.prompt(questions)
-        correct = answers["correct"]
-    return answers["branch"]
+import git_portfolio.prompt as p
 
 
 class GhDeleteBranchUseCase:
@@ -41,9 +15,7 @@ class GhDeleteBranchUseCase:
     def execute(self, branch: str = "", github_repo: str = "") -> None:
         """Delete branches."""
         if not branch:
-            branch = prompt_delete_branches(
-                self.github_manager.config.github_selected_repos
-            )
+            branch = p.delete_branches(self.github_manager.config.github_selected_repos)
 
         if github_repo:
             self._delete_branch_from_repo(github_repo, branch)
