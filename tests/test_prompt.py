@@ -3,10 +3,10 @@ import pytest
 from pytest_mock import MockerFixture
 
 import git_portfolio.domain.gh_connection_settings as gcs
+import git_portfolio.domain.issue as i
+import git_portfolio.domain.pull_request as pr
+import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.prompt as p
-from git_portfolio.domain.issue import Issue
-from git_portfolio.domain.pull_request import PullRequest
-from git_portfolio.domain.pull_request_merge import PullRequestMerge
 
 
 @pytest.fixture
@@ -50,12 +50,12 @@ def test_create_issues(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns issue."""
     mock_inquirer_prompt.return_value = {
         "title": "my title",
-        "labels": ["tests"],
+        "labels": "testing,refactor",
         "body": "my body",
         "correct": True,
     }
     result = p.InquirerPrompter.create_issues(["staticdev/omg"])
-    expected = Issue("my title", "my body", ["tests"])
+    expected = i.Issue("my title", "my body", "testing,refactor")
 
     assert result == expected
 
@@ -75,7 +75,7 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         "correct": True,
     }
     result = p.InquirerPrompter.create_pull_requests(["staticdev/omg"])
-    expected = PullRequest(
+    expected = pr.PullRequest(
         "my title",
         "my body",
         ["tests"],
@@ -109,6 +109,6 @@ def test_merge_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         "correct": True,
     }
     result = p.InquirerPrompter.merge_pull_requests("staticdev", ["staticdev/omg"])
-    expected = PullRequestMerge("branch", "main", "org name", True)
+    expected = prm.PullRequestMerge("branch", "main", "org name", True)
 
     assert result == expected

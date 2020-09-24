@@ -1,11 +1,13 @@
 """Merge pull request on Github use case."""
 from typing import Any
+from typing import Union
 
 import github
 
+import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.github_manager as ghm
+import git_portfolio.response_objects as res
 import git_portfolio.use_cases.gh_delete_branch_use_case as dbr
-from git_portfolio.domain.pull_request_merge import PullRequestMerge
 
 
 class GhMergePrUseCase:
@@ -15,7 +17,9 @@ class GhMergePrUseCase:
         """Initializer."""
         self.github_manager = github_manager
 
-    def execute(self, pr_merge: PullRequestMerge, github_repo: str = "") -> None:
+    def execute(
+        self, pr_merge: prm.PullRequestMerge, github_repo: str = ""
+    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
         """Merge pull requests."""
         # Important note: base and head arguments have different import formats.
         # https://developer.github.com/v3/pulls/#list-pull-requests
@@ -24,41 +28,42 @@ class GhMergePrUseCase:
         state = "open"
 
         if github_repo:
-            self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
+            output = self._merge_pull_request_from_repo(
+                github_repo, head, pr_merge, state
+            )
         else:
+            output = ""
             for github_repo in self.github_manager.config.github_selected_repos:
-                self._merge_pull_request_from_repo(github_repo, head, pr_merge, state)
+                output += self._merge_pull_request_from_repo(
+                    github_repo, head, pr_merge, state
+                )
+        return res.ResponseSuccess(output)
 
     def _merge_pull_request_from_repo(
         self, github_repo: str, head: str, pr_merge: Any, state: str
-    ) -> None:
+    ) -> str:
         """Merge pull request from one repository."""
         repo = self.github_manager.github_connection.get_repo(github_repo)
         pulls = repo.get_pulls(state=state, base=pr_merge.base, head=head)
         if pulls.totalCount == 1:
             pull = pulls[0]
             if pull.mergeable:
+                output = ""
                 try:
                     pull.merge()
-                    print(f"{github_repo}: PR merged successfully.")
+                    output += f"{github_repo}: PR merged successfully.\n"
                     if pr_merge.delete_branch:
                         delete_branch_use_case = dbr.GhDeleteBranchUseCase(
                             self.github_manager
                         )
                         delete_branch_use_case.execute(pr_merge.head, github_repo)
                 except github.GithubException as github_exception:
-                    print(f"{github_repo}: {github_exception.data['message']}.")
+                    output += f"{github_repo}: {github_exception.data['message']}."
+                return output
             else:
-                print(
-                    (
-                        f"{github_repo}: PR not mergeable, GitHub checks may be "
-                        "running."
-                    )
-                )
+                return f"{github_repo}: PR not mergeable, GitHub checks may be running."
         else:
-            print(
-                (
-                    f"{github_repo}: no open PR found for {pr_merge.base}:"
-                    f"{pr_merge.head}."
-                )
+            return (
+                f"{github_repo}: no open PR found for {pr_merge.base}:"
+                f"{pr_merge.head}."
             )
