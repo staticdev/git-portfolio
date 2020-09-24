@@ -22,6 +22,6 @@ class ConfigInitUseCase:
         """Initialize app configuration."""
         self.github_manager.set_github_account()
         repo_names = self.github_manager.get_repo_names()
-        selected_repos = p.select_repos(repo_names)
+        selected_repos = p.InquirerPrompter.select_repos(repo_names)
         cr.ConfigReposUseCase(self.config_manager).execute(selected_repos)
         return res.ResponseSuccess("gitp successfully configured.")

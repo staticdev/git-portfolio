@@ -1,12 +1,10 @@
 """Create issue on Github use case."""
 from typing import Any
 from typing import List
-from typing import Optional
 
 import github
 
 import git_portfolio.github_manager as ghm
-import git_portfolio.prompt as p
 from git_portfolio.domain.issue import Issue
 
 
@@ -17,10 +15,8 @@ class GhCreateIssueUseCase:
         """Initializer."""
         self.github_manager = github_manager
 
-    def execute(self, issue: Optional[Issue] = None, github_repo: str = "") -> None:
+    def execute(self, issue: Issue, github_repo: str = "") -> None:
         """Create issues."""
-        if not issue:
-            issue = p.create_issues(self.github_manager.config.github_selected_repos)
         labels = (
             [label.strip() for label in issue.labels.split(",")] if issue.labels else []
         )

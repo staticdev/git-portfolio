@@ -170,12 +170,14 @@ def config_init() -> None:
 @gitp_config_check
 def config_repos() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Configure current working `gitp` repositories."""
-    new_repos = p.new_repos(CONFIG_MANAGER.config.github_selected_repos)
+    new_repos = p.InquirerPrompter.new_repos(
+        CONFIG_MANAGER.config.github_selected_repos
+    )
     if not new_repos:
         return res.ResponseSuccess()
     github_manager = ghm.GithubManager(CONFIG_MANAGER.config)
     repo_names = github_manager.get_repo_names()
-    selected_repos = p.select_repos(repo_names)
+    selected_repos = p.InquirerPrompter.select_repos(repo_names)
     return cr.ConfigReposUseCase(CONFIG_MANAGER).execute(selected_repos)
 
 
@@ -183,28 +185,41 @@ def config_repos() -> Union[res.ResponseFailure, res.ResponseSuccess]:
 def create_issues() -> None:
     """Batch creation of issues on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
-    ghci.GhCreateIssueUseCase(manager).execute()
+    issue = p.InquirerPrompter.create_issues(
+        CONFIG_MANAGER.config.github_selected_repos
+    )
+    ghci.GhCreateIssueUseCase(manager).execute(issue)
 
 
 @create.command("prs")
 def create_prs() -> None:
     """Batch creation of pull requests on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
-    ghcp.GhCreatePrUseCase(manager).execute()
+    pr = p.InquirerPrompter.create_pull_requests(
+        CONFIG_MANAGER.config.github_selected_repos
+    )
+    ghcp.GhCreatePrUseCase(manager).execute(pr)
 
 
 @merge.command("prs")
 def merge_prs() -> None:
     """Batch merge of pull requests on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
-    ghmp.GhMergePrUseCase(manager).execute()
+    pr_merge = p.InquirerPrompter.merge_pull_requests(
+        manager.github_username,
+        manager.config.github_selected_repos,
+    )
+    ghmp.GhMergePrUseCase(manager).execute(pr_merge)
 
 
 @delete.command("branches")
 def delete_branches() -> None:
     """Batch deletion of branches on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
-    ghdb.GhDeleteBranchUseCase(manager).execute()
+    branch = p.InquirerPrompter.delete_branches(
+        CONFIG_MANAGER.config.github_selected_repos
+    )
+    ghdb.GhDeleteBranchUseCase(manager).execute(branch)
 
 
 main.add_command(configure)

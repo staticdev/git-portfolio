@@ -90,17 +90,9 @@ def mock_gh_delete_branch_use_case(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
-def mock_prompt_new_repos(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking prompt.new_repos."""
-    return mocker.patch("git_portfolio.prompt.new_repos")
-
-
-@pytest.fixture
-def mock_prompt_select_repos(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking prompt.select_repos."""
-    mock = mocker.patch("git_portfolio.prompt.select_repos")
-    mock.return_value = ["staticdev/omg"]
-    return mock
+def mock_prompt_inquirer_prompter(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking prompt.InquirerPrompter."""
+    return mocker.patch("git_portfolio.prompt.InquirerPrompter", autospec=True)
 
 
 def test_gitp_config_check_success(
@@ -317,8 +309,7 @@ def test_config_init(
 
 
 def test_config_repos_success(
-    mock_prompt_new_repos: MockerFixture,
-    mock_prompt_select_repos: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
     mock_github_manager: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_config_repos_use_case: MockerFixture,
@@ -327,7 +318,7 @@ def test_config_repos_success(
     """It executes config repos use case."""
     config_manager = mock_config_manager.return_value
     mock_config_manager.config_is_empty.return_value = False
-    mock_prompt_new_repos.return_value = True
+    mock_prompt_inquirer_prompter.new_repos.return_value = True
     mock_config_repos_use_case(
         config_manager
     ).execute.return_value = res.ResponseSuccess("success message")
@@ -340,13 +331,13 @@ def test_config_repos_success(
 
 
 def test_config_repos_do_not_change(
-    mock_prompt_new_repos: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
     """It does not change config file."""
     mock_config_manager.config_is_empty.return_value = False
-    mock_prompt_new_repos.return_value = False
+    mock_prompt_inquirer_prompter.new_repos.return_value = False
     result = runner.invoke(
         git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
     )
@@ -357,6 +348,7 @@ def test_config_repos_do_not_change(
 def test_create_issues(
     mock_gh_create_issue_use_case: MockerFixture,
     mock_github_manager: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
@@ -370,6 +362,7 @@ def test_create_issues(
 def test_create_prs(
     mock_gh_create_pr_use_case: MockerFixture,
     mock_github_manager: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
@@ -383,6 +376,7 @@ def test_create_prs(
 def test_merge_prs(
     mock_gh_merge_pr_use_case: MockerFixture,
     mock_github_manager: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
@@ -396,6 +390,7 @@ def test_merge_prs(
 def test_delete_branches(
     mock_gh_delete_branch_use_case: MockerFixture,
     mock_github_manager: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:

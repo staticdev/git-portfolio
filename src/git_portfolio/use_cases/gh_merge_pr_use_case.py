@@ -1,11 +1,9 @@
 """Merge pull request on Github use case."""
 from typing import Any
-from typing import Optional
 
 import github
 
 import git_portfolio.github_manager as ghm
-import git_portfolio.prompt as p
 import git_portfolio.use_cases.gh_delete_branch_use_case as dbr
 from git_portfolio.domain.pull_request_merge import PullRequestMerge
 
@@ -17,15 +15,8 @@ class GhMergePrUseCase:
         """Initializer."""
         self.github_manager = github_manager
 
-    def execute(
-        self, pr_merge: Optional[PullRequestMerge] = None, github_repo: str = ""
-    ) -> None:
+    def execute(self, pr_merge: PullRequestMerge, github_repo: str = "") -> None:
         """Merge pull requests."""
-        if not pr_merge:
-            pr_merge = p.merge_pull_requests(
-                self.github_manager.github_username,
-                self.github_manager.config.github_selected_repos,
-            )
         # Important note: base and head arguments have different import formats.
         # https://developer.github.com/v3/pulls/#list-pull-requests
         # head needs format "user/org:branch"

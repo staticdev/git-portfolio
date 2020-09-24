@@ -22,7 +22,7 @@ def test_connect_github(mock_inquirer_prompt: MockerFixture) -> None:
         "github_hostname": "my.host.com",
     }
     expected = gcs.GhConnectionSettings("def", "my.host.com")
-    result = p.connect_github("abc")
+    result = p.InquirerPrompter.connect_github("abc")
 
     assert result == expected
 
@@ -30,7 +30,7 @@ def test_connect_github(mock_inquirer_prompt: MockerFixture) -> None:
 def test_new_repos(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns False."""
     mock_inquirer_prompt.return_value = {"": False}
-    result = p.new_repos(["staticdev/omg"])
+    result = p.InquirerPrompter.new_repos(["staticdev/omg"])
 
     assert result is False
 
@@ -41,7 +41,7 @@ def test_select_repos(mock_inquirer_prompt: MockerFixture) -> None:
         {"github_repos": []},
         {"github_repos": ["staticdev/omg"]},
     ]
-    result = p.select_repos(["staticdev/omg"])
+    result = p.InquirerPrompter.select_repos(["staticdev/omg"])
 
     assert result == ["staticdev/omg"]
 
@@ -54,7 +54,7 @@ def test_create_issues(mock_inquirer_prompt: MockerFixture) -> None:
         "body": "my body",
         "correct": True,
     }
-    result = p.create_issues(["staticdev/omg"])
+    result = p.InquirerPrompter.create_issues(["staticdev/omg"])
     expected = Issue("my title", "my body", ["tests"])
 
     assert result == expected
@@ -74,7 +74,7 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         "inherit_labels": True,
         "correct": True,
     }
-    result = p.create_pull_requests(["staticdev/omg"])
+    result = p.InquirerPrompter.create_pull_requests(["staticdev/omg"])
     expected = PullRequest(
         "my title",
         "my body",
@@ -93,7 +93,7 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
 def test_delete_branches(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns branch name."""
     mock_inquirer_prompt.return_value = {"branch": "branch name", "correct": True}
-    result = p.delete_branches(["staticdev/omg"])
+    result = p.InquirerPrompter.delete_branches(["staticdev/omg"])
     expected = "branch name"
 
     assert result == expected
@@ -108,7 +108,7 @@ def test_merge_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         "delete_branch": True,
         "correct": True,
     }
-    result = p.merge_pull_requests("staticdev", ["staticdev/omg"])
+    result = p.InquirerPrompter.merge_pull_requests("staticdev", ["staticdev/omg"])
     expected = PullRequestMerge("branch", "main", "org name", True)
 
     assert result == expected

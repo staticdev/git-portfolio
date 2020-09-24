@@ -85,7 +85,7 @@ class GithubManager:
         """Set Github properties."""
         valid = False
         while not valid:
-            answers = p.connect_github(self.config.github_access_token)
+            answers = p.InquirerPrompter.connect_github(self.config.github_access_token)
             self.config.github_access_token = answers.github_access_token.strip()
             self.config.github_hostname = answers.github_hostname
             valid = self._validate_account()

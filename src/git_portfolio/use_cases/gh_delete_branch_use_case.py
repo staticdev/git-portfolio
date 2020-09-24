@@ -2,7 +2,6 @@
 import github
 
 import git_portfolio.github_manager as ghm
-import git_portfolio.prompt as p
 
 
 class GhDeleteBranchUseCase:
@@ -12,11 +11,8 @@ class GhDeleteBranchUseCase:
         """Initializer."""
         self.github_manager = github_manager
 
-    def execute(self, branch: str = "", github_repo: str = "") -> None:
+    def execute(self, branch: str, github_repo: str = "") -> None:
         """Delete branches."""
-        if not branch:
-            branch = p.delete_branches(self.github_manager.config.github_selected_repos)
-
         if github_repo:
             self._delete_branch_from_repo(github_repo, branch)
         else:
