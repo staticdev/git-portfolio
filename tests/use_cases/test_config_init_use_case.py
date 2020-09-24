@@ -18,9 +18,9 @@ def mock_github_manager(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
-def mock_prompt_select_repos(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking prompt.select_repos."""
-    return mocker.patch("git_portfolio.prompt.select_repos")
+def mock_prompt_inquirer_prompter(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking prompt.InquirerPrompter."""
+    return mocker.patch("git_portfolio.prompt.InquirerPrompter", autospec=True)
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def mock_config_repos_use_case(mocker: MockerFixture) -> MockerFixture:
 def test_execute(
     mock_config_manager: MockerFixture,
     mock_github_manager: MockerFixture,
-    mock_prompt_select_repos: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_repos_use_case: MockerFixture,
 ) -> None:
     """It returns success."""

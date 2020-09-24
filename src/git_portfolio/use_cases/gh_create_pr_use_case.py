@@ -1,12 +1,10 @@
 """Create pull request on Github use case."""
 from typing import Any
-from typing import Optional
 from typing import Set
 
 import github
 
 import git_portfolio.github_manager as ghm
-import git_portfolio.prompt as p
 from git_portfolio.domain.pull_request import PullRequest
 
 
@@ -17,13 +15,8 @@ class GhCreatePrUseCase:
         """Initializer."""
         self.github_manager = github_manager
 
-    def execute(self, pr: Optional[PullRequest] = None, github_repo: str = "") -> None:
+    def execute(self, pr: PullRequest, github_repo: str = "") -> None:
         """Create pull requests."""
-        if not pr:
-            pr = p.create_pull_requests(
-                self.github_manager.config.github_selected_repos
-            )
-
         if github_repo:
             self._create_pull_request_from_repo(github_repo, pr)
         else:
