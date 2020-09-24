@@ -4,6 +4,7 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 import git_portfolio.__main__
+import git_portfolio.domain.config as c
 import git_portfolio.response_objects as res
 
 
@@ -353,8 +354,8 @@ def test_create_issues(
     runner: CliRunner,
 ) -> None:
     """It executes gh_create_issue_use_case."""
-    runner.invoke(git_portfolio.__main__.create, ["issues"], prog_name="gitp")
     manager = mock_github_manager.return_value
+    runner.invoke(git_portfolio.__main__.create, ["issues"], prog_name="gitp")
 
     mock_gh_create_issue_use_case(manager).execute.assert_called_once()
 
@@ -367,8 +368,8 @@ def test_create_prs(
     runner: CliRunner,
 ) -> None:
     """It executes gh_create_pr_use_case."""
-    runner.invoke(git_portfolio.__main__.create, ["prs"], prog_name="gitp")
     manager = mock_github_manager.return_value
+    runner.invoke(git_portfolio.__main__.create, ["prs"], prog_name="gitp")
 
     mock_gh_create_pr_use_case(manager).execute.assert_called_once()
 
@@ -381,8 +382,10 @@ def test_merge_prs(
     runner: CliRunner,
 ) -> None:
     """It executes gh_merge_pr_use_case."""
-    runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
     manager = mock_github_manager.return_value
+    manager.github_username = "staticdev"
+    manager.config = c.Config("", "abc", ["staticdev/omg"])
+    runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
 
     mock_gh_merge_pr_use_case(manager).execute.assert_called_once()
 
@@ -395,7 +398,7 @@ def test_delete_branches(
     runner: CliRunner,
 ) -> None:
     """It call delete_branches from pm.GithubManager."""
-    runner.invoke(git_portfolio.__main__.delete, ["branches"], prog_name="gitp")
     manager = mock_github_manager.return_value
+    runner.invoke(git_portfolio.__main__.delete, ["branches"], prog_name="gitp")
 
     mock_gh_delete_branch_use_case(manager).execute.assert_called_once()
