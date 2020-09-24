@@ -5,10 +5,10 @@ from typing import List
 import inquirer
 
 import git_portfolio.domain.gh_connection_settings as gcs
+import git_portfolio.domain.issue as i
+import git_portfolio.domain.pull_request as pr
+import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.prompt_validation as val
-from git_portfolio.domain.issue import Issue
-from git_portfolio.domain.pull_request import PullRequest
-from git_portfolio.domain.pull_request_merge import PullRequestMerge
 
 
 class InquirerPrompter:
@@ -66,7 +66,7 @@ class InquirerPrompter:
                 print("Please select with `space` at least one repo.\n")
 
     @staticmethod
-    def create_issues(github_selected_repos: List[str]) -> Issue:
+    def create_issues(github_selected_repos: List[str]) -> i.Issue:
         """Prompt questions to create issues."""
         questions = [
             inquirer.Text(
@@ -91,10 +91,10 @@ class InquirerPrompter:
         while not correct:
             answers = inquirer.prompt(questions)
             correct = answers["correct"]
-        return Issue(answers["title"], answers["body"], answers["labels"])
+        return i.Issue(answers["title"], answers["body"], answers["labels"])
 
     @staticmethod
-    def create_pull_requests(github_selected_repos: List[str]) -> PullRequest:
+    def create_pull_requests(github_selected_repos: List[str]) -> pr.PullRequest:
         """Prompt questions to create pull requests."""
         questions = [
             inquirer.Text(
@@ -148,7 +148,7 @@ class InquirerPrompter:
         while not correct:
             answers = inquirer.prompt(questions)
             correct = answers["correct"]
-        return PullRequest(
+        return pr.PullRequest(
             answers["title"],
             answers["body"],
             answers["labels"],
@@ -187,7 +187,7 @@ class InquirerPrompter:
     @staticmethod
     def merge_pull_requests(
         github_username: str, github_selected_repos: List[str]
-    ) -> PullRequestMerge:
+    ) -> prm.PullRequestMerge:
         """Prompt questions to merge pull requests."""
         questions = [
             inquirer.Text(
@@ -225,7 +225,7 @@ class InquirerPrompter:
         while not correct:
             answers = inquirer.prompt(questions)
             correct = answers["correct"]
-        return PullRequestMerge(
+        return prm.PullRequestMerge(
             answers["base"],
             answers["head"],
             answers["prefix"],

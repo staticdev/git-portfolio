@@ -182,44 +182,48 @@ def config_repos() -> Union[res.ResponseFailure, res.ResponseSuccess]:
 
 
 @create.command("issues")
-def create_issues() -> None:
+@gitp_config_check
+def create_issues() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch creation of issues on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
     issue = p.InquirerPrompter.create_issues(
         CONFIG_MANAGER.config.github_selected_repos
     )
-    ghci.GhCreateIssueUseCase(manager).execute(issue)
+    return ghci.GhCreateIssueUseCase(manager).execute(issue)
 
 
 @create.command("prs")
-def create_prs() -> None:
+@gitp_config_check
+def create_prs() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch creation of pull requests on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
     pr = p.InquirerPrompter.create_pull_requests(
         CONFIG_MANAGER.config.github_selected_repos
     )
-    ghcp.GhCreatePrUseCase(manager).execute(pr)
+    return ghcp.GhCreatePrUseCase(manager).execute(pr)
 
 
 @merge.command("prs")
-def merge_prs() -> None:
+@gitp_config_check
+def merge_prs() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch merge of pull requests on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
     pr_merge = p.InquirerPrompter.merge_pull_requests(
         manager.github_username,
         manager.config.github_selected_repos,
     )
-    ghmp.GhMergePrUseCase(manager).execute(pr_merge)
+    return ghmp.GhMergePrUseCase(manager).execute(pr_merge)
 
 
 @delete.command("branches")
-def delete_branches() -> None:
+@gitp_config_check
+def delete_branches() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch deletion of branches on GitHub."""
     manager = ghm.GithubManager(CONFIG_MANAGER.config)
     branch = p.InquirerPrompter.delete_branches(
         CONFIG_MANAGER.config.github_selected_repos
     )
-    ghdb.GhDeleteBranchUseCase(manager).execute(branch)
+    return ghdb.GhDeleteBranchUseCase(manager).execute(branch)
 
 
 main.add_command(configure)
