@@ -63,22 +63,22 @@ def test_create_issues(mock_inquirer_prompt: MockerFixture) -> None:
 def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns pull request."""
     mock_inquirer_prompt.return_value = {
-        "base": "branch",
-        "head": "main",
         "title": "my title",
         "body": "my body",
-        "draft": True,
-        "labels": ["tests"],
+        "labels": "testing",
         "confirmation": True,
         "link": "issue title",
         "inherit_labels": True,
+        "head": "main",
+        "base": "branch",
+        "draft": True,
         "correct": True,
     }
     result = p.InquirerPrompter.create_pull_requests(["staticdev/omg"])
     expected = pr.PullRequest(
         "my title",
         "my body",
-        ["tests"],
+        "testing",
         True,
         "issue title",
         True,
