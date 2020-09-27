@@ -55,7 +55,21 @@ def test_create_issues(mock_inquirer_prompt: MockerFixture) -> None:
         "correct": True,
     }
     result = p.InquirerPrompter.create_issues(["staticdev/omg"])
-    expected = i.Issue("my title", "my body", "testing,refactor")
+    expected = i.Issue("my title", "my body", {"testing", "refactor"})
+
+    assert result == expected
+
+
+def test_create_issues_no_labels(mock_inquirer_prompt: MockerFixture) -> None:
+    """It returns issue."""
+    mock_inquirer_prompt.return_value = {
+        "title": "my title",
+        "labels": "",
+        "body": "my body",
+        "correct": True,
+    }
+    result = p.InquirerPrompter.create_issues(["staticdev/omg"])
+    expected = i.Issue("my title", "my body", set())
 
     assert result == expected
 
@@ -65,7 +79,7 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
     mock_inquirer_prompt.return_value = {
         "title": "my title",
         "body": "my body",
-        "labels": "testing",
+        "labels": "testing,refactor",
         "confirmation": True,
         "link": "issue title",
         "inherit_labels": True,
@@ -78,7 +92,37 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
     expected = pr.PullRequest(
         "my title",
         "my body",
-        "testing",
+        {"testing", "refactor"},
+        True,
+        "issue title",
+        True,
+        "main",
+        "branch",
+        True,
+    )
+
+    assert result == expected
+
+
+def test_create_pull_requests_no_labels(mock_inquirer_prompt: MockerFixture) -> None:
+    """It returns pull request."""
+    mock_inquirer_prompt.return_value = {
+        "title": "my title",
+        "body": "my body",
+        "labels": "",
+        "confirmation": True,
+        "link": "issue title",
+        "inherit_labels": True,
+        "head": "main",
+        "base": "branch",
+        "draft": True,
+        "correct": True,
+    }
+    result = p.InquirerPrompter.create_pull_requests(["staticdev/omg"])
+    expected = pr.PullRequest(
+        "my title",
+        "my body",
+        set(),
         True,
         "issue title",
         True,

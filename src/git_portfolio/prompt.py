@@ -91,7 +91,13 @@ class InquirerPrompter:
         while not correct:
             answers = inquirer.prompt(questions)
             correct = answers["correct"]
-        return i.Issue(answers["title"], answers["body"], answers["labels"])
+
+        labels = (
+            set(label.strip() for label in answers["labels"].split(","))
+            if answers["labels"]
+            else set()
+        )
+        return i.Issue(answers["title"], answers["body"], labels)
 
     @staticmethod
     def create_pull_requests(github_selected_repos: List[str]) -> pr.PullRequest:
@@ -126,6 +132,7 @@ class InquirerPrompter:
             inquirer.Text(
                 "link",
                 message="Write issue title (or part of it)",
+                default="",
                 validate=val.not_empty_validation,
                 ignore=val.ignore_if_not_confirmed,
             ),
@@ -148,10 +155,16 @@ class InquirerPrompter:
         while not correct:
             answers = inquirer.prompt(questions)
             correct = answers["correct"]
+
+        labels = (
+            set(label.strip() for label in answers["labels"].split(","))
+            if answers["labels"]
+            else set()
+        )
         return pr.PullRequest(
             answers["title"],
             answers["body"],
-            answers["labels"],
+            labels,
             answers["confirmation"],
             answers["link"],
             answers["inherit_labels"],
