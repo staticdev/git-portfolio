@@ -40,7 +40,7 @@ Features
 --------
 
 * Configure multiple working repositories.
-* Batch `git` command with subcommands `add`, `checkout`, `commit`, `pull`, `push`, `reset` and `status`.
+* Batch git_ command with subcommands `add`, `checkout`, `commit`, `pull`, `push`, `reset` and `status`.
 * Batch creation of issues, creation of pull requests, merge of pull requests and deletion branches by name on GitHub.
 
 
@@ -50,6 +50,12 @@ Requirements
 * `Create an auth token for GitHub`_, with the `repo` privileges enabled by clicking on Generate new token. You will be asked to select scopes for the token. Which scopes you choose will determine what information and actions you will be able to perform against the API. You should be careful with the ones prefixed with write:, delete: and admin: as these might be quite destructive. You can find description of each scope in docs here.
 
 Important: safeguard your token (once created you won't be able to see it again).
+
+* Install git_ (optional) -  this is needed for all git_ commands. For colored outputs please use the configuration:
+
+.. code:: console
+
+   $ git config --global color.ui always
 
 
 Installation
@@ -117,6 +123,7 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _Create an auth token for GitHub: https://github.com/settings/tokens
 .. _@cjolowicz: https://github.com/cjolowicz
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _git: https://git-scm.com
 .. _LGPLv3: https://www.gnu.org/licenses/lgpl-3.0.en.html
 .. _PyGithub: https://github.com/PyGithub/PyGithub
 .. _PyPI: https://pypi.org/
