@@ -1,6 +1,5 @@
 """Test cases for the Github create PR use case."""
 from typing import List
-from unittest.mock import Mock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -14,8 +13,10 @@ import git_portfolio.use_cases.gh_create_pr_use_case as ghcp
 def mock_github_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GithubManager."""
     mock = mocker.patch("git_portfolio.github_manager.GithubManager", autospec=True)
-    mock.return_value.config = c.Config("", "mytoken", ["staticdev/omg"])
-    mock.return_value.github_connection = Mock()
+    mock.return_value.config = c.Config(
+        "", "mytoken", ["staticdev/omg", "staticdev/omg2"]
+    )
+    mock.return_value.create_pull_request_from_repo.return_value = "success message\n"
     return mock
 
 
@@ -26,10 +27,10 @@ def domain_prs() -> List[pr.PullRequest]:
         pr.PullRequest(
             "my title",
             "my body",
-            "testing",
+            {"testing"},
             False,
-            None,
-            None,
+            "",
+            False,
             "main",
             "branch",
             True,
@@ -37,7 +38,7 @@ def domain_prs() -> List[pr.PullRequest]:
         pr.PullRequest(
             "my title",
             "my body",
-            "testing",
+            set(),
             True,
             "issue title",
             True,
@@ -50,7 +51,7 @@ def domain_prs() -> List[pr.PullRequest]:
 
 
 def test_execute_for_all_repos(
-    mock_github_manager: MockerFixture, domain_prs: pr.PullRequest
+    mock_github_manager: MockerFixture, domain_prs: List[pr.PullRequest]
 ) -> None:
     """It returns success."""
     github_manager = mock_github_manager.return_value
@@ -58,11 +59,23 @@ def test_execute_for_all_repos(
     response = ghcp.GhCreatePrUseCase(github_manager).execute(request)
 
     assert bool(response) is True
-    assert "staticdev/omg: PR created successfully." == response.value
+    assert "success message\nsuccess message\n" == response.value
+
+
+def test_execute_link_issue(
+    mock_github_manager: MockerFixture, domain_prs: List[pr.PullRequest]
+) -> None:
+    """It returns success."""
+    github_manager = mock_github_manager.return_value
+    request = domain_prs[1]
+    response = ghcp.GhCreatePrUseCase(github_manager).execute(request)
+
+    assert bool(response) is True
+    assert "success message\nsuccess message\n" == response.value
 
 
 def test_execute_for_specific_repo(
-    mock_github_manager: MockerFixture, domain_prs: pr.PullRequest
+    mock_github_manager: MockerFixture, domain_prs: List[pr.PullRequest]
 ) -> None:
     """It returns success."""
     github_manager = mock_github_manager.return_value
@@ -70,18 +83,16 @@ def test_execute_for_specific_repo(
     response = ghcp.GhCreatePrUseCase(github_manager).execute(request, "staticdev/omg")
 
     assert bool(response) is True
-    assert "staticdev/omg: PR created successfully." == response.value
+    assert "success message\n" == response.value
 
 
-# TODO: this scenario is coupled with issues
-# Add two issues in this test for next implementation using gh
-# def test_execute_link_issue(
-#     mock_github_manager: MockerFixture, domain_prs: pr.PullRequest
-# ) -> None:
-#     """It returns success."""
-#     github_manager = mock_github_manager.return_value
-#     request = domain_prs[1]
-#    response = ghcp.GhCreatePrUseCase(github_manager).execute(request, "staticdev/omg")
+def test_execute_link_issue_for_specific_repo(
+    mock_github_manager: MockerFixture, domain_prs: List[pr.PullRequest]
+) -> None:
+    """It returns success."""
+    github_manager = mock_github_manager.return_value
+    request = domain_prs[1]
+    response = ghcp.GhCreatePrUseCase(github_manager).execute(request, "staticdev/omg")
 
-#     assert bool(response) is True
-#     assert "staticdev/omg: PR created successfully." == response.value
+    assert bool(response) is True
+    assert "success message\n" == response.value

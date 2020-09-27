@@ -6,7 +6,7 @@ def test_issue_model_init() -> None:
     """Verify model initialization."""
     title = "issue title"
     body = "body description"
-    labels = ["testing"]
+    labels = {"testing"}
     test_issue = i.Issue(title, body, labels)
 
     assert test_issue.title == title

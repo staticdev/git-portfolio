@@ -1,7 +1,12 @@
 """Pull request merge model."""
-import collections
+from dataclasses import dataclass
 
 
-PullRequestMerge = collections.namedtuple(
-    "PullRequestMerge", ["base", "head", "prefix", "delete_branch"]
-)
+@dataclass
+class PullRequestMerge:
+    """Pull request merge class."""
+
+    base: str
+    head: str
+    prefix: str
+    delete_branch: bool

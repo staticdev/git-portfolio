@@ -9,6 +9,9 @@ import github
 import requests
 
 import git_portfolio.domain.config as c
+import git_portfolio.domain.issue as i
+import git_portfolio.domain.pull_request as pr
+import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.prompt as p
 
 
@@ -91,3 +94,102 @@ class GithubManager:
             valid = self._validate_account()
             if not valid:
                 print("Wrong GitHub token/permissions. Please try again.")
+
+    def create_issue_from_repo(self, github_repo: str, issue: i.Issue) -> str:
+        """Create issue from one repository."""
+        repo = self.github_connection.get_repo(github_repo)
+        try:
+            repo.create_issue(
+                title=issue.title, body=issue.body, labels=list(issue.labels)
+            )
+            return f"{github_repo}: issue created successfully."
+        except github.GithubException as github_exception:
+            if github_exception.data["message"] == "Issues are disabled for this repo":
+                return (
+                    f"{github_repo}: {github_exception.data['message']}. "
+                    "It may be a fork."
+                )
+
+            else:
+                return f"{github_repo}: {github_exception.data['message']}."
+
+    def create_pull_request_from_repo(
+        self, github_repo: str, pr: pr.PullRequest
+    ) -> str:
+        """Create pull request from one repository."""
+        repo = self.github_connection.get_repo(github_repo)
+        try:
+            created_pr = repo.create_pull(
+                title=pr.title,
+                body=pr.body,
+                head=pr.head,
+                base=pr.base,
+                draft=pr.draft,
+            )
+            # PyGithub does not support a list of strings for adding (only one str)
+            for label in pr.labels:
+                created_pr.add_to_labels(label)
+            return f"{github_repo}: PR created successfully."
+        except github.GithubException as github_exception:
+            extra = ""
+            for error in github_exception.data["errors"]:
+                if "message" in error:
+                    extra += f"{error['message']} "  # type: ignore
+                else:
+                    extra += f"Invalid field {error['field']}. "  # type: ignore
+            return f"{github_repo}: {github_exception.data['message']}. {extra}"
+
+    def link_issues(self, github_repo: str, pr: pr.PullRequest) -> None:
+        """Set body message and labels on PR."""
+        repo = self.github_connection.get_repo(github_repo)
+        labels = pr.labels
+        issues = repo.get_issues(state="open")
+        closes = ""
+        for issue in issues:
+            if pr.link in issue.title:
+                closes += f"Closes #{issue.number}\n"
+                if pr.inherit_labels:
+                    issue_labels = [label.name for label in issue.get_labels()]
+                    labels.update(issue_labels)
+        if closes:
+            pr.body += f"\n\n{closes}"
+        pr.labels = labels
+
+    def delete_branch_from_repo(self, github_repo: str, branch: str) -> str:
+        """Delete a branch from one repository."""
+        repo = self.github_connection.get_repo(github_repo)
+        try:
+            git_ref = repo.get_git_ref(f"heads/{branch}")
+            git_ref.delete()
+            return f"{github_repo}: branch deleted successfully."
+        except github.GithubException as github_exception:
+            return f"{github_repo}: {github_exception.data['message']}."
+
+    def merge_pull_request_from_repo(
+        self, github_repo: str, pr_merge: prm.PullRequestMerge
+    ) -> str:
+        """Merge pull request from one repository."""
+        repo = self.github_connection.get_repo(github_repo)
+
+        # Important note: base and head arguments have different import formats.
+        # https://developer.github.com/v3/pulls/#list-pull-requests
+        # head needs format "user/org:branch"
+        head = f"{pr_merge.prefix}:{pr_merge.head}"
+        pulls = repo.get_pulls(state="open", base=pr_merge.base, head=head)
+        if pulls.totalCount == 1:
+            pull = pulls[0]
+            if pull.mergeable:
+                output = ""
+                try:
+                    pull.merge()
+                    output += f"{github_repo}: PR merged successfully.\n"
+                except github.GithubException as github_exception:
+                    output += f"{github_repo}: {github_exception.data['message']}."
+                return output
+            else:
+                return f"{github_repo}: PR not mergeable, GitHub checks may be running."
+        else:
+            return (
+                f"{github_repo}: no open PR found for {pr_merge.base}:"
+                f"{pr_merge.head}."
+            )

@@ -1,5 +1,12 @@
 """Issue model."""
-import collections
+from dataclasses import dataclass
+from typing import Set
 
 
-Issue = collections.namedtuple("Issue", ["title", "body", "labels"])
+@dataclass
+class Issue:
+    """Issue class."""
+
+    title: str
+    body: str
+    labels: Set[str]

@@ -1,6 +1,4 @@
 """Test cases for the Github delete branch use case."""
-from unittest.mock import Mock
-
 import pytest
 from pytest_mock import MockerFixture
 
@@ -12,8 +10,10 @@ import git_portfolio.use_cases.gh_delete_branch_use_case as ghdb
 def mock_github_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GithubManager."""
     mock = mocker.patch("git_portfolio.github_manager.GithubManager", autospec=True)
-    mock.return_value.config = c.Config("", "mytoken", ["staticdev/omg"])
-    mock.return_value.github_connection = Mock()
+    mock.return_value.config = c.Config(
+        "", "mytoken", ["staticdev/omg", "staticdev/omg2"]
+    )
+    mock.return_value.delete_branch_from_repo.return_value = "success message\n"
     return mock
 
 
@@ -31,7 +31,7 @@ def test_execute_for_all_repos(
     response = ghdb.GhDeleteBranchUseCase(github_manager).execute(domain_branch)
 
     assert bool(response) is True
-    assert "staticdev/omg: branch deleted successfully." == response.value
+    assert "success message\nsuccess message\n" == response.value
 
 
 def test_execute_for_specific_repo(
@@ -44,4 +44,4 @@ def test_execute_for_specific_repo(
     )
 
     assert bool(response) is True
-    assert "staticdev/omg: branch deleted successfully." == response.value
+    assert "success message\n" == response.value

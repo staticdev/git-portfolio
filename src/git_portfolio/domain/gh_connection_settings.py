@@ -1,7 +1,10 @@
 """Github connection settings model."""
-import collections
+from dataclasses import dataclass
 
 
-GhConnectionSettings = collections.namedtuple(
-    "ConnectGithub", ["github_access_token", "github_hostname"]
-)
+@dataclass
+class GhConnectionSettings:
+    """Github connection settings class."""
+
+    github_access_token: str
+    github_hostname: str

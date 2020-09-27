@@ -1,17 +1,18 @@
 """Pull request model."""
-import collections
+from dataclasses import dataclass
+from typing import Set
 
-PullRequest = collections.namedtuple(
-    "PullRequest",
-    [
-        "title",
-        "body",
-        "labels",
-        "confirmation",
-        "link",
-        "inherit_labels",
-        "head",
-        "base",
-        "draft",
-    ],
-)
+
+@dataclass
+class PullRequest:
+    """Pull request class."""
+
+    title: str
+    body: str
+    labels: Set[str]
+    link_issues: bool
+    link: str
+    inherit_labels: bool
+    head: str
+    base: str
+    draft: bool
