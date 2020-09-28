@@ -24,7 +24,7 @@ inquirer = "^2.7.0"
 pyyaml = "^5.3.1"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.0.2"
+pytest = "^6.1.0"
 coverage = {extras = ["toml"], version = "^5.3"}
 safety = "^1.9.0"
 mypy = "^0.782"
