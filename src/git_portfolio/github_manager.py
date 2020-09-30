@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.ERROR, format=FORMAT, datefmt=DATE_FORMAT)
 LOGGER = logging.getLogger(__name__)
 
 
-class GithubManager:
+class GithubService:
     """Github manager class."""
 
     def __init__(self, config: c.Config) -> None:
@@ -54,6 +54,7 @@ class GithubManager:
         except (github.BadCredentialsException, github.GithubException):
             return ""
         except requests.exceptions.ConnectionError:
+            raise ConnectionError()
             sys.exit(
                 (
                     "Unable to reach server. Please check you network and credentials "

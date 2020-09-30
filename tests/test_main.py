@@ -24,9 +24,9 @@ def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
-def mock_github_manager(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking GithubManager."""
-    return mocker.patch("git_portfolio.github_manager.GithubManager", autospec=True)
+def mock_github_service(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GithubService."""
+    return mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
 
 
 @pytest.fixture
@@ -290,28 +290,28 @@ def test_status_success(
 
 
 def test_config_init(
-    mock_github_manager: MockerFixture,
+    mock_github_service: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_config_init_use_case: MockerFixture,
     runner: CliRunner,
 ) -> None:
     """It executes config init use case."""
     config_manager = mock_config_manager.return_value
-    github_manager = mock_github_manager.return_value
+    github_service = mock_github_service.return_value
     mock_config_init_use_case(
-        config_manager, github_manager
+        config_manager, github_service
     ).execute.return_value = res.ResponseSuccess("success message")
     result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
 
     mock_config_init_use_case(
-        config_manager, github_manager
+        config_manager, github_service
     ).execute.assert_called_once()
     assert result.output == "success message\n"
 
 
 def test_config_repos_success(
     mock_prompt_inquirer_prompter: MockerFixture,
-    mock_github_manager: MockerFixture,
+    mock_github_service: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_config_repos_use_case: MockerFixture,
     runner: CliRunner,
@@ -348,13 +348,13 @@ def test_config_repos_do_not_change(
 
 def test_create_issues(
     mock_gh_create_issue_use_case: MockerFixture,
-    mock_github_manager: MockerFixture,
+    mock_github_service: MockerFixture,
     mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
     """It executes gh_create_issue_use_case."""
-    manager = mock_github_manager.return_value
+    manager = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.create, ["issues"], prog_name="gitp")
 
     mock_gh_create_issue_use_case(manager).execute.assert_called_once()
@@ -362,13 +362,13 @@ def test_create_issues(
 
 def test_create_prs(
     mock_gh_create_pr_use_case: MockerFixture,
-    mock_github_manager: MockerFixture,
+    mock_github_service: MockerFixture,
     mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
     """It executes gh_create_pr_use_case."""
-    manager = mock_github_manager.return_value
+    manager = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.create, ["prs"], prog_name="gitp")
 
     mock_gh_create_pr_use_case(manager).execute.assert_called_once()
@@ -376,13 +376,13 @@ def test_create_prs(
 
 def test_merge_prs(
     mock_gh_merge_pr_use_case: MockerFixture,
-    mock_github_manager: MockerFixture,
+    mock_github_service: MockerFixture,
     mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
     """It executes gh_merge_pr_use_case."""
-    manager = mock_github_manager.return_value
+    manager = mock_github_service.return_value
     manager.github_username = "staticdev"
     manager.config = c.Config("", "abc", ["staticdev/omg"])
     runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
@@ -392,13 +392,13 @@ def test_merge_prs(
 
 def test_delete_branches(
     mock_gh_delete_branch_use_case: MockerFixture,
-    mock_github_manager: MockerFixture,
+    mock_github_service: MockerFixture,
     mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It call delete_branches from pm.GithubManager."""
-    manager = mock_github_manager.return_value
+    """It call delete_branches from pm.GithubService."""
+    manager = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.delete, ["branches"], prog_name="gitp")
 
     mock_gh_delete_branch_use_case(manager).execute.assert_called_once()

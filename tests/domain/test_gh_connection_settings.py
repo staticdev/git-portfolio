@@ -6,5 +6,5 @@ def test_gh_connection_settings_model_init() -> None:
     """Verify model initialization."""
     connection_settings = cs.GhConnectionSettings("mytoken", "myhost.com")
 
-    assert connection_settings.github_access_token == "mytoken"
-    assert connection_settings.github_hostname == "myhost.com"
+    assert connection_settings.access_token == "mytoken"
+    assert connection_settings.hostname == "myhost.com"

@@ -8,12 +8,19 @@ import git_portfolio.use_cases.gh_create_issue_use_case as ghci
 
 
 @pytest.fixture
-def mock_github_manager(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking GithubManager."""
-    mock = mocker.patch("git_portfolio.github_manager.GithubManager", autospec=True)
+def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking CONFIG_MANAGER."""
+    mock = mocker.patch("git_portfolio.config_manager.ConfigManager", autospec=True)
     mock.return_value.config = c.Config(
         "", "mytoken", ["staticdev/omg", "staticdev/omg2"]
     )
+    return mock
+
+
+@pytest.fixture
+def mock_github_service(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GithubService."""
+    mock = mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
     mock.return_value.create_issue_from_repo.return_value = "success message\n"
     return mock
 
@@ -30,22 +37,30 @@ def domain_issue() -> i.Issue:
 
 
 def test_execute_for_all_repos(
-    mock_github_manager: MockerFixture, domain_issue: i.Issue
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
+    domain_issue: i.Issue,
 ) -> None:
     """It returns success."""
-    github_manager = mock_github_manager.return_value
-    response = ghci.GhCreateIssueUseCase(github_manager).execute(domain_issue)
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    response = ghci.GhCreateIssueUseCase(config_manager, github_service).execute(
+        domain_issue
+    )
 
     assert bool(response) is True
     assert "success message\nsuccess message\n" == response.value
 
 
 def test_execute_for_specific_repo(
-    mock_github_manager: MockerFixture, domain_issue: i.Issue
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
+    domain_issue: i.Issue,
 ) -> None:
     """It returns success."""
-    github_manager = mock_github_manager.return_value
-    response = ghci.GhCreateIssueUseCase(github_manager).execute(
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    response = ghci.GhCreateIssueUseCase(config_manager, github_service).execute(
         domain_issue, "staticdev/omg"
     )
 
