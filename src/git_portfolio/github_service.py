@@ -13,11 +13,9 @@ import git_portfolio.domain.pull_request_merge as prm
 class GithubService:
     """Github service class."""
 
-    connection = None
-
     def __init__(self, github_config: cs.GhConnectionSettings) -> None:
         """Constructor."""
-        self.connection = self._get_connection(github_config)
+        connection = self._get_connection(github_config)
         self.user = self._test_connection(self.connection)
         self.repos = self.connection.repositories()
 
@@ -25,8 +23,6 @@ class GithubService:
         self, github_config: cs.GhConnectionSettings
     ) -> Union[github3.GitHub, github3.GitHubEnterprise]:
         """Get Github connection, create one if does not exist."""
-        if self.connection:
-            return self.connection
         # GitHub Enterprise
         if github_config.hostname:
             base_url = f"https://{github_config.hostname}/api/v3"
