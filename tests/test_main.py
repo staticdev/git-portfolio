@@ -289,24 +289,57 @@ def test_status_success(
     )
 
 
-def test_config_init(
-    mock_github_service: MockerFixture,
+def test_config_init_success(
+    mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_config_init_use_case: MockerFixture,
     runner: CliRunner,
 ) -> None:
     """It executes config init use case."""
     config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
     mock_config_init_use_case(
-        config_manager, github_service
+        config_manager
     ).execute.return_value = res.ResponseSuccess("success message")
     result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
 
-    mock_config_init_use_case(
-        config_manager, github_service
-    ).execute.assert_called_once()
+    mock_config_init_use_case(config_manager).execute.assert_called_once()
     assert result.output == "success message\n"
+
+
+def test_config_init_wrong_token(
+    mock_prompt_inquirer_prompter: MockerFixture,
+    mock_config_manager: MockerFixture,
+    mock_config_init_use_case: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It executes with token error first then succeeds."""
+    config_manager = mock_config_manager.return_value
+    mock_config_init_use_case(config_manager).execute.side_effect = [
+        res.ResponseFailure.build_parameters_error("message"),
+        res.ResponseSuccess("success message"),
+    ]
+    result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
+
+    assert mock_config_init_use_case(config_manager).execute.call_count == 2
+    assert result.output == "Error: message\nsuccess message\n"
+
+
+def test_config_init_connection_error(
+    mock_prompt_inquirer_prompter: MockerFixture,
+    mock_config_manager: MockerFixture,
+    mock_config_init_use_case: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It executes with connection error first then succeeds."""
+    config_manager = mock_config_manager.return_value
+    mock_config_init_use_case(config_manager).execute.side_effect = [
+        res.ResponseFailure.build_system_error("message"),
+        res.ResponseSuccess("success message"),
+    ]
+    result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
+
+    assert mock_config_init_use_case(config_manager).execute.call_count == 2
+    assert result.output == "Error: message\nsuccess message\n"
 
 
 def test_config_repos_success(
@@ -346,6 +379,49 @@ def test_config_repos_do_not_change(
     assert result.exit_code == 0
 
 
+def test_config_repos_wrong_token(
+    mock_prompt_inquirer_prompter: MockerFixture,
+    mock_github_service: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It executes _get_github_service with token error."""
+    mock_config_manager.config_is_empty.return_value = False
+    mock_prompt_inquirer_prompter.new_repos.return_value = True
+    mock_github_service.side_effect = AttributeError
+    result = runner.invoke(
+        git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
+    )
+
+    assert result.output.startswith(
+        "Error: Wrong GitHub permissions. Please check your token.\n"
+    )
+    assert type(result.exception) == SystemExit
+
+
+def test_config_repos_connection_error(
+    mock_prompt_inquirer_prompter: MockerFixture,
+    mock_github_service: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It executes _get_github_service with token error."""
+    mock_config_manager.config_is_empty.return_value = False
+    mock_prompt_inquirer_prompter.new_repos.return_value = True
+    mock_github_service.side_effect = ConnectionError
+    result = runner.invoke(
+        git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
+    )
+
+    assert result.output.startswith(
+        (
+            "Error: Unable to reach server. Please check you network and credentials "
+            "and try again.\n"
+        )
+    )
+    assert type(result.exception) == SystemExit
+
+
 def test_create_issues(
     mock_gh_create_issue_use_case: MockerFixture,
     mock_github_service: MockerFixture,
@@ -354,10 +430,13 @@ def test_create_issues(
     runner: CliRunner,
 ) -> None:
     """It executes gh_create_issue_use_case."""
-    manager = mock_github_service.return_value
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.create, ["issues"], prog_name="gitp")
 
-    mock_gh_create_issue_use_case(manager).execute.assert_called_once()
+    mock_gh_create_issue_use_case(
+        config_manager, github_service
+    ).execute.assert_called_once()
 
 
 def test_create_prs(
@@ -368,10 +447,13 @@ def test_create_prs(
     runner: CliRunner,
 ) -> None:
     """It executes gh_create_pr_use_case."""
-    manager = mock_github_service.return_value
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.create, ["prs"], prog_name="gitp")
 
-    mock_gh_create_pr_use_case(manager).execute.assert_called_once()
+    mock_gh_create_pr_use_case(
+        config_manager, github_service
+    ).execute.assert_called_once()
 
 
 def test_merge_prs(
@@ -382,12 +464,15 @@ def test_merge_prs(
     runner: CliRunner,
 ) -> None:
     """It executes gh_merge_pr_use_case."""
-    manager = mock_github_service.return_value
-    manager.github_username = "staticdev"
-    manager.config = c.Config("", "abc", ["staticdev/omg"])
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    github_service.github_username = "staticdev"
+    github_service.config = c.Config("", "abc", ["staticdev/omg"])
     runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
 
-    mock_gh_merge_pr_use_case(manager).execute.assert_called_once()
+    mock_gh_merge_pr_use_case(
+        config_manager, github_service
+    ).execute.assert_called_once()
 
 
 def test_delete_branches(
@@ -398,7 +483,10 @@ def test_delete_branches(
     runner: CliRunner,
 ) -> None:
     """It call delete_branches from pm.GithubService."""
-    manager = mock_github_service.return_value
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.delete, ["branches"], prog_name="gitp")
 
-    mock_gh_delete_branch_use_case(manager).execute.assert_called_once()
+    mock_gh_delete_branch_use_case(
+        config_manager, github_service
+    ).execute.assert_called_once()
