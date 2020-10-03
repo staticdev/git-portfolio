@@ -15,7 +15,7 @@ class GithubService:
 
     def __init__(self, github_config: cs.GhConnectionSettings) -> None:
         """Constructor."""
-        connection = self._get_connection(github_config)
+        self.connection = self._get_connection(github_config)
         self.user = self._test_connection(self.connection)
         self.repos = self.connection.repositories()
 
@@ -50,7 +50,6 @@ class GithubService:
         for repo in self.repos:
             if repo.full_name == repo_name:
                 return repo
-        return None
 
     def get_repo_names(self) -> List[str]:
         """Get list of repository names."""
@@ -130,11 +129,13 @@ class GithubService:
         """Delete a branch from one repository."""
         repo = self._get_repo(github_repo)
         try:
-            git_ref = repo.get_git_ref(f"heads/{branch}")
-            git_ref.delete()
+            # TODO: watch https://github.com/sigmavirus24/github3.py/issues/1002
+            branch_ref = repo.branch(branch)
+            print(dir(branch_ref))
+            branch_ref.delete()
             return f"{github_repo}: branch deleted successfully."
-        except github3.exceptions.ClientError as github_exception:
-            return f"{github_repo}: {github_exception.data['message']}."
+        except github3.exceptions.NotFoundError as github_exception:
+            return f"{github_repo}: {github_exception.msg}."
 
     def merge_pull_request_from_repo(
         self, github_repo: str, pr_merge: prm.PullRequestMerge
