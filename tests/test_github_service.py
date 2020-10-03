@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 
 import git_portfolio.domain.gh_connection_settings as cs
 import git_portfolio.domain.issue as i
+import git_portfolio.domain.pull_request as pr
 import git_portfolio.github_service as gc
 
 
@@ -36,6 +37,36 @@ def domain_issue() -> i.Issue:
         {"testing", "refactor"},
     )
     return issue
+
+
+@pytest.fixture
+def domain_prs() -> List[pr.PullRequest]:
+    """Pull requests fixture."""
+    prs = [
+        pr.PullRequest(
+            "my title",
+            "my body",
+            set(),
+            False,
+            "",
+            False,
+            "main",
+            "branch",
+            False,
+        ),
+        pr.PullRequest(
+            "my title",
+            "my body",
+            {"testing", "refactor"},
+            True,
+            "issue title",
+            True,
+            "main",
+            "branch",
+            False,
+        ),
+    ]
+    return prs
 
 
 @pytest.fixture
@@ -153,6 +184,32 @@ def test_create_issue_from_repo_other_error(
     )
 
     assert response == "staticdev/omg: returned message."
+
+
+def test_create_pull_request_from_repo_success(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+    domain_prs: List[pr.PullRequest],
+) -> None:
+    """It succeeds."""
+    response = gc.GithubService(
+        domain_gh_conn_settings[0]
+    ).create_pull_request_from_repo("staticdev/omg", domain_prs[0])
+
+    assert response == "staticdev/omg: PR created successfully."
+
+
+def test_create_pull_request_from_repo_with_labels(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+    domain_prs: List[pr.PullRequest],
+) -> None:
+    """It succeeds."""
+    response = gc.GithubService(
+        domain_gh_conn_settings[0]
+    ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
+
+    assert response == "staticdev/omg: PR created successfully."
 
 
 def test_delete_branch_from_repo_success(

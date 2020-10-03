@@ -85,7 +85,7 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         "inherit_labels": True,
         "head": "main",
         "base": "branch",
-        "draft": True,
+        "draft": False,
         "correct": True,
     }
     result = p.InquirerPrompter.create_pull_requests(["staticdev/omg"])
@@ -98,7 +98,7 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         True,
         "main",
         "branch",
-        True,
+        False,
     )
 
     assert result == expected
@@ -115,7 +115,7 @@ def test_create_pull_requests_no_labels(mock_inquirer_prompt: MockerFixture) -> 
         "inherit_labels": True,
         "head": "main",
         "base": "branch",
-        "draft": True,
+        "draft": False,
         "correct": True,
     }
     result = p.InquirerPrompter.create_pull_requests(["staticdev/omg"])
@@ -128,7 +128,7 @@ def test_create_pull_requests_no_labels(mock_inquirer_prompt: MockerFixture) -> 
         True,
         "main",
         "branch",
-        True,
+        False,
     )
 
     assert result == expected

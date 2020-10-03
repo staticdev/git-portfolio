@@ -118,9 +118,9 @@ class InquirerPrompter:
                 "title", message="Write a PR title", validate=val.not_empty_validation
             ),
             inquirer.Text("body", message="Write an PR body [optional]"),
-            inquirer.Confirm(
-                "draft", message="Do you want to create a draft PR?", default=False
-            ),
+            # inquirer.Confirm(
+            #     "draft", message="Do you want to create a draft PR?", default=False
+            # ),
             inquirer.Text(
                 "labels", message="Write PR labels [optional, separated by comma]"
             ),
@@ -170,7 +170,7 @@ class InquirerPrompter:
             answers["inherit_labels"],
             answers["head"],
             answers["base"],
-            answers["draft"],
+            False,
         )
 
     @staticmethod

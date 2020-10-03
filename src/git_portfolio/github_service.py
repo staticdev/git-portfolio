@@ -89,16 +89,18 @@ class GithubService:
         """Create pull request from one repository."""
         repo = self._get_repo(github_repo)
         try:
+            # github3 does not have draft attribute
+            # watch https://github.com/sigmavirus24/github3.py/issues/926
             created_pr = repo.create_pull(
                 title=pr.title,
                 body=pr.body,
                 head=pr.head,
                 base=pr.base,
-                draft=pr.draft,
+                # draft=pr.draft,
             )
-            # PyGithub does not support a list of strings for adding (only one str)
-            for label in pr.labels:
-                created_pr.add_to_labels(label)
+            if pr.labels:
+                created_pr.labels = pr.labels
+                created_pr.update()
             return f"{github_repo}: PR created successfully."
         except github3.exceptions.ClientError as github_exception:
             extra = ""
@@ -113,6 +115,7 @@ class GithubService:
         """Set body message and labels on PR."""
         repo = self._get_repo(github_repo)
         labels = pr.labels
+        # TODO: see equivalent to get_issues on github3!
         issues = repo.get_issues(state="open")
         closes = ""
         for issue in issues:
