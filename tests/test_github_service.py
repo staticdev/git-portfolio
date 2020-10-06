@@ -1,4 +1,5 @@
 """Test cases for the Github service module."""
+import unittest
 from typing import List
 from unittest.mock import Mock
 
@@ -9,6 +10,7 @@ from pytest_mock import MockerFixture
 import git_portfolio.domain.gh_connection_settings as cs
 import git_portfolio.domain.issue as i
 import git_portfolio.domain.pull_request as pr
+import git_portfolio.domain.pull_request_merge as mpr
 import git_portfolio.github_service as gc
 
 
@@ -67,6 +69,12 @@ def domain_prs() -> List[pr.PullRequest]:
         ),
     ]
     return prs
+
+
+@pytest.fixture
+def domain_mpr() -> mpr.PullRequestMerge:
+    """Pull request merge fixture."""
+    return mpr.PullRequestMerge("branch", "main", "org name", False)
 
 
 @pytest.fixture
@@ -212,6 +220,55 @@ def test_create_pull_request_from_repo_with_labels(
     assert response == "staticdev/omg: PR created successfully."
 
 
+# stackoverflow.com/questions/64226516/how-to-set-mocked-exception-behavior-on-python
+# def test_create_pull_request_from_repo_invalid_branch(
+#     domain_gh_conn_settings: List[cs.GhConnectionSettings],
+#     mock_github3_login: MockerFixture,
+#     domain_prs: List[pr.PullRequest],
+# ) -> None:
+#     """It gives the message error informing the invalid field head."""
+#     exception_mock = Mock(errors=[{"field": "head"}], msg="Validation Failed")
+#     mock_github3_login.return_value.repositories.return_value[
+#         1
+#     ].create_pull.side_effect = github3.exceptions.UnprocessableEntity(Mock())
+#     mock_github3_login.return_value.repositories.return_value[
+#         1
+#     ].create_pull.return_value = exception_mock
+#     response = gc.GithubService(
+#         domain_gh_conn_settings[0]
+#     ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
+
+#     assert response == "staticdev/sandbox: Validation Failed. Invalid field head."
+
+
+def test_link_issue_success(domain_gh_conn_settings: List[cs.GhConnectionSettings], mock_github3_login: MockerFixture, domain_prs: List[pr.PullRequest]) -> None:
+    """It succeeds."""
+    label1 = Mock()
+    label1.name = "dontinherit"
+    label2 = Mock()
+    label2.name = "enhancement"
+    label3 = Mock()
+    label3.name = "testing"
+
+    issue1 = Mock(title="issue title", number=3)
+    issue1.labels.return_value = []
+    issue2 = Mock(title="doesnt match title", number=4)
+    issue2.labels.return_value = [label1]
+    issue3 = Mock(title="match issue title", number=5)
+    issue3.labels.return_value = [label2, label3]
+
+    mock_github3_login.return_value.repositories.return_value[
+        1
+    ].issues.return_value = [issue1, issue2, issue3]
+    gc.GithubService(domain_gh_conn_settings[0]).link_issues(
+        "staticdev/omg", domain_prs[1]
+    )
+
+    assert domain_prs[1].body == "my body\n\nCloses #3\nCloses #5\n"
+    case = unittest.TestCase()
+    case.assertCountEqual(domain_prs[1].labels, {"testing", "refactor", "enhancement"})
+
+
 def test_delete_branch_from_repo_success(
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
@@ -241,3 +298,56 @@ def test_delete_branch_from_repo_branch_not_found(
     )
 
     assert response == "staticdev/omg: Branch not found."
+
+
+def test_merge_pull_request_from_repo_success(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+    domain_mpr: mpr.PullRequestMerge,
+) -> None:
+    """It succeeds."""
+    mock_github3_login.return_value.repositories.return_value[
+        1
+    ].pull_requests.return_value = [Mock()]
+    response = gc.GithubService(
+        domain_gh_conn_settings[0]
+    ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
+
+    assert response == "staticdev/omg: PR merged successfully."
+
+
+def test_merge_pull_request_from_repo_error_merging() -> None:
+    """It gives error message."""
+    pass
+
+
+def test_merge_pull_request_from_repo_not_found(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+    domain_mpr: mpr.PullRequestMerge,
+) -> None:
+    """It gives error message."""
+    mock_github3_login.return_value.repositories.return_value[
+        1
+    ].pull_requests.return_value = []
+    response = gc.GithubService(
+        domain_gh_conn_settings[0]
+    ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
+
+    assert response == "staticdev/omg: no open PR found for branch:main."
+
+
+def test_merge_pull_request_from_repo_ambiguous(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+    domain_mpr: mpr.PullRequestMerge,
+) -> None:
+    """It gives error message."""
+    mock_github3_login.return_value.repositories.return_value[
+        1
+    ].pull_requests.return_value = [Mock(), Mock()]
+    response = gc.GithubService(
+        domain_gh_conn_settings[0]
+    ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
+
+    assert response == "staticdev/omg: unexpected number of PRs for branch:main."

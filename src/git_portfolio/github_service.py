@@ -99,30 +99,29 @@ class GithubService:
                 # draft=pr.draft,
             )
             if pr.labels:
-                created_pr.labels = pr.labels
-                created_pr.update()
+                issue = created_pr.issue()
+                issue.add_labels(*pr.labels)
             return f"{github_repo}: PR created successfully."
-        except github3.exceptions.ClientError as github_exception:
+        except github3.exceptions.UnprocessableEntity as github_exception:
             extra = ""
-            for error in github_exception.data["errors"]:
+            for error in github_exception.errors:
                 if "message" in error:
                     extra += f"{error['message']} "
                 else:
                     extra += f"Invalid field {error['field']}. "
-            return f"{github_repo}: {github_exception.data['message']}. {extra}"
+            return f"{github_repo}: {github_exception.msg}. {extra}"
 
     def link_issues(self, github_repo: str, pr: pr.PullRequest) -> None:
         """Set body message and labels on PR."""
         repo = self._get_repo(github_repo)
         labels = pr.labels
-        # TODO: see equivalent to get_issues on github3!
-        issues = repo.get_issues(state="open")
+        issues = repo.issues(state="open")
         closes = ""
         for issue in issues:
             if pr.link in issue.title:
                 closes += f"Closes #{issue.number}\n"
                 if pr.inherit_labels:
-                    issue_labels = [label.name for label in issue.get_labels()]
+                    issue_labels = [label.name for label in issue.labels()]
                     labels.update(issue_labels)
         if closes:
             pr.body += f"\n\n{closes}"
@@ -150,21 +149,25 @@ class GithubService:
         # https://developer.github.com/v3/pulls/#list-pull-requests
         # head needs format "user/org:branch"
         head = f"{pr_merge.prefix}:{pr_merge.head}"
-        pulls = repo.get_pulls(state="open", base=pr_merge.base, head=head)
-        if pulls.totalCount == 1:
+        pulls = list(repo.pull_requests(base=pr_merge.base, head=head))
+        if not pulls:
+            return (
+                f"{github_repo}: no open PR found for {pr_merge.base}:{pr_merge.head}."
+            )
+        elif len(pulls) == 1:
             pull = pulls[0]
-            if pull.mergeable:
-                output = ""
-                try:
-                    pull.merge()
-                    output += f"{github_repo}: PR merged successfully.\n"
-                except github3.exceptions.ClientError as github_exception:
-                    output += f"{github_repo}: {github_exception.data['message']}."
-                return output
-            else:
-                return f"{github_repo}: PR not mergeable, GitHub checks may be running."
+            # TODO: check if pull is mergeable - create issue on github3.py
+            output = ""
+            try:
+                pull.merge()
+                output += f"{github_repo}: PR merged successfully."
+            except github3.exceptions.ClientError as github_exception:
+                output += f"{github_repo}: {github_exception.data['message']}."
+            except Exception as ex:
+                print(ex)
+            return output
         else:
             return (
-                f"{github_repo}: no open PR found for {pr_merge.base}:"
-                f"{pr_merge.head}."
+                f"{github_repo}: unexpected number of PRs for "
+                f"{pr_merge.base}:{pr_merge.head}."
             )
