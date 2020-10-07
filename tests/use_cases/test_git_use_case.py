@@ -1,6 +1,5 @@
 """Test cases for the git use case."""
 from typing import Any
-from unittest.mock import Mock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -52,9 +51,12 @@ def test_execute_git_not_installed(mock_popen: MockerFixture) -> None:
     )
 
 
-def test_execute_no_folder(mock_popen: MockerFixture) -> None:
+def test_execute_no_folder(mocker: MockerFixture, mock_popen: MockerFixture) -> None:
     """It returns that file does not exist."""
-    mock_popen.side_effect = [Mock(), FileNotFoundError("No such file or directory")]
+    mock_popen.side_effect = [
+        mocker.Mock(),
+        FileNotFoundError("No such file or directory"),
+    ]
     response = guc.GitUseCase().execute(["staticdev/notcloned"], "checkout", ("xx",))
 
     assert bool(response) is True

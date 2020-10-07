@@ -1,4 +1,5 @@
 """Github service module."""
+from typing import Any
 from typing import List
 from typing import Union
 
@@ -50,14 +51,15 @@ class GithubService:
         for repo in self.repos:
             if repo.full_name == repo_name:
                 return repo
+        raise NameError(f"Repository {repo_name} not found.")
 
     def get_repo_names(self) -> List[str]:
         """Get list of repository names."""
-        return [str(repo) for repo in self.repos]
+        return [repo.full_name for repo in self.repos]
 
-    def get_username(self) -> str:
+    def get_username(self) -> Any:
         """Get Github username."""
-        return str(self.user)
+        return self.user.login
 
     def create_issue_from_repo(self, github_repo: str, issue: i.Issue) -> str:
         """Create issue from one repository."""
@@ -106,10 +108,10 @@ class GithubService:
             extra = ""
             for error in github_exception.errors:
                 if "message" in error:
-                    extra += f"{error['message']} "
+                    extra += f" {error['message']}."
                 else:
-                    extra += f"Invalid field {error['field']}. "
-            return f"{github_repo}: {github_exception.msg}. {extra}"
+                    extra += f" Invalid field {error['field']}."
+            return f"{github_repo}: {github_exception.msg}.{extra}"
 
     def link_issues(self, github_repo: str, pr: pr.PullRequest) -> None:
         """Set body message and labels on PR."""
@@ -120,9 +122,8 @@ class GithubService:
         for issue in issues:
             if pr.link in issue.title:
                 closes += f"Closes #{issue.number}\n"
-                if pr.inherit_labels:
-                    issue_labels = [label.name for label in issue.labels()]
-                    labels.update(issue_labels)
+                issue_labels = [label.name for label in issue.labels()]
+                labels.update(issue_labels)
         if closes:
             pr.body += f"\n\n{closes}"
         pr.labels = labels
@@ -131,9 +132,7 @@ class GithubService:
         """Delete a branch from one repository."""
         repo = self._get_repo(github_repo)
         try:
-            # TODO: watch https://github.com/sigmavirus24/github3.py/issues/1002
-            branch_ref = repo.branch(branch)
-            print(dir(branch_ref))
+            branch_ref = repo.ref(f"heads/{branch}")
             branch_ref.delete()
             return f"{github_repo}: branch deleted successfully."
         except github3.exceptions.NotFoundError as github_exception:
@@ -156,15 +155,9 @@ class GithubService:
             )
         elif len(pulls) == 1:
             pull = pulls[0]
-            # TODO: check if pull is mergeable - create issue on github3.py
             output = ""
-            try:
-                pull.merge()
-                output += f"{github_repo}: PR merged successfully."
-            except github3.exceptions.ClientError as github_exception:
-                output += f"{github_repo}: {github_exception.data['message']}."
-            except Exception as ex:
-                print(ex)
+            pull.merge()
+            output += f"{github_repo}: PR merged successfully."
             return output
         else:
             return (
