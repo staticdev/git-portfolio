@@ -3,7 +3,7 @@ name = "git-portfolio"
 version = "0.6.0"
 description = "Git Portfolio"
 authors = ["Thiago Carvalho D'Ávila <thiagocavila@gmail.com>"]
-license = "LGPL-3.0-only"
+license = "MIT"
 readme = "README.rst"
 homepage = "https://github.com/staticdev/git-portfolio"
 repository = "https://github.com/staticdev/git-portfolio"
@@ -11,6 +11,7 @@ documentation = "https://git-portfolio.readthedocs.io"
 classifiers = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "License :: OSI Approved :: MIT License",
 ]
 
 [tool.poetry.urls]
