@@ -7,8 +7,8 @@ Git Portfolio
 
 |pre-commit| |Black|
 
-.. |Status| image:: https://badgen.net/badge/status/alpha/d8624d
-   :target: https://badgen.net/badge/status/alpha/d8624d
+.. |Status| image:: https://badgen.net/badge/status/beta/orange
+   :target: https://badgen.net/badge/status/beta/orange
    :alt: Project Status
 .. |PyPI| image:: https://img.shields.io/pypi/v/git-portfolio.svg
    :target: https://pypi.org/project/git-portfolio/
