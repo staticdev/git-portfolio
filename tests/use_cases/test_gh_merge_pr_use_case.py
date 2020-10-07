@@ -10,12 +10,19 @@ import git_portfolio.use_cases.gh_merge_pr_use_case as ghmp
 
 
 @pytest.fixture
-def mock_github_manager(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking GithubManager."""
-    mock = mocker.patch("git_portfolio.github_manager.GithubManager", autospec=True)
+def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking CONFIG_MANAGER."""
+    mock = mocker.patch("git_portfolio.config_manager.ConfigManager", autospec=True)
     mock.return_value.config = c.Config(
         "", "mytoken", ["staticdev/omg", "staticdev/omg2"]
     )
+    return mock
+
+
+@pytest.fixture
+def mock_github_service(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GithubService."""
+    mock = mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
     mock.return_value.merge_pull_request_from_repo.return_value = "success message\n"
     return mock
 
@@ -40,24 +47,33 @@ def domain_mprs() -> List[mpr.PullRequestMerge]:
 
 
 def test_execute_for_all_repos(
-    mock_github_manager: MockerFixture, domain_mprs: List[mpr.PullRequestMerge]
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
+    domain_mprs: List[mpr.PullRequestMerge],
 ) -> None:
     """It returns success."""
-    github_manager = mock_github_manager.return_value
-    response = ghmp.GhMergePrUseCase(github_manager).execute(domain_mprs[0])
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    response = ghmp.GhMergePrUseCase(config_manager, github_service).execute(
+        domain_mprs[0]
+    )
 
     assert bool(response) is True
     assert "success message\nsuccess message\n" == response.value
 
 
 def test_execute_delete_branch(
-    mock_github_manager: MockerFixture,
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
     mock_gh_delete_branch_use_case: MockerFixture,
     domain_mprs: List[mpr.PullRequestMerge],
 ) -> None:
     """It returns success."""
-    github_manager = mock_github_manager.return_value
-    response = ghmp.GhMergePrUseCase(github_manager).execute(domain_mprs[1])
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    response = ghmp.GhMergePrUseCase(config_manager, github_service).execute(
+        domain_mprs[1]
+    )
 
     assert bool(response) is True
     assert "success message\nsuccess message\n" == response.value
@@ -65,11 +81,14 @@ def test_execute_delete_branch(
 
 
 def test_execute_for_specific_repo(
-    mock_github_manager: MockerFixture, domain_mprs: List[mpr.PullRequestMerge]
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
+    domain_mprs: List[mpr.PullRequestMerge],
 ) -> None:
     """It returns success."""
-    github_manager = mock_github_manager.return_value
-    response = ghmp.GhMergePrUseCase(github_manager).execute(
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    response = ghmp.GhMergePrUseCase(config_manager, github_service).execute(
         domain_mprs[0], "staticdev/omg"
     )
     assert bool(response) is True
@@ -77,13 +96,15 @@ def test_execute_for_specific_repo(
 
 
 def test_execute_delete_branch_for_specific_repo(
-    mock_github_manager: MockerFixture,
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
     mock_gh_delete_branch_use_case: MockerFixture,
     domain_mprs: List[mpr.PullRequestMerge],
 ) -> None:
     """It returns success."""
-    github_manager = mock_github_manager.return_value
-    response = ghmp.GhMergePrUseCase(github_manager).execute(
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    response = ghmp.GhMergePrUseCase(config_manager, github_service).execute(
         domain_mprs[1], "staticdev/omg"
     )
 

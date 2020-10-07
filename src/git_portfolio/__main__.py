@@ -10,7 +10,9 @@ from typing import Union
 import click
 
 import git_portfolio.config_manager as cm
-import git_portfolio.github_manager as ghm
+import git_portfolio.domain.config as c
+import git_portfolio.domain.gh_connection_settings as cs
+import git_portfolio.github_service as ghs
 import git_portfolio.prompt as p
 import git_portfolio.response_objects as res
 import git_portfolio.use_cases.config_init_use_case as ci
@@ -55,6 +57,27 @@ def _echo_outputs(response: Union[res.ResponseFailure, res.ResponseSuccess]) -> 
         click.secho(success.value)
     else:
         click.secho(f"Error: {response.value['message']}", fg="red")
+
+
+def _get_github_service(config: c.Config) -> ghs.GithubService:
+    settings = cs.GhConnectionSettings(
+        config.github_access_token, config.github_hostname
+    )
+    try:
+        return ghs.GithubService(settings)
+    except AttributeError:
+        response = res.ResponseFailure.build_parameters_error(
+            "Wrong GitHub permissions. Please check your token."
+        )
+    except ConnectionError:
+        response = res.ResponseFailure.build_system_error(
+            (
+                "Unable to reach server. Please check you network and credentials and "
+                "try again."
+            )
+        )
+    _echo_outputs(response)
+    raise click.ClickException("")
 
 
 @main.command("add")
@@ -161,9 +184,16 @@ def delete() -> None:
 @configure.command("init")
 def config_init() -> None:
     """Initialize `gitp` config."""
-    github_manager = ghm.GithubManager(CONFIG_MANAGER.config)
-    response = ci.ConfigInitUseCase(CONFIG_MANAGER, github_manager).execute()
-    _echo_outputs(response)
+    while True:
+        settings = p.InquirerPrompter.connect_github(
+            CONFIG_MANAGER.config.github_access_token
+        )
+        response = ci.ConfigInitUseCase(CONFIG_MANAGER).execute(settings)
+        _echo_outputs(response)
+        if bool(response):
+            break
+        elif response.type == res.ResponseFailure.SYSTEM_ERROR:
+            click.ClickException("")
 
 
 @configure.command("repos")
@@ -175,8 +205,8 @@ def config_repos() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     )
     if not new_repos:
         return res.ResponseSuccess()
-    github_manager = ghm.GithubManager(CONFIG_MANAGER.config)
-    repo_names = github_manager.get_repo_names()
+    github_service = _get_github_service(CONFIG_MANAGER.config)
+    repo_names = github_service.get_repo_names()
     selected_repos = p.InquirerPrompter.select_repos(repo_names)
     return cr.ConfigReposUseCase(CONFIG_MANAGER).execute(selected_repos)
 
@@ -185,45 +215,45 @@ def config_repos() -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @gitp_config_check
 def create_issues() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch creation of issues on GitHub."""
-    manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    github_service = _get_github_service(CONFIG_MANAGER.config)
     issue = p.InquirerPrompter.create_issues(
         CONFIG_MANAGER.config.github_selected_repos
     )
-    return ghci.GhCreateIssueUseCase(manager).execute(issue)
+    return ghci.GhCreateIssueUseCase(CONFIG_MANAGER, github_service).execute(issue)
 
 
 @create.command("prs")
 @gitp_config_check
 def create_prs() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch creation of pull requests on GitHub."""
-    manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    github_service = _get_github_service(CONFIG_MANAGER.config)
     pr = p.InquirerPrompter.create_pull_requests(
         CONFIG_MANAGER.config.github_selected_repos
     )
-    return ghcp.GhCreatePrUseCase(manager).execute(pr)
+    return ghcp.GhCreatePrUseCase(CONFIG_MANAGER, github_service).execute(pr)
 
 
 @merge.command("prs")
 @gitp_config_check
 def merge_prs() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch merge of pull requests on GitHub."""
-    manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    github_service = _get_github_service(CONFIG_MANAGER.config)
     pr_merge = p.InquirerPrompter.merge_pull_requests(
-        manager.github_username,
-        manager.config.github_selected_repos,
+        github_service.get_username(),
+        CONFIG_MANAGER.config.github_selected_repos,
     )
-    return ghmp.GhMergePrUseCase(manager).execute(pr_merge)
+    return ghmp.GhMergePrUseCase(CONFIG_MANAGER, github_service).execute(pr_merge)
 
 
 @delete.command("branches")
 @gitp_config_check
 def delete_branches() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch deletion of branches on GitHub."""
-    manager = ghm.GithubManager(CONFIG_MANAGER.config)
+    github_service = _get_github_service(CONFIG_MANAGER.config)
     branch = p.InquirerPrompter.delete_branches(
         CONFIG_MANAGER.config.github_selected_repos
     )
-    return ghdb.GhDeleteBranchUseCase(manager).execute(branch)
+    return ghdb.GhDeleteBranchUseCase(CONFIG_MANAGER, github_service).execute(branch)
 
 
 main.add_command(configure)

@@ -6,5 +6,5 @@ from dataclasses import dataclass
 class GhConnectionSettings:
     """Github connection settings class."""
 
-    github_access_token: str
-    github_hostname: str
+    access_token: str
+    hostname: str
