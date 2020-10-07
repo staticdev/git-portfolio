@@ -103,7 +103,7 @@ To learn more, see the `Contributor Guide`_.
 License
 -------
 
-Distributed under the terms of the LGPLv3_ license since it depends on PyGithub_,
+Distributed under the terms of the MIT_ license,
 *Git Portfolio* is free and open source software.
 
 
@@ -124,8 +124,7 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _@cjolowicz: https://github.com/cjolowicz
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _git: https://git-scm.com
-.. _LGPLv3: https://www.gnu.org/licenses/lgpl-3.0.en.html
-.. _PyGithub: https://github.com/PyGithub/PyGithub
+.. _MIT: http://opensource.org/licenses/MIT
 .. _PyPI: https://pypi.org/
 .. _Hypermodern Python Cookiecutter: https://github.com/cjolowicz/cookiecutter-hypermodern-python
 .. _file an issue: https://github.com/staticdev/git-portfolio/issues
