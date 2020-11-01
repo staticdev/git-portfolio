@@ -43,9 +43,13 @@ class GithubService:
         try:
             return connection.me()
         except github3.exceptions.AuthenticationFailed:
-            raise AttributeError()
+            raise AttributeError("Invalid token.")
         except github3.exceptions.ConnectionError:
             raise ConnectionError()
+        except github3.exceptions.IncompleteResponse:
+            raise AttributeError(
+                "Invalid response. Your token might not be properly scoped."
+            )
 
     def _get_repo(self, repo_name: str) -> github3.repos.ShortRepository:
         for repo in self.repos:

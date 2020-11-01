@@ -115,17 +115,36 @@ def test_init_github_entreprise(
     gc.GithubService(domain_gh_conn_settings[1])
 
 
-def test_init_wrong_token(
+def test_init_invalid_token(
     mocker: MockerFixture,
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
-    """It succeeds."""
+    """It returns invalid token message."""
     mock_github3_login.return_value.me.side_effect = (
         github3.exceptions.AuthenticationFailed(mocker.Mock())
     )
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError) as excinfo:
         gc.GithubService(domain_gh_conn_settings[0])
+
+    assert "Invalid token." == str(excinfo.value)
+
+
+def test_init_invalid_token_scope(
+    mocker: MockerFixture,
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It returns invalid response message."""
+    mock_github3_login.return_value.me.side_effect = (
+        github3.exceptions.IncompleteResponse(mocker.Mock(), mocker.Mock())
+    )
+    with pytest.raises(AttributeError) as excinfo:
+        gc.GithubService(domain_gh_conn_settings[0])
+
+    assert "Invalid response. Your token might not be properly scoped." == str(
+        excinfo.value
+    )
 
 
 def test_init_connection_error(

@@ -22,8 +22,8 @@ class ConfigInitUseCase:
         """Initialize app configuration."""
         try:
             new_github_service = ghs.GithubService(request)
-        except AttributeError:
-            return res.ResponseFailure.build_parameters_error()
+        except AttributeError as ae:
+            return res.ResponseFailure.build_parameters_error(f"{ae}")
         except ConnectionError:
             return res.ResponseFailure.build_system_error()
         repo_names = new_github_service.get_repo_names()
