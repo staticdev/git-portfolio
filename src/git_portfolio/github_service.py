@@ -16,7 +16,8 @@ class GithubService:
 
     def __init__(self, github_config: cs.GhConnectionSettings) -> None:
         """Constructor."""
-        self.connection = self._get_connection(github_config)
+        self.config = github_config
+        self.connection = self._get_connection(self.config)
         self.user = self._test_connection(self.connection)
         self.repos = self.connection.repositories()
 
@@ -56,6 +57,10 @@ class GithubService:
             if repo.full_name == repo_name:
                 return repo
         raise NameError(f"Repository {repo_name} not found.")
+
+    def get_config(self) -> cs.GhConnectionSettings:
+        """Get service config."""
+        return self.config
 
     def get_repo_names(self) -> List[str]:
         """Get list of repository names."""

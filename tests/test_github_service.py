@@ -15,7 +15,7 @@ import git_portfolio.github_service as gc
 
 @pytest.fixture
 def domain_gh_conn_settings() -> List[cs.GhConnectionSettings]:
-    """Issue fixture."""
+    """Github connection settings fixture."""
     gh_conn_settings = [
         cs.GhConnectionSettings(
             "mytoken",
@@ -158,6 +158,17 @@ def test_init_connection_error(
     )
     with pytest.raises(ConnectionError):
         gc.GithubService(domain_gh_conn_settings[0])
+
+
+def test_get_config(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It returns service config."""
+    expected = domain_gh_conn_settings[0]
+    result = gc.GithubService(domain_gh_conn_settings[0]).get_config()
+
+    assert result == expected
 
 
 def test_get_repo_no_repo(
