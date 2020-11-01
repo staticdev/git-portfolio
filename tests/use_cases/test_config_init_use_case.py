@@ -68,11 +68,12 @@ def test_execute_attribute_error(
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
-    mock_github_service.side_effect = AttributeError
+    mock_github_service.side_effect = AttributeError("msg")
     response = ci.ConfigInitUseCase(config_manager).execute(domain_gh_conn_settings)
 
     assert bool(response) is False
     assert response.type == res.ResponseFailure.PARAMETERS_ERROR
+    assert response.value["message"] == "msg"
 
 
 def test_execute_connection_error(
