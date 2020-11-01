@@ -27,6 +27,7 @@ class ConfigInitUseCase:
         except ConnectionError:
             return res.ResponseFailure.build_system_error()
         repo_names = new_github_service.get_repo_names()
+        config = new_github_service.get_config()
         selected_repos = p.InquirerPrompter.select_repos(repo_names)
-        cr.ConfigReposUseCase(self.config_manager).execute(selected_repos)
+        cr.ConfigReposUseCase(self.config_manager).execute(config, selected_repos)
         return res.ResponseSuccess("gitp successfully configured.")

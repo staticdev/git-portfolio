@@ -45,6 +45,7 @@ def domain_gh_conn_settings() -> cs.GhConnectionSettings:
 
 
 def test_execute_success(
+    mocker: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     mock_prompt_inquirer_prompter: MockerFixture,
@@ -53,6 +54,7 @@ def test_execute_success(
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
+    config_manager.config = mocker.Mock()
     response = ci.ConfigInitUseCase(config_manager).execute(domain_gh_conn_settings)
 
     assert bool(response) is True

@@ -208,7 +208,9 @@ def config_repos() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     github_service = _get_github_service(CONFIG_MANAGER.config)
     repo_names = github_service.get_repo_names()
     selected_repos = p.InquirerPrompter.select_repos(repo_names)
-    return cr.ConfigReposUseCase(CONFIG_MANAGER).execute(selected_repos)
+    return cr.ConfigReposUseCase(CONFIG_MANAGER).execute(
+        github_service.get_config(), selected_repos
+    )
 
 
 @create.command("issues")
