@@ -14,10 +14,15 @@ class GitUseCase:
 
     def __init__(self) -> None:
         """Constructor."""
-        self.err_output = self._check_git_install()
+        self.err_output = self.check_git_install()
 
     @staticmethod
-    def _check_git_install() -> str:
+    def check_git_install() -> str:
+        """Check git installation.
+
+        Returns:
+            str: output message.
+        """
         try:
             popen = subprocess.Popen(  # noqa: S603, S607
                 "git", stdout=subprocess.DEVNULL, stderr=subprocess.PIPE
@@ -34,7 +39,7 @@ class GitUseCase:
 
         Args:
             git_selected_repos: list of configured repo names.
-            command: supported: checkout.
+            command: git command eg. checkout, pull, push...
             args (Tuple[str]): command arguments.
 
         Returns:
@@ -55,17 +60,12 @@ class GitUseCase:
                     stderr=subprocess.PIPE,
                     cwd=os.path.join(cwd, folder_name),
                 )
-                stdout, error = popen.communicate()
-                # case of commands that outputs nothing on success such as `git add .`
-                if not stdout and not error:
-                    output += "success.\n"
+                _, error = popen.communicate()
+                if popen.returncode == 0:
+                    output += f"{command} successful.\n"
                 else:
-                    if stdout:
-                        stdout_str = stdout.decode("utf-8")
-                        output += f"{stdout_str}"
-                    if error:
-                        error_str = error.decode("utf-8")
-                        output += f"{error_str}"
+                    error_str = error.decode("utf-8")
+                    output += f"{error_str}"
             except FileNotFoundError as fnf_error:
                 output += f"{fnf_error}\n"
         return res.ResponseSuccess(output)

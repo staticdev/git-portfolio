@@ -182,6 +182,29 @@ def test_get_repo_no_repo(
         gc.GithubService(domain_gh_conn_settings[0])._get_repo("staticdev/omg")
 
 
+def test_get_repo_url_success(
+    mocker: MockerFixture,
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It returns url."""
+    expected = "git@github.com:staticdev/omg.git"
+    result = gc.GithubService(domain_gh_conn_settings[0]).get_repo_url("staticdev/omg")
+
+    assert result == expected
+
+
+def test_get_repo_url_no_repo(
+    mocker: MockerFixture, domain_gh_conn_settings: List[cs.GhConnectionSettings]
+) -> None:
+    """It returns None."""
+    mock = mocker.patch("github3.login", autospec=True)
+    mock.return_value.repositories.return_value = []
+
+    with pytest.raises(NameError):
+        gc.GithubService(domain_gh_conn_settings[0]).get_repo_url("staticdev/omg")
+
+
 def test_get_repo_names(
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,

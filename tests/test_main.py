@@ -47,6 +47,14 @@ def mock_config_repos_use_case(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
+def mock_git_clone_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GitUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.git_clone_use_case.GitCloneUseCase", autospec=True
+    )
+
+
+@pytest.fixture
 def mock_git_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GitUseCase."""
     return mocker.patch(
@@ -420,6 +428,21 @@ def test_config_repos_connection_error(
         )
     )
     assert type(result.exception) == SystemExit
+
+
+def test_clone_success(
+    mock_git_clone_use_case: MockerFixture,
+    mock_github_service: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls git clone."""
+    github_service = mock_github_service.return_value
+    runner.invoke(git_portfolio.__main__.main, ["clone"], prog_name="gitp")
+
+    mock_git_clone_use_case(github_service).execute.assert_called_once_with(
+        ["staticdev/omg"]
+    )
 
 
 def test_create_issues(
