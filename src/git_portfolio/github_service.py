@@ -85,7 +85,7 @@ class GithubService:
             repo.create_issue(
                 title=issue.title, body=issue.body, labels=list(issue.labels)
             )
-            return f"{github_repo}: issue created successfully."
+            return f"{github_repo}: create issue successful.\n"
         except github3.exceptions.ClientError as github_exception:
             if github_exception.msg == "Issues are disabled for this repo":
                 return f"{github_repo}: {github_exception.msg}. It may be a fork."
@@ -120,7 +120,7 @@ class GithubService:
             if pr.labels:
                 issue = created_pr.issue()
                 issue.add_labels(*pr.labels)
-            return f"{github_repo}: PR created successfully."
+            return f"{github_repo}: create PR successful.\n"
         except github3.exceptions.UnprocessableEntity as github_exception:
             extra = ""
             for error in github_exception.errors:
@@ -151,7 +151,7 @@ class GithubService:
         try:
             branch_ref = repo.ref(f"heads/{branch}")
             branch_ref.delete()
-            return f"{github_repo}: branch deleted successfully."
+            return f"{github_repo}: delete branch successful.\n"
         except github3.exceptions.NotFoundError as github_exception:
             return f"{github_repo}: {github_exception.msg}."
 
@@ -174,7 +174,7 @@ class GithubService:
             pull = pulls[0]
             output = ""
             pull.merge()
-            output += f"{github_repo}: PR merged successfully."
+            output += f"{github_repo}: merge PR successful.\n"
             return output
         else:
             return (

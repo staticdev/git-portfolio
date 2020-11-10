@@ -238,7 +238,7 @@ def test_create_issue_from_repo_success(
         "staticdev/omg", domain_issue
     )
 
-    assert response == "staticdev/omg: issue created successfully."
+    assert response == "staticdev/omg: create issue successful.\n"
 
 
 def test_create_issue_from_repo_fork(
@@ -292,7 +292,7 @@ def test_create_pull_request_from_repo_success(
         domain_gh_conn_settings[0]
     ).create_pull_request_from_repo("staticdev/omg", domain_prs[0])
 
-    assert response == "staticdev/omg: PR created successfully."
+    assert response == "staticdev/omg: create PR successful.\n"
 
 
 def test_create_pull_request_from_repo_with_labels(
@@ -305,7 +305,7 @@ def test_create_pull_request_from_repo_with_labels(
         domain_gh_conn_settings[0]
     ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
 
-    assert response == "staticdev/omg: PR created successfully."
+    assert response == "staticdev/omg: create PR successful.\n"
 
 
 # Details on mocking exception constructor at
@@ -491,7 +491,7 @@ def test_delete_branch_from_repo_success(
         "staticdev/omg", domain_branch
     )
 
-    assert response == "staticdev/omg: branch deleted successfully."
+    assert response == "staticdev/omg: delete branch successful.\n"
 
 
 def test_delete_branch_from_repo_branch_not_found(
@@ -534,7 +534,7 @@ def test_merge_pull_request_from_repo_success(
         domain_gh_conn_settings[0]
     ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
 
-    assert response == "staticdev/omg: PR merged successfully."
+    assert response == "staticdev/omg: merge PR successful.\n"
 
 
 def test_merge_pull_request_from_repo_error_merging() -> None:
