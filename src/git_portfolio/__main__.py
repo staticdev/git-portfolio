@@ -21,6 +21,7 @@ import git_portfolio.use_cases.gh_create_issue_use_case as ghci
 import git_portfolio.use_cases.gh_create_pr_use_case as ghcp
 import git_portfolio.use_cases.gh_delete_branch_use_case as ghdb
 import git_portfolio.use_cases.gh_merge_pr_use_case as ghmp
+import git_portfolio.use_cases.git_clone_use_case as gcuc
 import git_portfolio.use_cases.git_use_case as guc
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -210,6 +211,16 @@ def config_repos() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     selected_repos = p.InquirerPrompter.select_repos(repo_names)
     return cr.ConfigReposUseCase(CONFIG_MANAGER).execute(
         github_service.get_config(), selected_repos
+    )
+
+
+@main.command("clone")
+@gitp_config_check
+def clone() -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """Batch `git clone` command on current folder. Does not accept aditional args."""
+    github_service = _get_github_service(CONFIG_MANAGER.config)
+    return gcuc.GitCloneUseCase(github_service).execute(
+        CONFIG_MANAGER.config.github_selected_repos
     )
 
 

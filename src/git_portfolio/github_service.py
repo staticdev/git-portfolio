@@ -66,6 +66,14 @@ class GithubService:
         """Get list of repository names."""
         return [repo.full_name for repo in self.repos]
 
+    def get_repo_url(self, repo_name: str) -> str:
+        """Get URL for repo."""
+        for repo in self.repos:
+            if repo.full_name == repo_name:
+                host = self.config.hostname if self.config.hostname else "github.com"
+                return f"git@{host}:{repo.full_name}.git"
+        raise NameError(f"Repository {repo_name} not found.")
+
     def get_username(self) -> Any:
         """Get Github username."""
         return self.user.login
