@@ -48,9 +48,17 @@ def mock_config_repos_use_case(mocker: MockerFixture) -> MockerFixture:
 
 @pytest.fixture
 def mock_git_clone_use_case(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking GitUseCase."""
+    """Fixture for mocking GitCloneUseCase."""
     return mocker.patch(
         "git_portfolio.use_cases.git_clone_use_case.GitCloneUseCase", autospec=True
+    )
+
+
+@pytest.fixture
+def mock_git_status_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GitStatusUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.git_status_use_case.GitStatusUseCase", autospec=True
     )
 
 
@@ -285,15 +293,15 @@ def test_reset_success_with_hard(
 
 
 def test_status_success(
-    mock_git_use_case: MockerFixture,
+    mock_git_status_use_case: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
     """It calls status."""
     runner.invoke(git_portfolio.__main__.main, ["status"], prog_name="gitp")
 
-    mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "status", ()
+    mock_git_status_use_case.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], ()
     )
 
 
