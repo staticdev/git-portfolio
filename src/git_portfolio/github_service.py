@@ -169,7 +169,7 @@ class GithubService:
         if not pulls:
             return (
                 f"{github_repo}: no open PR found for "
-                "{pr_merge.base}:{pr_merge.head}.\n"
+                f"{pr_merge.base}:{pr_merge.head}.\n"
             )
         elif len(pulls) == 1:
             pull = pulls[0]
