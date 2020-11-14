@@ -260,7 +260,7 @@ def test_create_issue_from_repo_fork(
 
     assert (
         response
-        == "staticdev/omg: Issues are disabled for this repo. It may be a fork."
+        == "staticdev/omg: Issues are disabled for this repo. It may be a fork.\n"
     )
 
 
@@ -279,7 +279,7 @@ def test_create_issue_from_repo_other_error(
         "staticdev/omg", domain_issue
     )
 
-    assert response == "staticdev/omg: returned message."
+    assert response == "staticdev/omg: returned message.\n"
 
 
 def test_create_pull_request_from_repo_success(
@@ -334,7 +334,7 @@ def test_create_pull_request_from_repo_invalid_branch(
         domain_gh_conn_settings[0]
     ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
 
-    assert response == "staticdev/omg: Validation Failed. Invalid field head."
+    assert response == "staticdev/omg: Validation Failed. Invalid field head.\n"
 
 
 @pytest.mark.e2e
@@ -359,7 +359,7 @@ def test_create_pull_request_from_repo_invalid_branch_unpatched_exception(
         domain_gh_conn_settings[0]
     ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
 
-    assert response == "staticdev/omg: Validation Failed. Invalid field head."
+    assert response == "staticdev/omg: Validation Failed. Invalid field head.\n"
 
 
 # Details on mocking exception constructor at
@@ -390,7 +390,7 @@ def test_create_pull_request_from_repo_no_commits(
 
     assert (
         response
-        == "staticdev/omg: Validation Failed. No commits between master and new-branch."
+        == "staticdev/omg: Validation Failed. No commits between master and new-branch.\n"
     )
 
 
@@ -418,7 +418,7 @@ def test_create_pull_request_from_repo_no_commits_unpatched_exception(
 
     assert (
         response
-        == "staticdev/omg: Validation Failed. No commits between master and new-branch."
+        == "staticdev/omg: Validation Failed. No commits between master and new-branch.\n"
     )
 
 
@@ -518,7 +518,7 @@ def test_delete_branch_from_repo_branch_not_found(
         "staticdev/omg", domain_branch
     )
 
-    assert response == "staticdev/omg: Not found."
+    assert response == "staticdev/omg: Not found.\n"
 
 
 def test_merge_pull_request_from_repo_success(
@@ -554,7 +554,7 @@ def test_merge_pull_request_from_repo_not_found(
         domain_gh_conn_settings[0]
     ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
 
-    assert response == "staticdev/omg: no open PR found for branch:main."
+    assert response == "staticdev/omg: no open PR found for branch:main.\n"
 
 
 def test_merge_pull_request_from_repo_ambiguous(
@@ -570,4 +570,4 @@ def test_merge_pull_request_from_repo_ambiguous(
         domain_gh_conn_settings[0]
     ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
 
-    assert response == "staticdev/omg: unexpected number of PRs for branch:main."
+    assert response == "staticdev/omg: unexpected number of PRs for branch:main.\n"

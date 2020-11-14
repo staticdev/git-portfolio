@@ -88,9 +88,9 @@ class GithubService:
             return f"{github_repo}: create issue successful.\n"
         except github3.exceptions.ClientError as github_exception:
             if github_exception.msg == "Issues are disabled for this repo":
-                return f"{github_repo}: {github_exception.msg}. It may be a fork."
+                return f"{github_repo}: {github_exception.msg}. It may be a fork.\n"
             else:
-                return f"{github_repo}: {github_exception.msg}."
+                return f"{github_repo}: {github_exception.msg}.\n"
 
     # def close_issue_from_repo(self):
     #     print(dir(issue))
@@ -128,7 +128,7 @@ class GithubService:
                     extra += f" {error['message']}."
                 else:
                     extra += f" Invalid field {error['field']}."
-            return f"{github_repo}: {github_exception.msg}.{extra}"
+            return f"{github_repo}: {github_exception.msg}.{extra}\n"
 
     def link_issues(self, github_repo: str, pr: pr.PullRequest) -> None:
         """Set body message and labels on PR."""
@@ -153,7 +153,7 @@ class GithubService:
             branch_ref.delete()
             return f"{github_repo}: delete branch successful.\n"
         except github3.exceptions.NotFoundError as github_exception:
-            return f"{github_repo}: {github_exception.msg}."
+            return f"{github_repo}: {github_exception.msg}.\n"
 
     def merge_pull_request_from_repo(
         self, github_repo: str, pr_merge: prm.PullRequestMerge
@@ -168,7 +168,7 @@ class GithubService:
         pulls = list(repo.pull_requests(base=pr_merge.base, head=head))
         if not pulls:
             return (
-                f"{github_repo}: no open PR found for {pr_merge.base}:{pr_merge.head}."
+                f"{github_repo}: no open PR found for {pr_merge.base}:{pr_merge.head}.\n"
             )
         elif len(pulls) == 1:
             pull = pulls[0]
@@ -179,5 +179,5 @@ class GithubService:
         else:
             return (
                 f"{github_repo}: unexpected number of PRs for "
-                f"{pr_merge.base}:{pr_merge.head}."
+                f"{pr_merge.base}:{pr_merge.head}.\n"
             )
