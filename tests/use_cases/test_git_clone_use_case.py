@@ -22,13 +22,14 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
     return mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
 
 
+@pytest.mark.e2e
 def test_execute_git_not_installed(
     mock_github_service: MockerFixture, mock_popen: MockerFixture
 ) -> None:
     """It returns failure with git not installed message."""
     github_service = mock_github_service.return_value
     mock_popen.side_effect = FileNotFoundError
-    response = gcuc.GitCloneUseCase(github_service).execute(["staticdev/notcloned"])
+    response = gcuc.GitCloneUseCase(github_service).execute(["staticdev/omg"])
 
     assert bool(response) is False
     assert (
