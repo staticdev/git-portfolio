@@ -167,9 +167,7 @@ class GithubService:
         head = f"{pr_merge.prefix}:{pr_merge.head}"
         pulls = list(repo.pull_requests(base=pr_merge.base, head=head))
         if not pulls:
-            return (
-                f"{github_repo}: no open PR found for {pr_merge.base}:{pr_merge.head}.\n"
-            )
+            return f"{github_repo}: no open PR found for {pr_merge.base}:{pr_merge.head}.\n"
         elif len(pulls) == 1:
             pull = pulls[0]
             output = ""
