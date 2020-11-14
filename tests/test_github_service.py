@@ -388,9 +388,9 @@ def test_create_pull_request_from_repo_no_commits(
         domain_gh_conn_settings[0]
     ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
 
-    assert (
-        response
-        == "staticdev/omg: Validation Failed. No commits between master and new-branch.\n"
+    assert response == (
+        "staticdev/omg: Validation Failed. No commits between master and "
+        "new-branch.\n"
     )
 
 
@@ -416,9 +416,9 @@ def test_create_pull_request_from_repo_no_commits_unpatched_exception(
         domain_gh_conn_settings[0]
     ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
 
-    assert (
-        response
-        == "staticdev/omg: Validation Failed. No commits between master and new-branch.\n"
+    assert response == (
+        "staticdev/omg: Validation Failed. No commits between master and "
+        "new-branch.\n"
     )
 
 
