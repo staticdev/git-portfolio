@@ -23,15 +23,15 @@ class GhCreatePrUseCase:
         """Create pull requests."""
         if github_repo:
             if pr.link_issues:
-                self.github_service.link_issues(github_repo, pr)
+                pr = self.github_service.link_issues(github_repo, pr)
             output = self.github_service.create_pull_request_from_repo(github_repo, pr)
         else:
             output = ""
             if pr.link_issues:
                 for github_repo in self.config_manager.config.github_selected_repos:
-                    self.github_service.link_issues(github_repo, pr)
+                    custom_pr = self.github_service.link_issues(github_repo, pr)
                     output += self.github_service.create_pull_request_from_repo(
-                        github_repo, pr
+                        github_repo, custom_pr
                     )
             else:
                 for github_repo in self.config_manager.config.github_selected_repos:

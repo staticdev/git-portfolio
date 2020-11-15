@@ -1,4 +1,5 @@
 """Github service module."""
+import copy
 from typing import Any
 from typing import List
 from typing import Union
@@ -130,8 +131,9 @@ class GithubService:
                     extra += f" Invalid field {error['field']}."
             return f"{github_repo}: {github_exception.msg}.{extra}\n"
 
-    def link_issues(self, github_repo: str, pr: pr.PullRequest) -> None:
-        """Set body message and labels on PR."""
+    def link_issues(self, github_repo: str, pr_base: pr.PullRequest) -> pr.PullRequest:
+        """Return a new PR with body message and labels of linked issues."""
+        pr = copy.deepcopy(pr_base)
         repo = self._get_repo(github_repo)
         labels = pr.labels
         issues = repo.issues(state="open")
@@ -144,6 +146,7 @@ class GithubService:
         if closes:
             pr.body += f"\n\n{closes}"
         pr.labels = labels
+        return pr
 
     def delete_branch_from_repo(self, github_repo: str, branch: str) -> str:
         """Delete a branch from one repository."""

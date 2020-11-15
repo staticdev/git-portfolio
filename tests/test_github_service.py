@@ -33,8 +33,8 @@ def domain_gh_conn_settings() -> List[cs.GhConnectionSettings]:
 def domain_issue() -> i.Issue:
     """Issue fixture."""
     issue = i.Issue(
-        "my title",
-        "my body",
+        "my issue title",
+        "my issue body",
         {"testing", "refactor"},
     )
     return issue
@@ -45,8 +45,8 @@ def domain_prs() -> List[pr.PullRequest]:
     """Pull requests fixture."""
     prs = [
         pr.PullRequest(
-            "my title",
-            "my body",
+            "my pr title",
+            "my pr body",
             set(),
             False,
             "",
@@ -56,8 +56,8 @@ def domain_prs() -> List[pr.PullRequest]:
             False,
         ),
         pr.PullRequest(
-            "my title",
-            "my body",
+            "my pr title 2",
+            "my pr body 2",
             {"testing", "refactor"},
             True,
             "issue title",
@@ -449,13 +449,15 @@ def test_link_issue_success(
         issue2,
         issue3,
     ]
-    gc.GithubService(domain_gh_conn_settings[0]).link_issues(
+    pr = gc.GithubService(domain_gh_conn_settings[0]).link_issues(
         "staticdev/omg", domain_prs[1]
     )
 
-    assert domain_prs[1].body == "my body\n\nCloses #3\nCloses #5\n"
+    assert domain_prs[1].body == "my pr body 2"
+    assert pr.body == "my pr body 2\n\nCloses #3\nCloses #5\n"
     case = unittest.TestCase()
-    case.assertCountEqual(domain_prs[1].labels, {"testing", "refactor", "enhancement"})
+    case.assertCountEqual(domain_prs[1].labels, {"testing", "refactor"})
+    case.assertCountEqual(pr.labels, {"testing", "refactor", "enhancement"})
 
 
 def test_link_issue_no_link(
@@ -477,7 +479,7 @@ def test_link_issue_no_link(
         "staticdev/omg", domain_prs[1]
     )
 
-    assert domain_prs[1].body == "my body"
+    assert domain_prs[1].body == "my pr body 2"
 
 
 def test_delete_branch_from_repo_success(
