@@ -16,20 +16,29 @@ def mock_popen(mocker: MockerFixture) -> Any:
     return mock
 
 
-def test_check_git_install_success(mock_popen: MockerFixture) -> None:
+@pytest.fixture
+def mock_check_command_installed(mocker: MockerFixture) -> Any:
+    """Fixture for mocking GitUseCase.check_command_installed."""
+    return mocker.patch(
+        "git_portfolio.use_cases.git_use_case.GitUseCase.check_command_installed",
+        return_value="",
+    )
+
+
+def test_check_command_installed_success(mock_popen: MockerFixture) -> None:
     """It returns success."""
-    response = guc.GitUseCase.check_git_install()
+    response = guc.GitUseCase.check_command_installed("git")
 
     assert "" == response
 
 
-def test_check_git_install_error(mock_popen: MockerFixture) -> None:
+def test_check_command_installed_error(mock_popen: MockerFixture) -> None:
     """It returns failure with git not installed message."""
     mock_popen.side_effect = FileNotFoundError
-    response = guc.GitUseCase.check_git_install()
+    response = guc.GitUseCase.check_command_installed("git")
 
     assert (
-        "This command requires Git executable installed and on system path." == response
+        "This command requires git executable installed and on system path." == response
     )
 
 
@@ -40,11 +49,12 @@ def test_execute_success(mock_popen: MockerFixture) -> None:
     )
 
     assert bool(response) is True
-    assert response.value == "omg: checkout successful.\nomg2: checkout successful.\n"
+    assert response.value == "omg: some output\nomg2: some output\n"
 
 
 def test_execute_success_no_output(mock_popen: MockerFixture) -> None:
     """It returns success message."""
+    mock_popen.return_value.communicate.return_value = (b"", b"")
     response = guc.GitUseCase().execute(
         ["staticdev/omg", "staticdev/omg2"], "add", (".",)
     )
@@ -60,21 +70,22 @@ def test_execute_git_not_installed(mock_popen: MockerFixture) -> None:
 
     assert bool(response) is False
     assert (
-        "This command requires Git executable installed and on system path."
+        "This command requires git executable installed and on system path."
         == response.value["message"]
     )
 
 
-def test_execute_no_folder(mocker: MockerFixture, mock_popen: MockerFixture) -> None:
+def test_execute_no_folder(
+    mock_check_command_installed: MockerFixture, mock_popen: MockerFixture
+) -> None:
     """It returns that file does not exist."""
-    mock_popen.side_effect = [
-        mocker.Mock(),
-        FileNotFoundError("No such file or directory"),
-    ]
-    response = guc.GitUseCase().execute(["staticdev/notcloned"], "checkout", ("xx",))
+    mock_exception = FileNotFoundError(2, "No such file or directory")
+    mock_exception.filename = "/path/x"
+    mock_popen.side_effect = mock_exception
+    response = guc.GitUseCase().execute(["staticdev/x"], "checkout", ("xx",))
 
     assert bool(response) is True
-    assert response.value == "notcloned: No such file or directory\n"
+    assert response.value == "x: No such file or directory: /path/x\n"
 
 
 def test_execute_error_during_execution(mock_popen: MockerFixture) -> None:

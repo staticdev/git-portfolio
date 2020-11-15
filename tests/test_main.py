@@ -293,15 +293,15 @@ def test_reset_success_with_hard(
 
 
 def test_status_success(
-    mock_git_status_use_case: MockerFixture,
+    mock_git_use_case: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
     """It calls status."""
     runner.invoke(git_portfolio.__main__.main, ["status"], prog_name="gitp")
 
-    mock_git_status_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], ()
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        ["staticdev/omg"], "status", ()
     )
 
 

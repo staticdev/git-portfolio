@@ -15,7 +15,7 @@ class GitCloneUseCase:
     def __init__(self, github_service: ghs.GithubService) -> None:
         """Constructor."""
         self.github_service = github_service
-        self.err_output = guc.GitUseCase.check_git_install()
+        self.err_output = guc.GitUseCase.check_command_installed("git")
 
     def execute(
         self, git_selected_repos: List[str]

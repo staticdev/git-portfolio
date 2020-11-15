@@ -22,7 +22,6 @@ import git_portfolio.use_cases.gh_create_pr_use_case as ghcp
 import git_portfolio.use_cases.gh_delete_branch_use_case as ghdb
 import git_portfolio.use_cases.gh_merge_pr_use_case as ghmp
 import git_portfolio.use_cases.git_clone_use_case as gcuc
-import git_portfolio.use_cases.git_status_use_case as gsuc
 import git_portfolio.use_cases.git_use_case as guc
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -147,8 +146,8 @@ def reset(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @gitp_config_check
 def status(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git status` command."""
-    return gsuc.GitStatusUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, args
+    return guc.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "status", args
     )
 
 
