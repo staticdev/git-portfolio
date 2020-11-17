@@ -25,7 +25,9 @@ class ConfigInitUseCase:
         except AttributeError as ae:
             return res.ResponseFailure.build_parameters_error(f"{ae}")
         except ConnectionError:
-            return res.ResponseFailure.build_system_error()
+            return res.ResponseFailure.build_system_error(
+                "impossible to connect, please check your hostname address and token."
+            )
         repo_names = new_github_service.get_repo_names()
         config = new_github_service.get_config()
         selected_repos = p.InquirerPrompter.select_repos(repo_names)
