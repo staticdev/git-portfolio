@@ -92,4 +92,7 @@ def test_execute_connection_error(
 
     assert bool(response) is False
     assert response.type == res.ResponseFailure.SYSTEM_ERROR
-    assert response.value["message"] == "impossible to connect, please check your hostname address and token."
+    assert (
+        response.value["message"]
+        == "impossible to connect, please check your hostname address and token."
+    )
