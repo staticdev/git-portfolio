@@ -5,7 +5,11 @@ from pytest_mock import MockerFixture
 
 import git_portfolio.__main__
 import git_portfolio.domain.config as c
-import git_portfolio.response_objects as res
+import git_portfolio.responses as res
+
+
+REPO = "org/reponame"
+REPO2 = "org/reponame2"
 
 
 @pytest.fixture
@@ -19,7 +23,7 @@ def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking CONFIG_MANAGER."""
     mock = mocker.patch("git_portfolio.__main__.CONFIG_MANAGER")
     mock.config_is_empty.return_value = False
-    mock.config.github_selected_repos = ["staticdev/omg"]
+    mock.config.github_selected_repos = [REPO]
     return mock
 
 
@@ -33,7 +37,7 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
 def mock_config_init_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking ConfigInitUseCase."""
     return mocker.patch(
-        "git_portfolio.use_cases.config_init_use_case.ConfigInitUseCase", autospec=True
+        "git_portfolio.use_cases.config_init.ConfigInitUseCase", autospec=True
     )
 
 
@@ -41,7 +45,7 @@ def mock_config_init_use_case(mocker: MockerFixture) -> MockerFixture:
 def mock_config_repos_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking ConfigReposUseCase."""
     return mocker.patch(
-        "git_portfolio.use_cases.config_repos_use_case.ConfigReposUseCase",
+        "git_portfolio.use_cases.config_repos.ConfigReposUseCase",
         autospec=True,
     )
 
@@ -50,7 +54,7 @@ def mock_config_repos_use_case(mocker: MockerFixture) -> MockerFixture:
 def mock_git_clone_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GitCloneUseCase."""
     return mocker.patch(
-        "git_portfolio.use_cases.git_clone_use_case.GitCloneUseCase", autospec=True
+        "git_portfolio.use_cases.git_clone.GitCloneUseCase", autospec=True
     )
 
 
@@ -65,16 +69,23 @@ def mock_git_status_use_case(mocker: MockerFixture) -> MockerFixture:
 @pytest.fixture
 def mock_git_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GitUseCase."""
-    return mocker.patch(
-        "git_portfolio.use_cases.git_use_case.GitUseCase", autospec=True
-    )
+    return mocker.patch("git_portfolio.use_cases.git.GitUseCase", autospec=True)
 
 
 @pytest.fixture
 def mock_gh_create_issue_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GhCreateIssueUseCase."""
     return mocker.patch(
-        "git_portfolio.use_cases.gh_create_issue_use_case.GhCreateIssueUseCase",
+        "git_portfolio.use_cases.gh_create_issue.GhCreateIssueUseCase",
+        autospec=True,
+    )
+
+
+@pytest.fixture
+def mock_gh_close_issue_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GhCloseIssueUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.gh_close_issue.GhCloseIssueUseCase",
         autospec=True,
     )
 
@@ -83,7 +94,7 @@ def mock_gh_create_issue_use_case(mocker: MockerFixture) -> MockerFixture:
 def mock_gh_create_pr_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GhCreatePrUseCase."""
     return mocker.patch(
-        "git_portfolio.use_cases.gh_create_pr_use_case.GhCreatePrUseCase",
+        "git_portfolio.use_cases.gh_create_pr.GhCreatePrUseCase",
         autospec=True,
     )
 
@@ -92,7 +103,7 @@ def mock_gh_create_pr_use_case(mocker: MockerFixture) -> MockerFixture:
 def mock_gh_merge_pr_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GhMergePrUseCase."""
     return mocker.patch(
-        "git_portfolio.use_cases.gh_merge_pr_use_case.GhMergePrUseCase",
+        "git_portfolio.use_cases.gh_merge_pr.GhMergePrUseCase",
         autospec=True,
     )
 
@@ -101,7 +112,7 @@ def mock_gh_merge_pr_use_case(mocker: MockerFixture) -> MockerFixture:
 def mock_gh_delete_branch_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GhDeleteBranchUseCase."""
     return mocker.patch(
-        "git_portfolio.use_cases.gh_delete_branch_use_case.GhDeleteBranchUseCase",
+        "git_portfolio.use_cases.gh_delete_branch.GhDeleteBranchUseCase",
         autospec=True,
     )
 
@@ -135,7 +146,7 @@ def test_gitp_config_check_execute_error(
     @git_portfolio.__main__.main.command("test")
     @git_portfolio.__main__.gitp_config_check
     def _() -> res.ResponseFailure:
-        return res.ResponseFailure.build_system_error("some error msg")
+        return res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, "some error msg")
 
     result = runner.invoke(git_portfolio.__main__.main, ["test"], prog_name="gitp")
 
@@ -150,7 +161,7 @@ def test_gitp_config_check_no_repos(
     @git_portfolio.__main__.main.command("test")
     @git_portfolio.__main__.gitp_config_check
     def _() -> res.ResponseFailure:
-        return res.ResponseFailure.build_system_error("some error msg")
+        return res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, "some error msg")
 
     mock_config_manager.config_is_empty.return_value = True
     result = runner.invoke(git_portfolio.__main__.main, ["test"], prog_name="gitp")
@@ -167,7 +178,7 @@ def test_add_success(
     runner.invoke(git_portfolio.__main__.main, ["add", "."], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "add", (".",)
+        [REPO], "add", (".",)
     )
 
 
@@ -180,7 +191,7 @@ def test_checkout_success(
     runner.invoke(git_portfolio.__main__.main, ["checkout", "master"], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "checkout", ("master",)
+        [REPO], "checkout", ("master",)
     )
 
 
@@ -195,7 +206,7 @@ def test_checkout_new_branch(
     )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"],
+        [REPO],
         "checkout",
         (
             "-b",
@@ -215,7 +226,7 @@ def test_commit_success(
     )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "commit", ("-m", "message")
+        [REPO], "commit", ("-m", "message")
     )
 
 
@@ -227,9 +238,7 @@ def test_pull_success(
     """It calls pull."""
     runner.invoke(git_portfolio.__main__.main, ["pull"], prog_name="gitp")
 
-    mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "pull", ()
-    )
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "pull", ())
 
 
 def test_push_success(
@@ -243,7 +252,7 @@ def test_push_success(
     )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "push", ("origin", "master")
+        [REPO], "push", ("origin", "master")
     )
 
 
@@ -260,7 +269,7 @@ def test_push_with_extra_arguments(
     )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "push", ("--set-upstream", "origin", "new-branch")
+        [REPO], "push", ("--set-upstream", "origin", "new-branch")
     )
 
 
@@ -273,7 +282,7 @@ def test_reset_success(
     runner.invoke(git_portfolio.__main__.main, ["reset", "HEAD^"], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "reset", ("HEAD^",)
+        [REPO], "reset", ("HEAD^",)
     )
 
 
@@ -288,7 +297,7 @@ def test_reset_success_with_hard(
     )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "reset", ("--hard", "HEAD^")
+        [REPO], "reset", ("--hard", "HEAD^")
     )
 
 
@@ -300,9 +309,7 @@ def test_status_success(
     """It calls status."""
     runner.invoke(git_portfolio.__main__.main, ["status"], prog_name="gitp")
 
-    mock_git_use_case.return_value.execute.assert_called_once_with(
-        ["staticdev/omg"], "status", ()
-    )
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "status", ())
 
 
 def test_config_init_success(
@@ -331,7 +338,7 @@ def test_config_init_wrong_token(
     """It executes with token error first then succeeds."""
     config_manager = mock_config_manager.return_value
     mock_config_init_use_case(config_manager).execute.side_effect = [
-        res.ResponseFailure.build_parameters_error("message"),
+        res.ResponseFailure(res.ResponseTypes.PARAMETERS_ERROR, "message"),
         res.ResponseSuccess("success message"),
     ]
     result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
@@ -349,7 +356,7 @@ def test_config_init_connection_error(
     """It executes with connection error first then succeeds."""
     config_manager = mock_config_manager.return_value
     mock_config_init_use_case(config_manager).execute.side_effect = [
-        res.ResponseFailure.build_system_error("message"),
+        res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, "message"),
         res.ResponseSuccess("success message"),
     ]
     result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
@@ -448,9 +455,7 @@ def test_clone_success(
     github_service = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.main, ["clone"], prog_name="gitp")
 
-    mock_git_clone_use_case(github_service).execute.assert_called_once_with(
-        ["staticdev/omg"]
-    )
+    mock_git_clone_use_case(github_service).execute.assert_called_once_with([REPO])
 
 
 def test_create_issues(
@@ -460,12 +465,29 @@ def test_create_issues(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It executes gh_create_issue_use_case."""
+    """It executes gh_create_issue."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.create, ["issues"], prog_name="gitp")
 
     mock_gh_create_issue_use_case(
+        config_manager, github_service
+    ).execute.assert_called_once()
+
+
+def test_close_issues(
+    mock_gh_close_issue_use_case: MockerFixture,
+    mock_github_service: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It executes gh_close_issue."""
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    runner.invoke(git_portfolio.__main__.close, ["issues"], prog_name="gitp")
+
+    mock_gh_close_issue_use_case(
         config_manager, github_service
     ).execute.assert_called_once()
 
@@ -477,7 +499,7 @@ def test_create_prs(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It executes gh_create_pr_use_case."""
+    """It executes gh_create_pr."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     runner.invoke(git_portfolio.__main__.create, ["prs"], prog_name="gitp")
@@ -494,11 +516,11 @@ def test_merge_prs(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It executes gh_merge_pr_use_case."""
+    """It executes gh_merge_pr."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     github_service.github_username = "staticdev"
-    github_service.config = c.Config("", "abc", ["staticdev/omg"])
+    github_service.config = c.Config("", "abc", [REPO])
     runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
 
     mock_gh_merge_pr_use_case(

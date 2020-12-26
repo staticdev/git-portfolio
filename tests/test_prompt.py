@@ -9,6 +9,10 @@ import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.prompt as p
 
 
+REPO = "org/reponame"
+REPO2 = "org/reponame2"
+
+
 @pytest.fixture
 def mock_inquirer_prompt(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking inquirer.prompt."""
@@ -30,7 +34,7 @@ def test_connect_github(mock_inquirer_prompt: MockerFixture) -> None:
 def test_new_repos(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns False."""
     mock_inquirer_prompt.return_value = {"": False}
-    result = p.InquirerPrompter.new_repos(["staticdev/omg"])
+    result = p.InquirerPrompter.new_repos([REPO])
 
     assert result is False
 
@@ -39,11 +43,11 @@ def test_select_repos(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns list with repos."""
     mock_inquirer_prompt.side_effect = [
         {"github_repos": []},
-        {"github_repos": ["staticdev/omg"]},
+        {"github_repos": [REPO]},
     ]
-    result = p.InquirerPrompter.select_repos(["staticdev/omg"])
+    result = p.InquirerPrompter.select_repos([REPO])
 
-    assert result == ["staticdev/omg"]
+    assert result == [REPO]
 
 
 def test_create_issues(mock_inquirer_prompt: MockerFixture) -> None:
@@ -54,8 +58,8 @@ def test_create_issues(mock_inquirer_prompt: MockerFixture) -> None:
         "body": "my body",
         "correct": True,
     }
-    result = p.InquirerPrompter.create_issues(["staticdev/omg"])
-    expected = i.Issue("my title", "my body", {"testing", "refactor"})
+    result = p.InquirerPrompter.create_issues([REPO])
+    expected = i.Issue(0, "my title", "my body", {"testing", "refactor"})
 
     assert result == expected
 
@@ -68,8 +72,8 @@ def test_create_issues_no_labels(mock_inquirer_prompt: MockerFixture) -> None:
         "body": "my body",
         "correct": True,
     }
-    result = p.InquirerPrompter.create_issues(["staticdev/omg"])
-    expected = i.Issue("my title", "my body", set())
+    result = p.InquirerPrompter.create_issues([REPO])
+    expected = i.Issue(0, "my title", "my body", set())
 
     assert result == expected
 
@@ -81,15 +85,15 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         "body": "my body",
         "labels": "testing,refactor",
         "confirmation": True,
-        "link": "issue title",
+        "issues_title_query": "issue title",
         "inherit_labels": True,
         "head": "main",
         "base": "branch",
         "draft": False,
         "correct": True,
     }
-    result = p.InquirerPrompter.create_pull_requests(["staticdev/omg"])
-    expected = pr.PullRequest(
+    result = p.InquirerPrompter.create_pull_requests([REPO])
+    expected_pr = pr.PullRequest(
         "my title",
         "my body",
         {"testing", "refactor"},
@@ -101,7 +105,7 @@ def test_create_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         False,
     )
 
-    assert result == expected
+    assert result == expected_pr
 
 
 def test_create_pull_requests_no_labels(mock_inquirer_prompt: MockerFixture) -> None:
@@ -111,15 +115,15 @@ def test_create_pull_requests_no_labels(mock_inquirer_prompt: MockerFixture) -> 
         "body": "my body",
         "labels": "",
         "confirmation": True,
-        "link": "issue title",
+        "issues_title_query": "issue title",
         "inherit_labels": True,
         "head": "main",
         "base": "branch",
         "draft": False,
         "correct": True,
     }
-    result = p.InquirerPrompter.create_pull_requests(["staticdev/omg"])
-    expected = pr.PullRequest(
+    result = p.InquirerPrompter.create_pull_requests([REPO])
+    expected_pr = pr.PullRequest(
         "my title",
         "my body",
         set(),
@@ -131,13 +135,25 @@ def test_create_pull_requests_no_labels(mock_inquirer_prompt: MockerFixture) -> 
         False,
     )
 
+    assert result == expected_pr
+
+
+def test_close_issues(mock_inquirer_prompt: MockerFixture) -> None:
+    """It returns issue query title."""
+    mock_inquirer_prompt.return_value = {
+        "issues_title_query": "issue title",
+        "correct": True,
+    }
+    result = p.InquirerPrompter.close_issues([REPO])
+    expected = "issue title"
+
     assert result == expected
 
 
 def test_delete_branches(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns branch name."""
     mock_inquirer_prompt.return_value = {"branch": "branch name", "correct": True}
-    result = p.InquirerPrompter.delete_branches(["staticdev/omg"])
+    result = p.InquirerPrompter.delete_branches([REPO])
     expected = "branch name"
 
     assert result == expected
@@ -152,7 +168,7 @@ def test_merge_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         "delete_branch": True,
         "correct": True,
     }
-    result = p.InquirerPrompter.merge_pull_requests("staticdev", ["staticdev/omg"])
+    result = p.InquirerPrompter.merge_pull_requests("staticdev", [REPO])
     expected = prm.PullRequestMerge("branch", "main", "org name", True)
 
     assert result == expected

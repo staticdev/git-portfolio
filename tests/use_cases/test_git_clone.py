@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from pytest_mock import MockerFixture
 
-from git_portfolio.use_cases import git_clone_use_case as gcuc
+from git_portfolio.use_cases import git_clone as gcuc
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
 def mock_check_command_installed(mocker: MockerFixture) -> Any:
     """Fixture for mocking GitUseCase.check_command_installed."""
     return mocker.patch(
-        "git_portfolio.use_cases.git_use_case.GitUseCase.check_command_installed",
+        "git_portfolio.use_cases.git.GitUseCase.check_command_installed",
         return_value="",
     )
 

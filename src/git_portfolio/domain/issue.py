@@ -7,6 +7,7 @@ from typing import Set
 class Issue:
     """Issue class."""
 
+    number: int
     title: str
     body: str
     labels: Set[str]

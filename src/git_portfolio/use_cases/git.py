@@ -6,7 +6,7 @@ from typing import List
 from typing import Tuple
 from typing import Union
 
-import git_portfolio.response_objects as res
+import git_portfolio.responses as res
 
 
 class GitUseCase:
@@ -52,7 +52,7 @@ class GitUseCase:
             Union[res.ResponseFailure, res.ResponseSuccess]: final result.
         """
         if self.err_output:
-            return res.ResponseFailure.build_system_error(self.err_output)
+            return res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, self.err_output)
         output = ""
         cwd = pathlib.Path().absolute()
         for repo_name in git_selected_repos:

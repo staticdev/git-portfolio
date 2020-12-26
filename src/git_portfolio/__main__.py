@@ -14,15 +14,17 @@ import git_portfolio.domain.config as c
 import git_portfolio.domain.gh_connection_settings as cs
 import git_portfolio.github_service as ghs
 import git_portfolio.prompt as p
-import git_portfolio.response_objects as res
-import git_portfolio.use_cases.config_init_use_case as ci
-import git_portfolio.use_cases.config_repos_use_case as cr
-import git_portfolio.use_cases.gh_create_issue_use_case as ghci
-import git_portfolio.use_cases.gh_create_pr_use_case as ghcp
-import git_portfolio.use_cases.gh_delete_branch_use_case as ghdb
-import git_portfolio.use_cases.gh_merge_pr_use_case as ghmp
-import git_portfolio.use_cases.git_clone_use_case as gcuc
-import git_portfolio.use_cases.git_use_case as guc
+import git_portfolio.request_objects.issue_list as il
+import git_portfolio.responses as res
+import git_portfolio.use_cases.config_init as ci
+import git_portfolio.use_cases.config_repos as cr
+import git_portfolio.use_cases.gh_close_issue as ghcli
+import git_portfolio.use_cases.gh_create_issue as ghci
+import git_portfolio.use_cases.gh_create_pr as ghcp
+import git_portfolio.use_cases.gh_delete_branch as ghdb
+import git_portfolio.use_cases.gh_merge_pr as ghmp
+import git_portfolio.use_cases.git as git
+import git_portfolio.use_cases.git_clone as gcuc
 
 F = TypeVar("F", bound=Callable[..., Any])
 CONFIG_MANAGER = cm.ConfigManager()
@@ -67,15 +69,17 @@ def _get_github_service(config: c.Config) -> ghs.GithubService:
     try:
         return ghs.GithubService(settings)
     except AttributeError:
-        response = res.ResponseFailure.build_parameters_error(
-            "Wrong GitHub permissions. Please check your token."
+        response = res.ResponseFailure(
+            res.ResponseTypes.PARAMETERS_ERROR,
+            "Wrong GitHub permissions. Please check your token.",
         )
     except ConnectionError:
-        response = res.ResponseFailure.build_system_error(
+        response = res.ResponseFailure(
+            res.ResponseTypes.SYSTEM_ERROR,
             (
                 "Unable to reach server. Please check you network and credentials and "
                 "try again."
-            )
+            ),
         )
     _echo_outputs(response)
     raise click.ClickException("")
@@ -86,7 +90,7 @@ def _get_github_service(config: c.Config) -> ghs.GithubService:
 @gitp_config_check
 def add(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git add` command."""
-    return guc.GitUseCase().execute(
+    return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "add", args
     )
 
@@ -96,7 +100,7 @@ def add(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @gitp_config_check
 def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git checkout` command."""
-    return guc.GitUseCase().execute(
+    return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "checkout", args
     )
 
@@ -106,7 +110,7 @@ def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess
 @gitp_config_check
 def commit(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git commit` command."""
-    return guc.GitUseCase().execute(
+    return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "commit", args
     )
 
@@ -116,7 +120,7 @@ def commit(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @gitp_config_check
 def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git pull` command."""
-    return guc.GitUseCase().execute(
+    return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "pull", args
     )
 
@@ -126,7 +130,7 @@ def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @gitp_config_check
 def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git push` command."""
-    return guc.GitUseCase().execute(
+    return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "push", args
     )
 
@@ -136,7 +140,7 @@ def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @gitp_config_check
 def reset(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git reset` command."""
-    return guc.GitUseCase().execute(
+    return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "reset", args
     )
 
@@ -146,7 +150,7 @@ def reset(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @gitp_config_check
 def status(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git status` command."""
-    return guc.GitUseCase().execute(
+    return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "status", args
     )
 
@@ -169,11 +173,10 @@ def merge() -> None:
     pass
 
 
-# TODO
-# @click.group("close")
-# def close() -> None:
-#     """Close command group."""
-#     pass
+@click.group("close")
+def close() -> None:
+    """Close command group."""
+    pass
 
 
 @click.group("delete")
@@ -193,7 +196,7 @@ def config_init() -> None:
         _echo_outputs(response)
         if bool(response):
             break
-        elif response.type == res.ResponseFailure.SYSTEM_ERROR:
+        elif response.type == res.ResponseTypes.SYSTEM_ERROR:
             click.ClickException("")
 
 
@@ -235,6 +238,26 @@ def create_issues() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     return ghci.GhCreateIssueUseCase(CONFIG_MANAGER, github_service).execute(issue)
 
 
+@close.command("issues")
+@gitp_config_check
+def close_issues() -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """Batch close issues on GitHub."""
+    github_service = _get_github_service(CONFIG_MANAGER.config)
+    issues_title_query = p.InquirerPrompter.close_issues(
+        CONFIG_MANAGER.config.github_selected_repos
+    )
+    request_issues = il.build_issue_list_request(
+        filters={
+            "obj__eq": "issue",
+            "state__eq": "open",
+            "title__contains": issues_title_query,
+        }
+    )
+    return ghcli.GhCloseIssueUseCase(CONFIG_MANAGER, github_service).execute(
+        request_issues
+    )
+
+
 @create.command("prs")
 @gitp_config_check
 def create_prs() -> Union[res.ResponseFailure, res.ResponseSuccess]:
@@ -243,7 +266,16 @@ def create_prs() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     pr = p.InquirerPrompter.create_pull_requests(
         CONFIG_MANAGER.config.github_selected_repos
     )
-    return ghcp.GhCreatePrUseCase(CONFIG_MANAGER, github_service).execute(pr)
+    request_issues = il.build_issue_list_request(
+        filters={
+            "obj__eq": "issue",
+            "state__eq": "open",
+            "title__contains": pr.issues_title_query,
+        }
+    )
+    return ghcp.GhCreatePrUseCase(CONFIG_MANAGER, github_service).execute(
+        pr, request_issues
+    )
 
 
 @merge.command("prs")
@@ -271,7 +303,7 @@ def delete_branches() -> Union[res.ResponseFailure, res.ResponseSuccess]:
 
 main.add_command(configure)
 main.add_command(create)
-# main.add_command(close)
+main.add_command(close)
 main.add_command(merge)
 main.add_command(delete)
 

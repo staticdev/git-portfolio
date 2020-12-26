@@ -11,6 +11,13 @@ import git_portfolio.domain.issue as i
 import git_portfolio.domain.pull_request as pr
 import git_portfolio.domain.pull_request_merge as mpr
 import git_portfolio.github_service as gc
+import git_portfolio.request_objects.issue_list as il
+
+
+REPO = "org/reponame"
+REPO2 = "org/reponame2"
+INVALID_REQUEST_ISSUES = il.IssueListInvalidRequest()
+NO_FILTER_REQUEST_ISSUES = il.IssueListValidRequest()
 
 
 @pytest.fixture
@@ -30,14 +37,21 @@ def domain_gh_conn_settings() -> List[cs.GhConnectionSettings]:
 
 
 @pytest.fixture
-def domain_issue() -> i.Issue:
-    """Issue fixture."""
-    issue = i.Issue(
-        "my issue title",
-        "my issue body",
-        {"testing", "refactor"},
-    )
-    return issue
+def domain_issues() -> List[i.Issue]:
+    """Issues fixture."""
+    issues = [
+        i.Issue(
+            0,
+            "my issue title",
+            "my issue body",
+            {"testing", "refactor"},
+        ),
+        i.Issue(2, "also doesnt match title", "body2", set()),
+        i.Issue(4, "doesnt match title", "body4", {"dontinherit"}),
+        i.Issue(3, "issue title", "body3", set()),
+        i.Issue(5, "pr match issue title", "body5", {"enhancement", "testing"}),
+    ]
+    return issues
 
 
 @pytest.fixture
@@ -85,10 +99,13 @@ def domain_branch() -> str:
 @pytest.fixture
 def mock_github3_login(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking github3.login."""
+    mock_repo = mocker.Mock(full_name=REPO)
+    mock_repo2 = mocker.Mock(full_name=REPO2)
+
     mock = mocker.patch("github3.login", autospec=True)
     mock.return_value.repositories.return_value = [
-        mocker.Mock(full_name="staticdev/nope"),
-        mocker.Mock(full_name="staticdev/omg"),
+        mock_repo2,
+        mock_repo,
     ]
     return mock
 
@@ -179,7 +196,7 @@ def test_get_repo_no_repo(
     mock.return_value.repositories.return_value = []
 
     with pytest.raises(NameError):
-        gc.GithubService(domain_gh_conn_settings[0])._get_repo("staticdev/omg")
+        gc.GithubService(domain_gh_conn_settings[0])._get_repo(REPO)
 
 
 def test_get_repo_url_success(
@@ -188,8 +205,8 @@ def test_get_repo_url_success(
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns url."""
-    expected = "git@github.com:staticdev/omg.git"
-    result = gc.GithubService(domain_gh_conn_settings[0]).get_repo_url("staticdev/omg")
+    expected = f"git@github.com:{REPO}.git"
+    result = gc.GithubService(domain_gh_conn_settings[0]).get_repo_url(REPO)
 
     assert result == expected
 
@@ -202,7 +219,7 @@ def test_get_repo_url_no_repo(
     mock.return_value.repositories.return_value = []
 
     with pytest.raises(NameError):
-        gc.GithubService(domain_gh_conn_settings[0]).get_repo_url("staticdev/omg")
+        gc.GithubService(domain_gh_conn_settings[0]).get_repo_url(REPO)
 
 
 def test_get_repo_names(
@@ -210,7 +227,7 @@ def test_get_repo_names(
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns list of strings."""
-    expected = ["staticdev/nope", "staticdev/omg"]
+    expected = [REPO2, REPO]
     result = gc.GithubService(domain_gh_conn_settings[0]).get_repo_names()
 
     assert result == expected
@@ -231,21 +248,21 @@ def test_get_username(
 def test_create_issue_from_repo_success(
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_issue: i.Issue,
+    domain_issues: List[i.Issue],
 ) -> None:
     """It succeeds."""
     response = gc.GithubService(domain_gh_conn_settings[0]).create_issue_from_repo(
-        "staticdev/omg", domain_issue
+        REPO, domain_issues[0]
     )
 
-    assert response == "staticdev/omg: create issue successful.\n"
+    assert response == f"{REPO}: create issue successful.\n"
 
 
 def test_create_issue_from_repo_fork(
     mocker: MockerFixture,
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_issue: i.Issue,
+    domain_issues: List[i.Issue],
 ) -> None:
     """It gives a message error telling it is a fork."""
     exception_mock = mocker.Mock()
@@ -255,20 +272,17 @@ def test_create_issue_from_repo_fork(
     repo = mock_github3_login.return_value.repositories.return_value[1]
     repo.create_issue.side_effect = github3.exceptions.ClientError(exception_mock)
     response = gc.GithubService(domain_gh_conn_settings[0]).create_issue_from_repo(
-        "staticdev/omg", domain_issue
+        REPO, domain_issues[0]
     )
 
-    assert (
-        response
-        == "staticdev/omg: Issues are disabled for this repo. It may be a fork.\n"
-    )
+    assert response == f"{REPO}: Issues are disabled for this repo. It may be a fork.\n"
 
 
 def test_create_issue_from_repo_other_error(
     mocker: MockerFixture,
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_issue: i.Issue,
+    domain_issues: List[i.Issue],
 ) -> None:
     """It gives the message error returned from the API."""
     exception_mock = mocker.Mock()
@@ -276,10 +290,166 @@ def test_create_issue_from_repo_other_error(
     repo = mock_github3_login.return_value.repositories.return_value[1]
     repo.create_issue.side_effect = github3.exceptions.ClientError(exception_mock)
     response = gc.GithubService(domain_gh_conn_settings[0]).create_issue_from_repo(
-        "staticdev/omg", domain_issue
+        REPO, domain_issues[0]
     )
 
-    assert response == "staticdev/omg: returned message.\n"
+    assert response == f"{REPO}: returned message.\n"
+
+
+def test_list_issues_from_repo_title_filter(
+    mocker: MockerFixture,
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It succeeds."""
+    label1 = mocker.Mock()
+    label1.name = "dontinherit"
+    label2 = mocker.Mock()
+    label2.name = "enhancement"
+    label3 = mocker.Mock()
+    label3.name = "testing"
+
+    issue1 = mocker.Mock(title="issue title", number=3)
+    issue1.labels.return_value = []
+    issue2 = mocker.Mock(title="doesnt match title", number=4)
+    issue2.labels.return_value = [label1]
+    issue3 = mocker.Mock(title="pr match issue title", number=5)
+    issue3.labels.return_value = [label2, label3]
+
+    repo = mock_github3_login.return_value.repositories.return_value[1]
+    repo.issues.return_value = [
+        issue1,
+        issue2,
+        issue3,
+    ]
+
+    title_filtered_request = il.IssueListValidRequest(
+        filters={"state__eq": "open", "title__contains": "issue title"}
+    )
+
+    response = gc.GithubService(domain_gh_conn_settings[0]).list_issues_from_repo(
+        REPO, title_filtered_request
+    )
+
+    assert len(response) == 2
+    assert response[0].number == domain_issues[3].number
+    assert response[0].title == domain_issues[3].title
+    assert response[1].number == domain_issues[4].number
+    assert response[1].title == domain_issues[4].title
+
+
+@pytest.mark.parametrize("value", ["issue", "pr"])
+def test_list_issues_from_repo_obj_filter(
+    value: str,
+    mocker: MockerFixture,
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It succeeds."""
+    label1 = mocker.Mock()
+    label1.name = "enhancement"
+    label2 = mocker.Mock()
+    label2.name = "testing"
+
+    issue1 = mocker.Mock(title="issue title", number=3, pull_request_urls=None)
+    issue1.labels.return_value = []
+    issue2 = mocker.Mock(
+        title="pr match issue title", number=5, pull_request_urls="something"
+    )
+    issue2.labels.return_value = [label1, label2]
+
+    repo = mock_github3_login.return_value.repositories.return_value[1]
+    repo.issues.return_value = [
+        issue1,
+        issue2,
+    ]
+
+    obj_filtered_request = il.IssueListValidRequest(
+        filters={"state__eq": "open", "obj__eq": value}
+    )
+
+    response = gc.GithubService(domain_gh_conn_settings[0]).list_issues_from_repo(
+        REPO, obj_filtered_request
+    )
+
+    assert len(response) == 1
+    if value == "issue":
+        assert response[0].number == domain_issues[3].number
+        assert response[0].title == domain_issues[3].title
+    elif value == "pr":
+        assert response[0].number == domain_issues[4].number
+        assert response[0].title == domain_issues[4].title
+
+
+def test_list_issues_from_repo_invalid_request(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It returns empty result."""
+    response = gc.GithubService(domain_gh_conn_settings[0]).list_issues_from_repo(
+        REPO, INVALID_REQUEST_ISSUES
+    )
+
+    assert response == []
+
+
+def test_list_issues_from_repo_no_filter_request(
+    mocker: MockerFixture,
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It returns empty result."""
+    issue1 = mocker.Mock(title="issue title", number=3)
+    issue1.labels.return_value = []
+    issue2 = mocker.Mock(title="doesnt match title", number=4)
+    issue2.labels.return_value = []
+    repo = mock_github3_login.return_value.repositories.return_value[1]
+    repo.issues.return_value = [
+        issue1,
+        issue2,
+    ]
+
+    response = gc.GithubService(domain_gh_conn_settings[0]).list_issues_from_repo(
+        REPO, NO_FILTER_REQUEST_ISSUES
+    )
+
+    assert len(response) == 2
+    assert response[0].number == domain_issues[3].number
+    assert response[1].number == domain_issues[2].number
+    assert response[0].title == domain_issues[3].title
+    assert response[1].title == domain_issues[2].title
+
+
+def test_close_issues_from_repo_success(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It succeeds."""
+    mock_github3_login.return_value.issue().is_closed.return_value = False
+    response = gc.GithubService(domain_gh_conn_settings[0]).close_issues_from_repo(
+        REPO, domain_issues
+    )
+
+    assert response == f"{REPO}: close issues successful.\n"
+
+
+def test_close_issues_from_repo_already_closed(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It succeeds."""
+    mock_github3_login.return_value.issue().is_closed.return_value = True
+    response = gc.GithubService(domain_gh_conn_settings[0]).close_issues_from_repo(
+        REPO, domain_issues
+    )
+
+    assert response == f"{REPO}: close issues successful.\n"
 
 
 def test_create_pull_request_from_repo_success(
@@ -290,9 +460,9 @@ def test_create_pull_request_from_repo_success(
     """It succeeds."""
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo("staticdev/omg", domain_prs[0])
+    ).create_pull_request_from_repo(REPO, domain_prs[0])
 
-    assert response == "staticdev/omg: create PR successful.\n"
+    assert response == f"{REPO}: create PR successful.\n"
 
 
 def test_create_pull_request_from_repo_with_labels(
@@ -303,9 +473,9 @@ def test_create_pull_request_from_repo_with_labels(
     """It succeeds."""
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
+    ).create_pull_request_from_repo(REPO, domain_prs[1])
 
-    assert response == "staticdev/omg: create PR successful.\n"
+    assert response == f"{REPO}: create PR successful.\n"
 
 
 # Details on mocking exception constructor at
@@ -332,9 +502,9 @@ def test_create_pull_request_from_repo_invalid_branch(
     repo.create_pull.side_effect = github3.exceptions.UnprocessableEntity
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
+    ).create_pull_request_from_repo(REPO, domain_prs[1])
 
-    assert response == "staticdev/omg: Validation Failed. Invalid field head.\n"
+    assert response == f"{REPO}: Validation Failed. Invalid field head.\n"
 
 
 @pytest.mark.e2e
@@ -357,9 +527,9 @@ def test_create_pull_request_from_repo_invalid_branch_unpatched_exception(
     )
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
+    ).create_pull_request_from_repo(REPO, domain_prs[1])
 
-    assert response == "staticdev/omg: Validation Failed. Invalid field head.\n"
+    assert response == f"{REPO}: Validation Failed. Invalid field head.\n"
 
 
 # Details on mocking exception constructor at
@@ -386,11 +556,10 @@ def test_create_pull_request_from_repo_no_commits(
     repo.create_pull.side_effect = github3.exceptions.UnprocessableEntity
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
+    ).create_pull_request_from_repo(REPO, domain_prs[1])
 
     assert response == (
-        "staticdev/omg: Validation Failed. No commits between master and "
-        "new-branch.\n"
+        f"{REPO}: Validation Failed. No commits between master and " "new-branch.\n"
     )
 
 
@@ -414,43 +583,22 @@ def test_create_pull_request_from_repo_no_commits_unpatched_exception(
     )
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo("staticdev/omg", domain_prs[1])
+    ).create_pull_request_from_repo(REPO, domain_prs[1])
 
     assert response == (
-        "staticdev/omg: Validation Failed. No commits between master and "
-        "new-branch.\n"
+        f"{REPO}: Validation Failed. No commits between master and " "new-branch.\n"
     )
 
 
 def test_link_issue_success(
-    mocker: MockerFixture,
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    mock_github3_login: MockerFixture,
+    domain_issues: List[i.Issue],
     domain_prs: List[pr.PullRequest],
+    mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
-    label1 = mocker.Mock()
-    label1.name = "dontinherit"
-    label2 = mocker.Mock()
-    label2.name = "enhancement"
-    label3 = mocker.Mock()
-    label3.name = "testing"
-
-    issue1 = mocker.Mock(title="issue title", number=3)
-    issue1.labels.return_value = []
-    issue2 = mocker.Mock(title="doesnt match title", number=4)
-    issue2.labels.return_value = [label1]
-    issue3 = mocker.Mock(title="match issue title", number=5)
-    issue3.labels.return_value = [label2, label3]
-
-    repo = mock_github3_login.return_value.repositories.return_value[1]
-    repo.issues.return_value = [
-        issue1,
-        issue2,
-        issue3,
-    ]
     pr = gc.GithubService(domain_gh_conn_settings[0]).link_issues(
-        "staticdev/omg", domain_prs[1]
+        domain_prs[1], domain_issues[3:]
     )
 
     assert domain_prs[1].body == "my pr body 2"
@@ -461,23 +609,13 @@ def test_link_issue_success(
 
 
 def test_link_issue_no_link(
-    mocker: MockerFixture,
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    mock_github3_login: MockerFixture,
+    domain_issues: List[i.Issue],
     domain_prs: List[pr.PullRequest],
+    mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds without any linked issue."""
-    issue1 = mocker.Mock(title="doesnt match title", number=1)
-    issue2 = mocker.Mock(title="also doesnt match title", number=2)
-
-    repo = mock_github3_login.return_value.repositories.return_value[1]
-    repo.issues.return_value = [
-        issue1,
-        issue2,
-    ]
-    gc.GithubService(domain_gh_conn_settings[0]).link_issues(
-        "staticdev/omg", domain_prs[1]
-    )
+    gc.GithubService(domain_gh_conn_settings[0]).link_issues(domain_prs[1], [])
 
     assert domain_prs[1].body == "my pr body 2"
 
@@ -490,10 +628,10 @@ def test_delete_branch_from_repo_success(
 ) -> None:
     """It succeeds."""
     response = gc.GithubService(domain_gh_conn_settings[0]).delete_branch_from_repo(
-        "staticdev/omg", domain_branch
+        REPO, domain_branch
     )
 
-    assert response == "staticdev/omg: delete branch successful.\n"
+    assert response == f"{REPO}: delete branch successful.\n"
 
 
 def test_delete_branch_from_repo_branch_not_found(
@@ -517,10 +655,10 @@ def test_delete_branch_from_repo_branch_not_found(
     repo.ref.side_effect = github3.exceptions.NotFoundError
 
     response = gc.GithubService(domain_gh_conn_settings[0]).delete_branch_from_repo(
-        "staticdev/omg", domain_branch
+        REPO, domain_branch
     )
 
-    assert response == "staticdev/omg: Not found.\n"
+    assert response == f"{REPO}: Not found.\n"
 
 
 def test_merge_pull_request_from_repo_success(
@@ -534,9 +672,9 @@ def test_merge_pull_request_from_repo_success(
     repo.pull_requests.return_value = [mocker.Mock()]
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
+    ).merge_pull_request_from_repo(REPO, domain_mpr)
 
-    assert response == "staticdev/omg: merge PR successful.\n"
+    assert response == f"{REPO}: merge PR successful.\n"
 
 
 def test_merge_pull_request_from_repo_error_merging() -> None:
@@ -554,9 +692,9 @@ def test_merge_pull_request_from_repo_not_found(
     repo.pull_requests.return_value = []
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
+    ).merge_pull_request_from_repo(REPO, domain_mpr)
 
-    assert response == "staticdev/omg: no open PR found for branch:main.\n"
+    assert response == f"{REPO}: no open PR found for branch:main.\n"
 
 
 def test_merge_pull_request_from_repo_ambiguous(
@@ -570,6 +708,6 @@ def test_merge_pull_request_from_repo_ambiguous(
     repo.pull_requests.return_value = [mocker.Mock(), mocker.Mock()]
     response = gc.GithubService(
         domain_gh_conn_settings[0]
-    ).merge_pull_request_from_repo("staticdev/omg", domain_mpr)
+    ).merge_pull_request_from_repo(REPO, domain_mpr)
 
-    assert response == "staticdev/omg: unexpected number of PRs for branch:main.\n"
+    assert response == f"{REPO}: unexpected number of PRs for branch:main.\n"

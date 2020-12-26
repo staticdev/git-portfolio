@@ -4,8 +4,8 @@ from typing import Union
 import git_portfolio.config_manager as cm
 import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.github_service as ghs
-import git_portfolio.response_objects as res
-import git_portfolio.use_cases.gh_delete_branch_use_case as dbr
+import git_portfolio.responses as res
+import git_portfolio.use_cases.gh_delete_branch as dbr
 
 
 class GhMergePrUseCase:

@@ -6,13 +6,20 @@ from typing import Dict
 from typing import Optional
 from typing import Union
 
+import git_portfolio.request_objects.issue_list as il
+
+
+class ResponseTypes:
+    """Response types class."""
+
+    PARAMETERS_ERROR = "ParametersError"
+    RESOURCE_ERROR = "ResourceError"
+    SYSTEM_ERROR = "SystemError"
+    SUCCESS = "Success"
+
 
 class ResponseFailure:
     """Response failure class."""
-
-    RESOURCE_ERROR = "ResourceError"
-    PARAMETERS_ERROR = "ParametersError"
-    SYSTEM_ERROR = "SystemError"
 
     def __init__(self, type_: str, message: Union[str, Exception, None]) -> None:
         """Constructor."""
@@ -45,38 +52,25 @@ class ResponseFailure:
         """Bool return for success."""
         return False
 
-    @classmethod
-    def build_resource_error(
-        cls, message: Union[str, Exception, None] = None
-    ) -> ResponseFailure:
-        """Build a ResponseFailure with type resource error."""
-        return cls(cls.RESOURCE_ERROR, message)
-
-    @classmethod
-    def build_system_error(
-        cls, message: Union[str, Exception, None] = None
-    ) -> ResponseFailure:
-        """Build a ResponseFailure with type system error."""
-        return cls(cls.SYSTEM_ERROR, message)
-
-    @classmethod
-    def build_parameters_error(
-        cls, message: Union[str, Exception, None] = None
-    ) -> ResponseFailure:
-        """Build a ResponseFailure with type parameters error."""
-        return cls(cls.PARAMETERS_ERROR, message)
-
 
 class ResponseSuccess:
     """Response success class."""
 
-    SUCCESS = "Success"
-
     def __init__(self, value: Any = None) -> None:
         """Constructor."""
-        self.type = self.SUCCESS
+        self.type = ResponseTypes.SUCCESS
         self.value = value
 
     def __bool__(self) -> bool:
         """Bool return for success."""
         return True
+
+
+def build_response_from_invalid_request(
+    invalid_request: il.IssueListInvalidRequest,
+) -> ResponseFailure:
+    """Create response with error messages."""
+    message = "\n".join(
+        [f"{err['parameter']}: {err['message']}" for err in invalid_request.errors]
+    )
+    return ResponseFailure(ResponseTypes.PARAMETERS_ERROR, message)

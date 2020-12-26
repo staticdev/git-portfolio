@@ -4,7 +4,7 @@ from typing import Union
 
 import git_portfolio.config_manager as cm
 import git_portfolio.domain.gh_connection_settings as cs
-import git_portfolio.response_objects as res
+import git_portfolio.responses as res
 
 
 class ConfigReposUseCase:

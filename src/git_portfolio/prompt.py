@@ -1,5 +1,6 @@
 """User prompting module."""
 from typing import Any
+from typing import cast
 from typing import List
 
 import inquirer
@@ -97,10 +98,39 @@ class InquirerPrompter:
             if answers["labels"]
             else set()
         )
-        return i.Issue(answers["title"], answers["body"], labels)
+        return i.Issue(0, answers["title"], answers["body"], labels)
 
     @staticmethod
-    def create_pull_requests(github_selected_repos: List[str]) -> pr.PullRequest:
+    def close_issues(
+        github_selected_repos: List[str],
+    ) -> str:
+        """Prompt questions to close issues."""
+        questions = [
+            inquirer.Text(
+                "issues_title_query",
+                message="Write an issue title or part of it",
+                validate=val.not_empty_validation,
+            ),
+            inquirer.Confirm(
+                "correct",
+                message=(
+                    "Confirm closing issue(s) for the project(s) "
+                    f"{github_selected_repos}. Continue?"
+                ),
+                default=False,
+            ),
+        ]
+        correct = False
+        while not correct:
+            answers = inquirer.prompt(questions)
+            correct = answers["correct"]
+
+        return cast(str, answers["issues_title_query"])
+
+    @staticmethod
+    def create_pull_requests(
+        github_selected_repos: List[str],
+    ) -> pr.PullRequest:
         """Prompt questions to create pull requests."""
         questions = [
             inquirer.Text(
@@ -130,7 +160,7 @@ class InquirerPrompter:
                 default=False,
             ),
             inquirer.Text(
-                "link",
+                "issues_title_query",
                 message="Write issue title (or part of it)",
                 default="",
                 validate=val.not_empty_validation,
@@ -166,7 +196,7 @@ class InquirerPrompter:
             answers["body"],
             labels,
             answers["confirmation"],
-            answers["link"],
+            answers["issues_title_query"],
             answers["inherit_labels"],
             answers["head"],
             answers["base"],
@@ -174,7 +204,7 @@ class InquirerPrompter:
         )
 
     @staticmethod
-    def delete_branches(github_selected_repos: List[str]) -> Any:
+    def delete_branches(github_selected_repos: List[str]) -> str:
         """Prompt questions to delete branches."""
         questions = [
             inquirer.Text(
@@ -195,7 +225,7 @@ class InquirerPrompter:
         while not correct:
             answers = inquirer.prompt(questions)
             correct = answers["correct"]
-        return answers["branch"]
+        return cast(str, answers["branch"])
 
     @staticmethod
     def merge_pull_requests(

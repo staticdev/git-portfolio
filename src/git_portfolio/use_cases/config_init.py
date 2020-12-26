@@ -5,8 +5,8 @@ import git_portfolio.config_manager as cm
 import git_portfolio.domain.gh_connection_settings as gcs
 import git_portfolio.github_service as ghs
 import git_portfolio.prompt as p
-import git_portfolio.response_objects as res
-import git_portfolio.use_cases.config_repos_use_case as cr
+import git_portfolio.responses as res
+import git_portfolio.use_cases.config_repos as cr
 
 
 class ConfigInitUseCase:
@@ -23,10 +23,11 @@ class ConfigInitUseCase:
         try:
             new_github_service = ghs.GithubService(request)
         except AttributeError as ae:
-            return res.ResponseFailure.build_parameters_error(f"{ae}")
+            return res.ResponseFailure(res.ResponseTypes.PARAMETERS_ERROR, f"{ae}")
         except ConnectionError:
-            return res.ResponseFailure.build_system_error(
-                "impossible to connect, please check your hostname address and token."
+            return res.ResponseFailure(
+                res.ResponseTypes.SYSTEM_ERROR,
+                "impossible to connect, please check your hostname address and token.",
             )
         repo_names = new_github_service.get_repo_names()
         config = new_github_service.get_config()

@@ -5,8 +5,8 @@ from typing import List
 from typing import Union
 
 import git_portfolio.github_service as ghs
-import git_portfolio.response_objects as res
-import git_portfolio.use_cases.git_use_case as guc
+import git_portfolio.responses as res
+import git_portfolio.use_cases.git as git
 
 
 class GitCloneUseCase:
@@ -15,7 +15,7 @@ class GitCloneUseCase:
     def __init__(self, github_service: ghs.GithubService) -> None:
         """Constructor."""
         self.github_service = github_service
-        self.err_output = guc.GitUseCase.check_command_installed("git")
+        self.err_output = git.GitUseCase.check_command_installed("git")
 
     def execute(
         self, git_selected_repos: List[str]
@@ -30,7 +30,7 @@ class GitCloneUseCase:
             str: error output.
         """
         if self.err_output:
-            return res.ResponseFailure.build_system_error(self.err_output)
+            return res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, self.err_output)
         output = ""
         cwd = pathlib.Path().absolute()
         for repo_name in git_selected_repos:

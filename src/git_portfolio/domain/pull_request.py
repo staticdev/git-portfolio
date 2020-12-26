@@ -11,7 +11,7 @@ class PullRequest:
     body: str
     labels: Set[str]
     link_issues: bool
-    link: str
+    issues_title_query: str
     inherit_labels: bool
     head: str
     base: str

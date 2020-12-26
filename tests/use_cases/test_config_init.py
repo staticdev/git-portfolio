@@ -3,8 +3,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 import git_portfolio.domain.gh_connection_settings as cs
-import git_portfolio.response_objects as res
-import git_portfolio.use_cases.config_init_use_case as ci
+import git_portfolio.responses as res
+import git_portfolio.use_cases.config_init as ci
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def mock_prompt_inquirer_prompter(mocker: MockerFixture) -> MockerFixture:
 def mock_config_repos_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking ConfigReposUseCase."""
     return mocker.patch(
-        "git_portfolio.use_cases.config_repos_use_case.ConfigReposUseCase",
+        "git_portfolio.use_cases.config_repos.ConfigReposUseCase",
         autospec=True,
     )
 
@@ -74,7 +74,7 @@ def test_execute_attribute_error(
     response = ci.ConfigInitUseCase(config_manager).execute(domain_gh_conn_settings)
 
     assert bool(response) is False
-    assert response.type == res.ResponseFailure.PARAMETERS_ERROR
+    assert response.type == res.ResponseTypes.PARAMETERS_ERROR
     assert response.value["message"] == "msg"
 
 
@@ -91,7 +91,7 @@ def test_execute_connection_error(
     response = ci.ConfigInitUseCase(config_manager).execute(domain_gh_conn_settings)
 
     assert bool(response) is False
-    assert response.type == res.ResponseFailure.SYSTEM_ERROR
+    assert response.type == res.ResponseTypes.SYSTEM_ERROR
     assert (
         response.value["message"]
         == "impossible to connect, please check your hostname address and token."

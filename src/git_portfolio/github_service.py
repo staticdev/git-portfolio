@@ -10,6 +10,7 @@ import git_portfolio.domain.gh_connection_settings as cs
 import git_portfolio.domain.issue as i
 import git_portfolio.domain.pull_request as pr
 import git_portfolio.domain.pull_request_merge as prm
+import git_portfolio.request_objects.issue_list as il
 
 
 class GithubService:
@@ -18,24 +19,24 @@ class GithubService:
     def __init__(self, github_config: cs.GhConnectionSettings) -> None:
         """Constructor."""
         self.config = github_config
-        self.connection = self._get_connection(self.config)
+        self.connection = self._get_connection()
         self.user = self._test_connection(self.connection)
         self.repos = self.connection.repositories()
 
-    def _get_connection(
-        self, github_config: cs.GhConnectionSettings
-    ) -> Union[github3.GitHub, github3.GitHubEnterprise]:
+    def _get_connection(self) -> Union[github3.GitHub, github3.GitHubEnterprise]:
         """Get Github connection, create one if does not exist."""
+        if hasattr(self, "connection"):
+            return self.connection
+
         # GitHub Enterprise
-        if github_config.hostname:
-            base_url = f"https://{github_config.hostname}/api/v3"
-            self.connection = github3.enterprise_login(
-                url=base_url, token=github_config.access_token
+        if self.config.hostname:
+            base_url = f"https://{self.config.hostname}/api/v3"
+            return github3.enterprise_login(
+                url=base_url, token=self.config.access_token
             )
         # GitHub.com
         else:
-            self.connection = github3.login(token=github_config.access_token)
-        return self.connection
+            return github3.login(token=self.config.access_token)
 
     @staticmethod
     def _test_connection(
@@ -93,12 +94,64 @@ class GithubService:
             else:
                 return f"{github_repo}: {github_exception.msg}.\n"
 
-    # def close_issue_from_repo(self):
-    #     print(dir(issue))
-    #     if not issue.is_closed():
-    #         issue.close()
+    def list_issues_from_repo(
+        self,
+        github_repo: str,
+        request: Union[il.IssueListValidRequest, il.IssueListInvalidRequest],
+    ) -> List[i.Issue]:
+        """Return list of issues from one repository."""
+        if isinstance(request, il.IssueListValidRequest):
+            repo = self._get_repo(github_repo)
 
-    # def reopen_issue_from_repo(self):
+            domain_issues = []
+            if not request.filters:
+                issues = list(repo.issues())
+                for issue in issues:
+                    labels = set(label.name for label in issue.labels())
+                    domain_issues.append(
+                        i.Issue(issue.number, issue.title, issue.body, labels)
+                    )
+                return issues
+
+            obj = request.filters.get("obj__eq")
+            state = request.filters.get("state__eq")
+            title_query = request.filters.get("title__contains")
+            issues = list(repo.issues(state=state))
+
+            if obj == "issue":
+                issues = [issue for issue in issues if issue.pull_request_urls is None]
+            elif obj == "pr":
+                issues = [issue for issue in issues if issue.pull_request_urls]
+
+            if title_query:
+                issues = [issue for issue in issues if title_query in issue.title]
+
+            for issue in issues:
+                labels = set(label.name for label in issue.labels())
+                domain_issues.append(
+                    i.Issue(issue.number, issue.title, issue.body, labels)
+                )
+
+            return domain_issues
+        return []
+
+    def close_issues_from_repo(
+        self, github_repo: str, domain_issues: List[i.Issue]
+    ) -> str:
+        """Close issues from one repository."""
+        connection = self._get_connection()
+        repo_suffix = github_repo.split("/")[1]
+
+        for domain_issue in domain_issues:
+            issue = connection.issue(
+                self.get_username(), repo_suffix, domain_issue.number
+            )
+            if not issue.is_closed():
+                issue.close()
+        return f"{github_repo}: close issues successful.\n"
+
+    # def reopen_issues_from_repo(self, github_repo: str, number: int):
+    #     """Reopen issue from one repository."""
     #     issue = gh.issue(user, repo, num)
     #     if issue.is_closed():
     #         issue.reopen()
@@ -131,18 +184,18 @@ class GithubService:
                     extra += f" Invalid field {error['field']}."
             return f"{github_repo}: {github_exception.msg}.{extra}\n"
 
-    def link_issues(self, github_repo: str, pr_base: pr.PullRequest) -> pr.PullRequest:
+    @staticmethod
+    def link_issues(
+        pr_base: pr.PullRequest, filtered_issues: List[i.Issue]
+    ) -> pr.PullRequest:
         """Return a new PR with body message and labels of linked issues."""
         pr = copy.deepcopy(pr_base)
-        repo = self._get_repo(github_repo)
         labels = pr.labels
-        issues = repo.issues(state="open")
         closes = ""
-        for issue in issues:
-            if pr.link in issue.title:
-                closes += f"Closes #{issue.number}\n"
-                issue_labels = [label.name for label in issue.labels()]
-                labels.update(issue_labels)
+        for issue in filtered_issues:
+            closes += f"Closes #{issue.number}\n"
+            issue_labels = list(issue.labels)
+            labels.update(issue_labels)
         if closes:
             pr.body += f"\n\n{closes}"
         pr.labels = labels

@@ -3,7 +3,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 import git_portfolio.domain.config as c
-import git_portfolio.use_cases.gh_delete_branch_use_case as ghdb
+import git_portfolio.use_cases.gh_delete_branch as ghdb
 
 
 @pytest.fixture

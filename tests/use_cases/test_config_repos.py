@@ -4,7 +4,7 @@ from pytest_mock import MockerFixture
 
 import git_portfolio.domain.config as c
 import git_portfolio.domain.gh_connection_settings as cs
-import git_portfolio.use_cases.config_repos_use_case as cr
+import git_portfolio.use_cases.config_repos as cr
 
 
 @pytest.fixture

@@ -41,7 +41,7 @@ Features
 
 * Configure multiple working repositories.
 * Batch git_ command with subcommands `add`, `checkout`, `commit`, `pull`, `push`, `reset` and `status`.
-* Batch creation of issues, creation of pull requests, merge of pull requests and deletion branches by name on GitHub.
+* Batch create/close issues, create pull requests, merge pull requests and delete branches by name on GitHub.
 
 
 Requirements

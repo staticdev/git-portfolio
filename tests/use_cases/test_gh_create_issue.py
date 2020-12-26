@@ -4,7 +4,7 @@ from pytest_mock import MockerFixture
 
 import git_portfolio.domain.config as c
 import git_portfolio.domain.issue as i
-import git_portfolio.use_cases.gh_create_issue_use_case as ghci
+import git_portfolio.use_cases.gh_create_issue as ghci
 
 
 @pytest.fixture
@@ -29,6 +29,7 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
 def domain_issue() -> i.Issue:
     """Issue fixture."""
     issue = i.Issue(
+        0,
         "my title",
         "my body",
         {"testing", "refactor"},
