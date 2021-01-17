@@ -101,20 +101,20 @@ class InquirerPrompter:
         return i.Issue(0, answers["title"], answers["body"], labels)
 
     @staticmethod
-    def close_issues(
-        github_selected_repos: List[str],
+    def close_objects(
+        github_selected_repos: List[str], object_name: str
     ) -> str:
-        """Prompt questions to close issues."""
+        """Prompt questions to close issues or pull requests."""
         questions = [
             inquirer.Text(
-                "issues_title_query",
-                message="Write an issue title or part of it",
+                "object_title_query",
+                message=f"Write {object_name} title or part of it",
                 validate=val.not_empty_validation,
             ),
             inquirer.Confirm(
                 "correct",
                 message=(
-                    "Confirm closing issue(s) for the project(s) "
+                    f"Confirm closing {object_name}(s) for the project(s) "
                     f"{github_selected_repos}. Continue?"
                 ),
                 default=False,
@@ -125,7 +125,7 @@ class InquirerPrompter:
             answers = inquirer.prompt(questions)
             correct = answers["correct"]
 
-        return cast(str, answers["issues_title_query"])
+        return cast(str, answers["object_title_query"])
 
     @staticmethod
     def create_pull_requests(

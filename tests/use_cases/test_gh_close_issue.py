@@ -9,7 +9,7 @@ import git_portfolio.use_cases.gh_close_issue as ghci
 
 REPO = "org/reponame"
 REPO2 = "org/reponame2"
-REQUEST_ISSUES = il.build_issue_list_request(
+REQUEST_ISSUES = il.build_list_request(
     filters={"state__eq": "open", "title__contains": "title"}
 )
 

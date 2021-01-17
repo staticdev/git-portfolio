@@ -59,7 +59,7 @@ def test_execute_without_parameters(
     github_service = mock_github_service.return_value
     github_service.list_issues_from_repo.return_value = domain_issues
 
-    request = il.build_issue_list_request()
+    request = il.build_list_request()
 
     response = li.GhListIssueUseCase(config_manager, github_service).execute(
         request, repo
@@ -82,7 +82,7 @@ def test_execute_with_filters(
     github_service.list_issues_from_repo.return_value = domain_issues
 
     qry_filters = {"state__eq": "open"}
-    request = il.build_issue_list_request(filters=qry_filters)
+    request = il.build_list_request(filters=qry_filters)
 
     response = li.GhListIssueUseCase(config_manager, github_service).execute(
         request, repo
@@ -105,7 +105,7 @@ def test_execute_handles_generic_error(
         "Just an error message"
     )
 
-    request = il.build_issue_list_request(filters={})
+    request = il.build_list_request(filters={})
 
     response = li.GhListIssueUseCase(config_manager, github_service).execute(
         request, repo
@@ -128,7 +128,7 @@ def test_execute_handles_bad_request(
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
 
-    request = il.build_issue_list_request(filters=5)  # type: ignore
+    request = il.build_list_request(filters=5)  # type: ignore
 
     response = li.GhListIssueUseCase(config_manager, github_service).execute(
         request, repo
