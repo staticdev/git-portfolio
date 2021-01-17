@@ -509,6 +509,23 @@ def test_create_prs(
     ).execute.assert_called_once()
 
 
+def test_close_prs(
+    mock_gh_close_issue_use_case: MockerFixture,
+    mock_github_service: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It executes gh_close_issue."""
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    runner.invoke(git_portfolio.__main__.close, ["prs"], prog_name="gitp")
+
+    mock_gh_close_issue_use_case(
+        config_manager, github_service
+    ).execute.assert_called_once()
+
+
 def test_merge_prs(
     mock_gh_merge_pr_use_case: MockerFixture,
     mock_github_service: MockerFixture,

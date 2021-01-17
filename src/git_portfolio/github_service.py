@@ -120,7 +120,7 @@ class GithubService:
 
             if obj == "issue":
                 issues = [issue for issue in issues if issue.pull_request_urls is None]
-            elif obj == "pr":
+            elif obj == "pull request":
                 issues = [issue for issue in issues if issue.pull_request_urls]
 
             if title_query:

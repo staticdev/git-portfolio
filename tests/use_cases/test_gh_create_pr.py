@@ -10,7 +10,7 @@ import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_create_pr as ghcp
 
-REQUEST_ISSUES = il.build_issue_list_request(
+REQUEST_ISSUES = il.build_list_request(
     filters={"state__eq": "open", "title__contains": "title"}
 )
 

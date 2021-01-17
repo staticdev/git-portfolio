@@ -1,4 +1,4 @@
-"""Request for list of issues."""
+"""Request for list of issues and/or pull requests."""
 from collections.abc import Mapping
 from typing import Dict
 from typing import List
@@ -38,7 +38,7 @@ class IssueListValidRequest:
         return True
 
 
-def build_issue_list_request(
+def build_list_request(
     filters: Optional[Dict[str, str]] = None
 ) -> Union[IssueListInvalidRequest, IssueListValidRequest]:
     """Create request from filters."""
@@ -53,7 +53,7 @@ def build_issue_list_request(
         for key, value in filters.items():
             if key not in accepted_filters:
                 invalid_req.add_error("filters", f"Key {key} cannot be used.")
-            if key == "obj__eq" and value not in ["pr", "issue", "all"]:
+            if key == "obj__eq" and value not in ["pull request", "issue", "all"]:
                 invalid_req.add_error(
                     "filters", f"Value {value} for key 'obj__eq' cannot be used."
                 )

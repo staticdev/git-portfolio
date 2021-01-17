@@ -339,7 +339,7 @@ def test_list_issues_from_repo_title_filter(
     assert response[1].title == domain_issues[4].title
 
 
-@pytest.mark.parametrize("value", ["issue", "pr"])
+@pytest.mark.parametrize("value", ["issue", "pull request"])
 def test_list_issues_from_repo_obj_filter(
     value: str,
     mocker: MockerFixture,

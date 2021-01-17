@@ -138,13 +138,13 @@ def test_create_pull_requests_no_labels(mock_inquirer_prompt: MockerFixture) -> 
     assert result == expected_pr
 
 
-def test_close_issues(mock_inquirer_prompt: MockerFixture) -> None:
+def test_close_objects(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns issue query title."""
     mock_inquirer_prompt.return_value = {
-        "issues_title_query": "issue title",
+        "object_title_query": "issue title",
         "correct": True,
     }
-    result = p.InquirerPrompter.close_issues([REPO])
+    result = p.InquirerPrompter.close_objects([REPO], "issue")
     expected = "issue title"
 
     assert result == expected
