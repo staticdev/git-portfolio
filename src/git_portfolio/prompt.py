@@ -101,9 +101,7 @@ class InquirerPrompter:
         return i.Issue(0, answers["title"], answers["body"], labels)
 
     @staticmethod
-    def close_objects(
-        github_selected_repos: List[str], object_name: str
-    ) -> str:
+    def close_objects(github_selected_repos: List[str], object_name: str) -> str:
         """Prompt questions to close issues or pull requests."""
         questions = [
             inquirer.Text(
