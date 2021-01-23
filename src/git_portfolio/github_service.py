@@ -88,11 +88,13 @@ class GithubService:
                 title=issue.title, body=issue.body, labels=list(issue.labels)
             )
             return f"{github_repo}: create issue successful.\n"
-        except github3.exceptions.ClientError as github_exception:
-            if github_exception.msg == "Issues are disabled for this repo":
-                return f"{github_repo}: {github_exception.msg}. It may be a fork.\n"
+        except github3.exceptions.ClientError as client_error:
+            if client_error.msg == "Issues are disabled for this repo":
+                return f"{github_repo}: {client_error.msg}. It may be a fork.\n"
             else:
-                return f"{github_repo}: {github_exception.msg}.\n"
+                return f"{github_repo}: {client_error.msg}.\n"
+        except github3.exceptions.GitHubError as github_error:
+            raise AttributeError(f"{github_repo}: {github_error.msg}\n")
 
     def list_issues_from_repo(
         self,
@@ -142,6 +144,9 @@ class GithubService:
         connection = self._get_connection()
         repo_suffix = github_repo.split("/")[1]
 
+        if not domain_issues:
+            return f"{github_repo}: no issues match.\n"
+
         for domain_issue in domain_issues:
             issue = connection.issue(
                 self.get_username(), repo_suffix, domain_issue.number
@@ -183,6 +188,8 @@ class GithubService:
                 else:
                     extra += f" Invalid field {error['field']}."
             return f"{github_repo}: {github_exception.msg}.{extra}\n"
+        except github3.exceptions.GitHubError as github_error:
+            raise AttributeError(f"{github_repo}: {github_error.msg}\n")
 
     @staticmethod
     def link_issues(
@@ -210,6 +217,8 @@ class GithubService:
             return f"{github_repo}: delete branch successful.\n"
         except github3.exceptions.NotFoundError as github_exception:
             return f"{github_repo}: {github_exception.msg}.\n"
+        except github3.exceptions.GitHubError as github_error:
+            raise AttributeError(f"{github_repo}: {github_error.msg}\n")
 
     def merge_pull_request_from_repo(
         self, github_repo: str, pr_merge: prm.PullRequestMerge

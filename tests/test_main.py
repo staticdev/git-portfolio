@@ -150,7 +150,8 @@ def test_gitp_config_check_execute_error(
 
     result = runner.invoke(git_portfolio.__main__.main, ["test"], prog_name="gitp")
 
-    assert "Error: some error msg" in result.output
+    assert "Error(s) found during execution:\nsome error msg" in result.output
+    assert result.exit_code == 4
 
 
 def test_gitp_config_check_no_repos(
@@ -167,6 +168,7 @@ def test_gitp_config_check_no_repos(
     result = runner.invoke(git_portfolio.__main__.main, ["test"], prog_name="gitp")
 
     assert result.output.startswith("Error: no config found")
+    assert result.exit_code == 3
 
 
 def test_add_success(
@@ -417,7 +419,8 @@ def test_config_repos_wrong_token(
     )
 
     assert result.output.startswith(
-        "Error: Wrong GitHub permissions. Please check your token.\n"
+        "Error(s) found during execution:\nWrong GitHub permissions. Please check your"
+        " token.\n"
     )
     assert type(result.exception) == SystemExit
 
@@ -438,8 +441,8 @@ def test_config_repos_connection_error(
 
     assert result.output.startswith(
         (
-            "Error: Unable to reach server. Please check you network and credentials "
-            "and try again.\n"
+            "Error(s) found during execution:\nUnable to reach server. Please check "
+            "your network and credentials and try again.\n"
         )
     )
     assert type(result.exception) == SystemExit

@@ -278,7 +278,7 @@ def test_create_issue_from_repo_fork(
     assert response == f"{REPO}: Issues are disabled for this repo. It may be a fork.\n"
 
 
-def test_create_issue_from_repo_other_error(
+def test_create_issue_from_repo_other_client_error(
     mocker: MockerFixture,
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
@@ -294,6 +294,24 @@ def test_create_issue_from_repo_other_error(
     )
 
     assert response == f"{REPO}: returned message.\n"
+
+
+def test_create_issue_from_repo_other_error(
+    mocker: MockerFixture,
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+    domain_issues: List[i.Issue],
+) -> None:
+    """It gives the message error returned from the API."""
+    exception_mock = mocker.Mock()
+    exception_mock.json.return_value.get.return_value = "returned message"
+    repo = mock_github3_login.return_value.repositories.return_value[1]
+    repo.create_issue.side_effect = github3.exceptions.ForbiddenError(exception_mock)
+
+    with pytest.raises(AttributeError, match="org/reponame: returned message"):
+        gc.GithubService(domain_gh_conn_settings[0]).create_issue_from_repo(
+            REPO, domain_issues[0]
+        )
 
 
 def test_list_issues_from_repo_title_filter(
@@ -436,6 +454,20 @@ def test_close_issues_from_repo_success(
     )
 
     assert response == f"{REPO}: close issues successful.\n"
+
+
+def test_close_issues_from_repo_no_issue(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It returns a not issue message."""
+    mock_github3_login.return_value.issue().is_closed.return_value = False
+    response = gc.GithubService(domain_gh_conn_settings[0]).close_issues_from_repo(
+        REPO, []
+    )
+
+    assert response == f"{REPO}: no issues match.\n"
 
 
 def test_close_issues_from_repo_already_closed(
@@ -590,6 +622,24 @@ def test_create_pull_request_from_repo_no_commits_unpatched_exception(
     )
 
 
+def test_create_pull_request_from_repo_other_error(
+    mocker: MockerFixture,
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+    domain_prs: List[pr.PullRequest],
+) -> None:
+    """It gives the message error returned from the API."""
+    exception_mock = mocker.Mock()
+    exception_mock.json.return_value.get.return_value = "returned message"
+    repo = mock_github3_login.return_value.repositories.return_value[1]
+    repo.create_pull.side_effect = github3.exceptions.ForbiddenError(exception_mock)
+
+    with pytest.raises(AttributeError, match="org/reponame: returned message"):
+        gc.GithubService(domain_gh_conn_settings[0]).create_pull_request_from_repo(
+            REPO, domain_prs[0]
+        )
+
+
 def test_link_issue_success(
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     domain_issues: List[i.Issue],
@@ -659,6 +709,24 @@ def test_delete_branch_from_repo_branch_not_found(
     )
 
     assert response == f"{REPO}: Not found.\n"
+
+
+def test_delete_branch_from_repo_other_error(
+    mocker: MockerFixture,
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+    domain_branch: str,
+) -> None:
+    """It gives the message error returned from the API."""
+    exception_mock = mocker.Mock()
+    exception_mock.json.return_value.get.return_value = "returned message"
+    repo = mock_github3_login.return_value.repositories.return_value[1]
+    repo.ref.side_effect = github3.exceptions.ForbiddenError(exception_mock)
+
+    with pytest.raises(AttributeError, match="org/reponame: returned message"):
+        gc.GithubService(domain_gh_conn_settings[0]).delete_branch_from_repo(
+            REPO, domain_branch
+        )
 
 
 def test_merge_pull_request_from_repo_success(

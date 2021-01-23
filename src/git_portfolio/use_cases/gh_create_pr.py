@@ -1,23 +1,15 @@
 """Create pull request on Github use case."""
 from typing import Union
 
-import git_portfolio.config_manager as cm
 import git_portfolio.domain.pull_request as pr
-import git_portfolio.github_service as ghs
 import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
+import git_portfolio.use_cases.gh as gh
 import git_portfolio.use_cases.gh_list_issue as li
 
 
-class GhCreatePrUseCase:
+class GhCreatePrUseCase(gh.GhUseCase):
     """Github merge pull request use case."""
-
-    def __init__(
-        self, config_manager: cm.ConfigManager, github_service: ghs.GithubService
-    ) -> None:
-        """Initializer."""
-        self.config_manager = config_manager
-        self.github_service = github_service
 
     def execute(
         self,
@@ -55,4 +47,4 @@ class GhCreatePrUseCase:
                     output += self.github_service.create_pull_request_from_repo(
                         github_repo, pr
                     )
-        return res.ResponseSuccess(output)
+        return self.generate_response(output)
