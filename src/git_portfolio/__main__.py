@@ -1,5 +1,6 @@
 """Command-line interface."""
 import functools
+import sys
 from typing import Any
 from typing import Callable
 from typing import cast
@@ -40,9 +41,12 @@ def gitp_config_check(func: F) -> F:
                 "Error: no config found, please run `gitp config init`.",
                 fg="red",
             )
+            sys.exit(3)
         else:
             value = func(*args, **kwargs)
             _echo_outputs(value)
+            if not bool(value):
+                sys.exit(4)
             return value
 
     return cast(F, wrapper)
@@ -59,7 +63,9 @@ def _echo_outputs(response: Union[res.ResponseFailure, res.ResponseSuccess]) -> 
         success = cast(res.ResponseSuccess, response)
         click.secho(success.value)
     else:
-        click.secho(f"Error: {response.value['message']}", fg="red")
+        click.secho(
+            f"Error(s) found during execution:\n{response.value['message']}", fg="red"
+        )
 
 
 def _get_github_service(config: c.Config) -> ghs.GithubService:
@@ -77,7 +83,7 @@ def _get_github_service(config: c.Config) -> ghs.GithubService:
         response = res.ResponseFailure(
             res.ResponseTypes.SYSTEM_ERROR,
             (
-                "Unable to reach server. Please check you network and credentials and "
+                "Unable to reach server. Please check your network and credentials and "
                 "try again."
             ),
         )
@@ -193,11 +199,14 @@ def config_init() -> None:
             CONFIG_MANAGER.config.github_access_token
         )
         response = ci.ConfigInitUseCase(CONFIG_MANAGER).execute(settings)
-        _echo_outputs(response)
         if bool(response):
+            success = cast(res.ResponseSuccess, response)
+            click.secho(success.value)
             break
-        elif response.type == res.ResponseTypes.SYSTEM_ERROR:
-            click.ClickException("")
+        else:
+            click.secho(f"Error: {response.value['message']}", fg="red")
+            if response.type == res.ResponseTypes.SYSTEM_ERROR:
+                click.ClickException("")
 
 
 @configure.command("repos")
