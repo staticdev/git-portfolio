@@ -14,9 +14,10 @@ class GhMergePrUseCase(gh.GhUseCase):
         self, pr_merge: prm.PullRequestMerge, github_repo: str = ""
     ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
         """Merge pull requests."""
+        output = ""
         if github_repo:
-            output = self.github_service.merge_pull_request_from_repo(
-                github_repo, pr_merge
+            output = self.call_github_service(
+                "merge_pull_request_from_repo", output, github_repo, pr_merge
             )
             if pr_merge.delete_branch:
                 delete_branch_use_case = dbr.GhDeleteBranchUseCase(
@@ -24,11 +25,10 @@ class GhMergePrUseCase(gh.GhUseCase):
                 )
                 delete_branch_use_case.execute(pr_merge.head, github_repo)
         else:
-            output = ""
             if pr_merge.delete_branch:
                 for github_repo in self.config_manager.config.github_selected_repos:
-                    output += self.github_service.merge_pull_request_from_repo(
-                        github_repo, pr_merge
+                    output = self.call_github_service(
+                        "merge_pull_request_from_repo", output, github_repo, pr_merge
                     )
                     delete_branch_use_case = dbr.GhDeleteBranchUseCase(
                         self.config_manager, self.github_service
@@ -36,7 +36,7 @@ class GhMergePrUseCase(gh.GhUseCase):
                     delete_branch_use_case.execute(pr_merge.head, github_repo)
             else:
                 for github_repo in self.config_manager.config.github_selected_repos:
-                    output += self.github_service.merge_pull_request_from_repo(
-                        github_repo, pr_merge
+                    output = self.call_github_service(
+                        "merge_pull_request_from_repo", output, github_repo, pr_merge
                     )
         return self.generate_response(output)

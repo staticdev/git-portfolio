@@ -18,6 +18,7 @@ class GhCreatePrUseCase(gh.GhUseCase):
         github_repo: str = "",
     ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
         """Create pull requests."""
+        output = ""
         if github_repo:
             if pr.link_issues:
                 response = li.GhListIssueUseCase(
@@ -27,9 +28,10 @@ class GhCreatePrUseCase(gh.GhUseCase):
                     custom_pr = self.github_service.link_issues(pr, response.value)
                 else:
                     custom_pr = pr
-            output = self.github_service.create_pull_request_from_repo(github_repo, pr)
+            output = self.call_github_service(
+                "create_pull_request_from_repo", output, github_repo, pr
+            )
         else:
-            output = ""
             if pr.link_issues:
                 for github_repo in self.config_manager.config.github_selected_repos:
                     response = li.GhListIssueUseCase(
@@ -39,12 +41,12 @@ class GhCreatePrUseCase(gh.GhUseCase):
                         custom_pr = self.github_service.link_issues(pr, response.value)
                     else:
                         custom_pr = pr
-                    output += self.github_service.create_pull_request_from_repo(
-                        github_repo, custom_pr
+                    output = self.call_github_service(
+                        "create_pull_request_from_repo", output, github_repo, custom_pr
                     )
             else:
                 for github_repo in self.config_manager.config.github_selected_repos:
-                    output += self.github_service.create_pull_request_from_repo(
-                        github_repo, pr
+                    output = self.call_github_service(
+                        "create_pull_request_from_repo", output, github_repo, pr
                     )
         return self.generate_response(output)
