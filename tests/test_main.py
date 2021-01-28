@@ -243,6 +243,19 @@ def test_pull_success(
     mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "pull", ())
 
 
+def test_pull_rebase_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls pull."""
+    runner.invoke(git_portfolio.__main__.main, ["pull", "--rebase"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        [REPO], "pull", ("--rebase",)
+    )
+
+
 def test_push_success(
     mock_git_use_case: MockerFixture,
     mock_config_manager: MockerFixture,
