@@ -121,7 +121,7 @@ def commit(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     )
 
 
-@main.command("pull")
+@main.command("pull", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @gitp_config_check
 def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
