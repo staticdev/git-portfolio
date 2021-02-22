@@ -11,7 +11,7 @@ import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_create_pr as ghcp
 
 
-REPO = "org/reponame"
+REPO = "org/repo-name"
 REQUEST_ISSUES = il.build_list_request(
     filters={"state__eq": "open", "title__contains": "title"}
 )
@@ -21,7 +21,7 @@ REQUEST_ISSUES = il.build_list_request(
 def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking CONFIG_MANAGER."""
     mock = mocker.patch("git_portfolio.config_manager.ConfigManager", autospec=True)
-    mock.return_value.config = c.Config("", "mytoken", [REPO])
+    mock.return_value.config = c.Config("", "my-token", [REPO])
     return mock
 
 

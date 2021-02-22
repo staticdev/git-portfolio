@@ -155,11 +155,22 @@ class GithubService:
                 issue.close()
         return f"{github_repo}: close issues successful.\n"
 
-    # def reopen_issues_from_repo(self, github_repo: str, number: int):
-    #     """Reopen issue from one repository."""
-    #     issue = gh.issue(user, repo, num)
-    #     if issue.is_closed():
-    #         issue.reopen()
+    def reopen_issues_from_repo(
+        self, github_repo: str, domain_issues: List[i.Issue]
+    ) -> str:
+        """Reopen issues from one repository."""
+        connection = self._get_connection()
+        repo_suffix = github_repo.split("/")[1]
+
+        if not domain_issues:
+            return f"{github_repo}: no issues match.\n"
+
+        for domain_issue in domain_issues:
+            issue = connection.issue(
+                self.get_username(), repo_suffix, domain_issue.number
+            )
+            issue.reopen()
+        return f"{github_repo}: reopen issues successful.\n"
 
     def create_pull_request_from_repo(
         self, github_repo: str, pr: pr.PullRequest

@@ -11,7 +11,7 @@ import git_portfolio.use_cases.config_repos as cr
 def domain_gh_conn_settings() -> cs.GhConnectionSettings:
     """Github connection settings fixture."""
     return cs.GhConnectionSettings(
-        "mytoken",
+        "my-token",
         "myhost.com",
     )
 
