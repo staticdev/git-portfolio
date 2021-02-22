@@ -53,11 +53,12 @@ def build_list_request(
         for key, value in filters.items():
             if key not in accepted_filters:
                 invalid_req.add_error("filters", f"Key {key} cannot be used.")
-            if key == "obj__eq" and value not in ["pull request", "issue", "all"]:
+            if (key == "obj__eq" and value not in ["pull request", "issue", "all"]) or (
+                key == "state__eq" and value not in ["all", "open", "closed"]
+            ):
                 invalid_req.add_error(
                     "filters", f"Value {value} for key 'obj__eq' cannot be used."
                 )
-
         if invalid_req.has_errors():
             return invalid_req
 

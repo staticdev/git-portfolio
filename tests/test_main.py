@@ -8,8 +8,8 @@ import git_portfolio.domain.config as c
 import git_portfolio.responses as res
 
 
-REPO = "org/reponame"
-REPO2 = "org/reponame2"
+REPO = "org/repo-name"
+REPO2 = "org/repo-name2"
 
 
 @pytest.fixture
@@ -86,6 +86,15 @@ def mock_gh_close_issue_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GhCloseIssueUseCase."""
     return mocker.patch(
         "git_portfolio.use_cases.gh_close_issue.GhCloseIssueUseCase",
+        autospec=True,
+    )
+
+
+@pytest.fixture
+def mock_gh_reopen_issue_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GhReopenIssueUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.gh_reopen_issue.GhReopenIssueUseCase",
         autospec=True,
     )
 
@@ -504,6 +513,23 @@ def test_close_issues(
     runner.invoke(git_portfolio.__main__.close, ["issues"], prog_name="gitp")
 
     mock_gh_close_issue_use_case(
+        config_manager, github_service
+    ).execute.assert_called_once()
+
+
+def test_reopen_issues(
+    mock_gh_reopen_issue_use_case: MockerFixture,
+    mock_github_service: MockerFixture,
+    mock_prompt_inquirer_prompter: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It executes gh_reopen_issue."""
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    runner.invoke(git_portfolio.__main__.reopen, ["issues"], prog_name="gitp")
+
+    mock_gh_reopen_issue_use_case(
         config_manager, github_service
     ).execute.assert_called_once()
 

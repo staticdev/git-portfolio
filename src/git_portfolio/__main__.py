@@ -24,6 +24,7 @@ import git_portfolio.use_cases.gh_create_issue as ghci
 import git_portfolio.use_cases.gh_create_pr as ghcp
 import git_portfolio.use_cases.gh_delete_branch as ghdb
 import git_portfolio.use_cases.gh_merge_pr as ghmp
+import git_portfolio.use_cases.gh_reopen_issue as ghri
 import git_portfolio.use_cases.git as git
 import git_portfolio.use_cases.git_clone as gcuc
 
@@ -191,6 +192,12 @@ def delete() -> None:
     pass
 
 
+@click.group("reopen")
+def reopen() -> None:
+    """Reopen command group."""
+    pass
+
+
 @configure.command("init")
 def config_init() -> None:
     """Initialize `gitp` config."""
@@ -253,7 +260,7 @@ def close_issues() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch close issues on GitHub."""
     github_service = _get_github_service(CONFIG_MANAGER.config)
     list_object = "issue"
-    title_query = p.InquirerPrompter.close_objects(
+    title_query = p.InquirerPrompter.query_by_title(
         CONFIG_MANAGER.config.github_selected_repos, list_object
     )
     list_request = il.build_list_request(
@@ -264,6 +271,27 @@ def close_issues() -> Union[res.ResponseFailure, res.ResponseSuccess]:
         }
     )
     return ghcli.GhCloseIssueUseCase(CONFIG_MANAGER, github_service).execute(
+        list_request
+    )
+
+
+@reopen.command("issues")
+@gitp_config_check
+def reopen_issues() -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """Batch reopen issues on GitHub."""
+    github_service = _get_github_service(CONFIG_MANAGER.config)
+    list_object = "issue"
+    title_query = p.InquirerPrompter.query_by_title(
+        CONFIG_MANAGER.config.github_selected_repos, list_object
+    )
+    list_request = il.build_list_request(
+        filters={
+            "obj__eq": list_object,
+            "state__eq": "closed",
+            "title__contains": title_query,
+        }
+    )
+    return ghri.GhReopenIssueUseCase(CONFIG_MANAGER, github_service).execute(
         list_request
     )
 
@@ -295,7 +323,7 @@ def close_prs() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch close pull requests on GitHub."""
     github_service = _get_github_service(CONFIG_MANAGER.config)
     list_object = "pull request"
-    title_query = p.InquirerPrompter.close_objects(
+    title_query = p.InquirerPrompter.query_by_title(
         CONFIG_MANAGER.config.github_selected_repos, list_object
     )
     list_request = il.build_list_request(
@@ -338,6 +366,7 @@ main.add_command(create)
 main.add_command(close)
 main.add_command(merge)
 main.add_command(delete)
+main.add_command(reopen)
 
 
 if __name__ == "__main__":

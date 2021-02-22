@@ -5,7 +5,7 @@ import git_portfolio.domain.config as c
 def test_config_model_init() -> None:
     """Verify model initialization."""
     github_hostname = "localhost"
-    github_access_token = "mytoken"
+    github_access_token = "my-token"
     github_selected_repos = ["staticdev/omg", "staticdev/omg2"]
     test_config = c.Config(github_hostname, github_access_token, github_selected_repos)
 

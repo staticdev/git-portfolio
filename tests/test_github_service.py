@@ -14,8 +14,8 @@ import git_portfolio.github_service as gc
 import git_portfolio.request_objects.issue_list as il
 
 
-REPO = "org/reponame"
-REPO2 = "org/reponame2"
+REPO = "org/repo-name"
+REPO2 = "org/repo-name2"
 INVALID_REQUEST_ISSUES = il.IssueListInvalidRequest()
 NO_FILTER_REQUEST_ISSUES = il.IssueListValidRequest()
 
@@ -25,11 +25,11 @@ def domain_gh_conn_settings() -> List[cs.GhConnectionSettings]:
     """Github connection settings fixture."""
     gh_conn_settings = [
         cs.GhConnectionSettings(
-            "mytoken",
+            "my-token",
             "",
         ),
         cs.GhConnectionSettings(
-            "mytoken",
+            "my-token",
             "myhost.com",
         ),
     ]
@@ -308,7 +308,7 @@ def test_create_issue_from_repo_other_error(
     repo = mock_github3_login.return_value.repositories.return_value[1]
     repo.create_issue.side_effect = github3.exceptions.ForbiddenError(exception_mock)
 
-    with pytest.raises(AttributeError, match="org/reponame: returned message"):
+    with pytest.raises(AttributeError, match="org/repo-name: returned message"):
         gc.GithubService(domain_gh_conn_settings[0]).create_issue_from_repo(
             REPO, domain_issues[0]
         )
@@ -484,6 +484,32 @@ def test_close_issues_from_repo_already_closed(
     assert response == f"{REPO}: close issues successful.\n"
 
 
+def test_reopen_issues_from_repo_success(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It succeeds."""
+    response = gc.GithubService(domain_gh_conn_settings[0]).reopen_issues_from_repo(
+        REPO, domain_issues
+    )
+
+    assert response == f"{REPO}: reopen issues successful.\n"
+
+
+def test_reopen_issues_from_repo_no_issue(
+    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_issues: List[i.Issue],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It returns a not issue message."""
+    response = gc.GithubService(domain_gh_conn_settings[0]).reopen_issues_from_repo(
+        REPO, []
+    )
+
+    assert response == f"{REPO}: no issues match.\n"
+
+
 def test_create_pull_request_from_repo_success(
     domain_gh_conn_settings: List[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
@@ -634,7 +660,7 @@ def test_create_pull_request_from_repo_other_error(
     repo = mock_github3_login.return_value.repositories.return_value[1]
     repo.create_pull.side_effect = github3.exceptions.ForbiddenError(exception_mock)
 
-    with pytest.raises(AttributeError, match="org/reponame: returned message"):
+    with pytest.raises(AttributeError, match="org/repo-name: returned message"):
         gc.GithubService(domain_gh_conn_settings[0]).create_pull_request_from_repo(
             REPO, domain_prs[0]
         )
@@ -723,7 +749,7 @@ def test_delete_branch_from_repo_other_error(
     repo = mock_github3_login.return_value.repositories.return_value[1]
     repo.ref.side_effect = github3.exceptions.ForbiddenError(exception_mock)
 
-    with pytest.raises(AttributeError, match="org/reponame: returned message"):
+    with pytest.raises(AttributeError, match="org/repo-name: returned message"):
         gc.GithubService(domain_gh_conn_settings[0]).delete_branch_from_repo(
             REPO, domain_branch
         )
