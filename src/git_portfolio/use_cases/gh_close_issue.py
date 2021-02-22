@@ -10,32 +10,17 @@ import git_portfolio.use_cases.gh_list_issue as li
 class GhCloseIssueUseCase(gh.GhUseCase):
     """Github close issue use case."""
 
-    def execute(
+    def action(  # type: ignore[override]
         self,
+        github_repo: str,
         request_object: Union[il.IssueListValidRequest, il.IssueListInvalidRequest],
-        github_repo: str = "",
-    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    ) -> None:
         """Close issues."""
-        output = ""
-        if github_repo:
-            response = li.GhListIssueUseCase(
-                self.config_manager, self.github_service
-            ).execute(request_object, github_repo)
-            if isinstance(response, res.ResponseSuccess):
-                output = self.call_github_service(
-                    "close_issues_from_repo", output, github_repo, response.value
-                )
-            else:
-                output = f"{github_repo}: no issues closed.\n"
+        github_service_method = "close_issues_from_repo"
+        response = li.GhListIssueUseCase(
+            self.config_manager, self.github_service
+        ).execute(request_object, github_repo)
+        if isinstance(response, res.ResponseSuccess):
+            self.call_github_service(github_service_method, github_repo, response.value)
         else:
-            for github_repo in self.config_manager.config.github_selected_repos:
-                response = li.GhListIssueUseCase(
-                    self.config_manager, self.github_service
-                ).execute(request_object, github_repo)
-                if isinstance(response, res.ResponseSuccess):
-                    output = self.call_github_service(
-                        "close_issues_from_repo", output, github_repo, response.value
-                    )
-                else:
-                    output += f"{github_repo}: no issues closed.\n"
-        return res.ResponseSuccess(output)
+            self.output += f"{github_repo}: no issues match search.\n"

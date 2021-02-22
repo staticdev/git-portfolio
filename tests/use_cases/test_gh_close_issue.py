@@ -7,8 +7,8 @@ import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_close_issue as ghci
 
+
 REPO = "org/reponame"
-REPO2 = "org/reponame2"
 REQUEST_ISSUES = il.build_list_request(
     filters={"state__eq": "open", "title__contains": "title"}
 )
@@ -18,7 +18,7 @@ REQUEST_ISSUES = il.build_list_request(
 def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking CONFIG_MANAGER."""
     mock = mocker.patch("git_portfolio.config_manager.ConfigManager", autospec=True)
-    mock.return_value.config = c.Config("", "mytoken", [REPO, REPO2])
+    mock.return_value.config = c.Config("", "mytoken", [REPO])
     return mock
 
 
@@ -39,41 +39,7 @@ def mock_gh_list_issue_use_case(mocker: MockerFixture) -> MockerFixture:
     )
 
 
-def test_execute_for_all_repos(
-    mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-) -> None:
-    """It returns success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    response = ghci.GhCloseIssueUseCase(config_manager, github_service).execute(
-        REQUEST_ISSUES
-    )
-
-    assert bool(response) is True
-    assert "success message\nsuccess message\n" == response.value
-
-
-def test_execute_for_all_repos_failed(
-    mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    mock_gh_list_issue_use_case: MockerFixture,
-) -> None:
-    """It returns success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    mock_gh_list_issue_use_case.return_value.execute.return_value = res.ResponseFailure(
-        res.ResponseTypes.PARAMETERS_ERROR, "msg"
-    )
-    response = ghci.GhCloseIssueUseCase(config_manager, github_service).execute(
-        REQUEST_ISSUES
-    )
-
-    assert bool(response) is True
-    assert f"{REPO}: no issues closed.\n{REPO2}: no issues closed.\n" == response.value
-
-
-def test_execute_for_specific_repo(
+def test_action(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     mock_gh_list_issue_use_case: MockerFixture,
@@ -84,15 +50,13 @@ def test_execute_for_specific_repo(
     mock_gh_list_issue_use_case.return_value.execute.return_value = (
         res.ResponseSuccess()
     )
-    response = ghci.GhCloseIssueUseCase(config_manager, github_service).execute(
-        REQUEST_ISSUES, REPO
-    )
+    use_case = ghci.GhCloseIssueUseCase(config_manager, github_service)
+    use_case.action(REPO, REQUEST_ISSUES)
 
-    assert bool(response) is True
-    assert "success message\n" == response.value
+    assert "success message\n" == use_case.output
 
 
-def test_execute_for_specific_repo_failed(
+def test_action_failed(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     mock_gh_list_issue_use_case: MockerFixture,
@@ -103,9 +67,7 @@ def test_execute_for_specific_repo_failed(
     mock_gh_list_issue_use_case.return_value.execute.return_value = res.ResponseFailure(
         res.ResponseTypes.PARAMETERS_ERROR, "msg"
     )
-    response = ghci.GhCloseIssueUseCase(config_manager, github_service).execute(
-        REQUEST_ISSUES, REPO
-    )
+    use_case = ghci.GhCloseIssueUseCase(config_manager, github_service)
+    use_case.action(REPO, REQUEST_ISSUES)
 
-    assert bool(response) is True
-    assert f"{REPO}: no issues closed.\n" == response.value
+    assert f"{REPO}: no issues match search.\n" == use_case.output

@@ -47,7 +47,7 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
     return mock
 
 
-def test_execute_without_parameters(
+def test_action_without_parameters(
     mocker: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
@@ -61,15 +61,14 @@ def test_execute_without_parameters(
 
     request = il.build_list_request()
 
-    response = li.GhListIssueUseCase(config_manager, github_service).execute(
-        request, repo
-    )
+    use_case = li.GhListIssueUseCase(config_manager, github_service)
+    response = use_case.action(repo, request)
 
     assert bool(response) is True
     assert response.value == domain_issues
 
 
-def test_execute_with_filters(
+def test_action_with_filters(
     mocker: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
@@ -84,15 +83,14 @@ def test_execute_with_filters(
     qry_filters = {"state__eq": "open"}
     request = il.build_list_request(filters=qry_filters)
 
-    response = li.GhListIssueUseCase(config_manager, github_service).execute(
-        request, repo
-    )
+    use_case = li.GhListIssueUseCase(config_manager, github_service)
+    response = use_case.action(repo, request)
 
     assert bool(response) is True
     assert response.value == domain_issues
 
 
-def test_execute_handles_generic_error(
+def test_action_handles_generic_error(
     mocker: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
@@ -107,9 +105,8 @@ def test_execute_handles_generic_error(
 
     request = il.build_list_request(filters={})
 
-    response = li.GhListIssueUseCase(config_manager, github_service).execute(
-        request, repo
-    )
+    use_case = li.GhListIssueUseCase(config_manager, github_service)
+    response = use_case.action(repo, request)
 
     assert bool(response) is False
     assert response.value == {
@@ -118,7 +115,7 @@ def test_execute_handles_generic_error(
     }
 
 
-def test_execute_handles_bad_request(
+def test_action_handles_bad_request(
     mocker: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
@@ -130,9 +127,8 @@ def test_execute_handles_bad_request(
 
     request = il.build_list_request(filters=5)  # type: ignore
 
-    response = li.GhListIssueUseCase(config_manager, github_service).execute(
-        request, repo
-    )
+    use_case = li.GhListIssueUseCase(config_manager, github_service)
+    response = use_case.action(repo, request)
 
     assert bool(response) is False
     assert response.value == {

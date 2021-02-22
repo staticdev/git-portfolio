@@ -10,6 +10,8 @@ import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_create_pr as ghcp
 
+
+REPO = "org/reponame"
 REQUEST_ISSUES = il.build_list_request(
     filters={"state__eq": "open", "title__contains": "title"}
 )
@@ -19,9 +21,7 @@ REQUEST_ISSUES = il.build_list_request(
 def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking CONFIG_MANAGER."""
     mock = mocker.patch("git_portfolio.config_manager.ConfigManager", autospec=True)
-    mock.return_value.config = c.Config(
-        "", "mytoken", ["staticdev/omg", "staticdev/omg2"]
-    )
+    mock.return_value.config = c.Config("", "mytoken", [REPO])
     return mock
 
 
@@ -72,7 +72,27 @@ def domain_prs() -> List[pr.PullRequest]:
     return prs
 
 
-def test_execute_for_all_repos(
+# TODO: improve output when issue list fails
+def test_action_link_issue_failed(
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
+    mock_gh_list_issue_use_case: MockerFixture,
+    domain_prs: List[pr.PullRequest],
+) -> None:
+    """It returns success."""
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    mock_gh_list_issue_use_case.return_value.action.return_value = res.ResponseFailure(
+        res.ResponseTypes.PARAMETERS_ERROR, "msg"
+    )
+    request = domain_prs[1]
+    use_case = ghcp.GhCreatePrUseCase(config_manager, github_service)
+    use_case.action(REPO, request, REQUEST_ISSUES)
+
+    assert "success message\n" == use_case.output
+
+
+def test_action(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     domain_prs: List[pr.PullRequest],
@@ -81,15 +101,13 @@ def test_execute_for_all_repos(
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     request = domain_prs[0]
-    response = ghcp.GhCreatePrUseCase(config_manager, github_service).execute(
-        request, REQUEST_ISSUES
-    )
+    use_case = ghcp.GhCreatePrUseCase(config_manager, github_service)
+    use_case.action(REPO, request, REQUEST_ISSUES)
 
-    assert bool(response) is True
-    assert "success message\nsuccess message\n" == response.value
+    assert "success message\n" == use_case.output
 
 
-def test_execute_link_issue(
+def test_action_link_issue(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     mock_gh_list_issue_use_case: MockerFixture,
@@ -98,42 +116,16 @@ def test_execute_link_issue(
     """It returns success."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    mock_gh_list_issue_use_case.return_value.execute.return_value = (
-        res.ResponseSuccess()
-    )
+    mock_gh_list_issue_use_case.return_value.action.return_value = res.ResponseSuccess()
     request = domain_prs[1]
-    response = ghcp.GhCreatePrUseCase(config_manager, github_service).execute(
-        request, REQUEST_ISSUES
-    )
+    use_case = ghcp.GhCreatePrUseCase(config_manager, github_service)
+    use_case.action(REPO, request, REQUEST_ISSUES)
 
-    assert bool(response) is True
-    assert "success message\nsuccess message\n" == response.value
-
-
-# TODO: improve output when issue list fails
-def test_execute_link_issue_failed(
-    mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    mock_gh_list_issue_use_case: MockerFixture,
-    domain_prs: List[pr.PullRequest],
-) -> None:
-    """It returns success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    mock_gh_list_issue_use_case.return_value.execute.return_value = res.ResponseFailure(
-        res.ResponseTypes.PARAMETERS_ERROR, "msg"
-    )
-    request = domain_prs[1]
-    response = ghcp.GhCreatePrUseCase(config_manager, github_service).execute(
-        request, REQUEST_ISSUES
-    )
-
-    assert bool(response) is True
-    assert "success message\nsuccess message\n" == response.value
+    assert "success message\n" == use_case.output
 
 
 @pytest.mark.e2e
-def test_execute_link_issue_e2e(
+def test_action_link_issue_e2e(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     domain_prs: List[pr.PullRequest],
@@ -142,87 +134,7 @@ def test_execute_link_issue_e2e(
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     request = domain_prs[1]
-    response = ghcp.GhCreatePrUseCase(config_manager, github_service).execute(
-        request, REQUEST_ISSUES
-    )
+    use_case = ghcp.GhCreatePrUseCase(config_manager, github_service)
+    use_case.action(REPO, request, REQUEST_ISSUES)
 
-    assert bool(response) is True
-    assert "success message\nsuccess message\n" == response.value
-
-
-def test_execute_for_specific_repo(
-    mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    domain_prs: List[pr.PullRequest],
-) -> None:
-    """It returns success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    request = domain_prs[0]
-    response = ghcp.GhCreatePrUseCase(config_manager, github_service).execute(
-        request, REQUEST_ISSUES, "staticdev/omg"
-    )
-
-    assert bool(response) is True
-    assert "success message\n" == response.value
-
-
-def test_execute_link_issue_for_specific_repo(
-    mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    mock_gh_list_issue_use_case: MockerFixture,
-    domain_prs: List[pr.PullRequest],
-) -> None:
-    """It returns success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    mock_gh_list_issue_use_case.return_value.execute.return_value = (
-        res.ResponseSuccess()
-    )
-    request = domain_prs[1]
-    response = ghcp.GhCreatePrUseCase(config_manager, github_service).execute(
-        request, REQUEST_ISSUES, "staticdev/omg"
-    )
-
-    assert bool(response) is True
-    assert "success message\n" == response.value
-
-
-# TODO: improve output when issue list fails
-def test_execute_link_issue_failed_for_specific_repo(
-    mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    mock_gh_list_issue_use_case: MockerFixture,
-    domain_prs: List[pr.PullRequest],
-) -> None:
-    """It returns success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    mock_gh_list_issue_use_case.return_value.execute.return_value = res.ResponseFailure(
-        res.ResponseTypes.PARAMETERS_ERROR, "msg"
-    )
-    request = domain_prs[1]
-    response = ghcp.GhCreatePrUseCase(config_manager, github_service).execute(
-        request, REQUEST_ISSUES, "staticdev/omg"
-    )
-
-    assert bool(response) is True
-    assert "success message\n" == response.value
-
-
-@pytest.mark.e2e
-def test_execute_link_issue_for_specific_repo_e2e(
-    mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    domain_prs: List[pr.PullRequest],
-) -> None:
-    """It returns success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    request = domain_prs[1]
-    response = ghcp.GhCreatePrUseCase(config_manager, github_service).execute(
-        request, REQUEST_ISSUES, "staticdev/omg"
-    )
-
-    assert bool(response) is True
-    assert "success message\n" == response.value
+    assert "success message\n" == use_case.output
