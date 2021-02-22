@@ -38,7 +38,7 @@ def mock_config_repos_use_case(mocker: MockerFixture) -> MockerFixture:
 def domain_gh_conn_settings() -> cs.GhConnectionSettings:
     """Issue fixture."""
     gh_conn_settings = cs.GhConnectionSettings(
-        "mytoken",
+        "my-token",
         "myhost.com",
     )
     return gh_conn_settings

@@ -6,15 +6,15 @@ import git_portfolio.domain.config as c
 import git_portfolio.use_cases.gh as gh
 
 
-REPO = "org/reponame"
-REPO2 = "org/reponame2"
+REPO = "org/repo-name"
+REPO2 = "org/repo-name2"
 
 
 @pytest.fixture
 def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking CONFIG_MANAGER."""
     mock = mocker.patch("git_portfolio.config_manager.ConfigManager", autospec=True)
-    mock.return_value.config = c.Config("", "mytoken", [REPO, REPO2])
+    mock.return_value.config = c.Config("", "my-token", [REPO, REPO2])
     return mock
 
 

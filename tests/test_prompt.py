@@ -9,8 +9,8 @@ import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.prompt as p
 
 
-REPO = "org/reponame"
-REPO2 = "org/reponame2"
+REPO = "org/repo-name"
+REPO2 = "org/repo-name2"
 
 
 @pytest.fixture
@@ -138,13 +138,13 @@ def test_create_pull_requests_no_labels(mock_inquirer_prompt: MockerFixture) -> 
     assert result == expected_pr
 
 
-def test_close_objects(mock_inquirer_prompt: MockerFixture) -> None:
+def test_query_by_title(mock_inquirer_prompt: MockerFixture) -> None:
     """It returns issue query title."""
     mock_inquirer_prompt.return_value = {
         "object_title_query": "issue title",
         "correct": True,
     }
-    result = p.InquirerPrompter.close_objects([REPO], "issue")
+    result = p.InquirerPrompter.query_by_title([REPO], "issue")
     expected = "issue title"
 
     assert result == expected
