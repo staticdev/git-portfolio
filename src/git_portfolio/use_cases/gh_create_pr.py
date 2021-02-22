@@ -11,42 +11,22 @@ import git_portfolio.use_cases.gh_list_issue as li
 class GhCreatePrUseCase(gh.GhUseCase):
     """Github merge pull request use case."""
 
-    def execute(
+    def action(  # type: ignore[override]
         self,
-        pr: pr.PullRequest,
+        github_repo: str,
+        pr_obj: pr.PullRequest,
         request_object: Union[il.IssueListValidRequest, il.IssueListInvalidRequest],
-        github_repo: str = "",
-    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    ) -> None:
         """Create pull requests."""
-        output = ""
-        if github_repo:
-            if pr.link_issues:
-                response = li.GhListIssueUseCase(
-                    self.config_manager, self.github_service
-                ).execute(request_object, github_repo)
-                if isinstance(response, res.ResponseSuccess):
-                    custom_pr = self.github_service.link_issues(pr, response.value)
-                else:
-                    custom_pr = pr
-            output = self.call_github_service(
-                "create_pull_request_from_repo", output, github_repo, pr
-            )
-        else:
-            if pr.link_issues:
-                for github_repo in self.config_manager.config.github_selected_repos:
-                    response = li.GhListIssueUseCase(
-                        self.config_manager, self.github_service
-                    ).execute(request_object, github_repo)
-                    if isinstance(response, res.ResponseSuccess):
-                        custom_pr = self.github_service.link_issues(pr, response.value)
-                    else:
-                        custom_pr = pr
-                    output = self.call_github_service(
-                        "create_pull_request_from_repo", output, github_repo, custom_pr
-                    )
-            else:
-                for github_repo in self.config_manager.config.github_selected_repos:
-                    output = self.call_github_service(
-                        "create_pull_request_from_repo", output, github_repo, pr
-                    )
-        return self.generate_response(output)
+        github_service_method = "create_pull_request_from_repo"
+        if pr_obj.link_issues:
+            response = li.GhListIssueUseCase(
+                self.config_manager, self.github_service, github_repo
+            ).execute(request_object)
+            if isinstance(response, res.ResponseSuccess):
+                custom_pr = self.github_service.link_issues(pr_obj, response.value)
+        try:
+            custom_pr
+        except NameError:
+            custom_pr = pr_obj
+        self.call_github_service(github_service_method, github_repo, custom_pr)

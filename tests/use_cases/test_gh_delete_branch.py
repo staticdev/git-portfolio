@@ -6,13 +6,14 @@ import git_portfolio.domain.config as c
 import git_portfolio.use_cases.gh_delete_branch as ghdb
 
 
+REPO = "org/reponame"
+
+
 @pytest.fixture
 def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking CONFIG_MANAGER."""
     mock = mocker.patch("git_portfolio.config_manager.ConfigManager", autospec=True)
-    mock.return_value.config = c.Config(
-        "", "mytoken", ["staticdev/omg", "staticdev/omg2"]
-    )
+    mock.return_value.config = c.Config("", "mytoken", [REPO])
     return mock
 
 
@@ -30,7 +31,7 @@ def domain_branch() -> str:
     return "my-branch"
 
 
-def test_execute_for_all_repos(
+def test_action(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     domain_branch: str,
@@ -38,25 +39,7 @@ def test_execute_for_all_repos(
     """It returns success."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    response = ghdb.GhDeleteBranchUseCase(config_manager, github_service).execute(
-        domain_branch
-    )
+    use_case = ghdb.GhDeleteBranchUseCase(config_manager, github_service)
+    use_case.action(REPO, domain_branch)
 
-    assert bool(response) is True
-    assert "success message\nsuccess message\n" == response.value
-
-
-def test_execute_for_specific_repo(
-    mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    domain_branch: str,
-) -> None:
-    """It returns success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    response = ghdb.GhDeleteBranchUseCase(config_manager, github_service).execute(
-        domain_branch, "staticdev/omg"
-    )
-
-    assert bool(response) is True
-    assert "success message\n" == response.value
+    assert "success message\n" == use_case.output
