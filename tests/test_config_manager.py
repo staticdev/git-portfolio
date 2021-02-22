@@ -19,7 +19,9 @@ def mock_yaml_dump(mocker: MockerFixture) -> MockerFixture:
     return mocker.patch("yaml.dump")
 
 
-def test_init_invalid_config(tmp_path: pathlib.Path, mock_os_join_path: MockerFixture) -> None:
+def test_init_invalid_config(
+    tmp_path: pathlib.Path, mock_os_join_path: MockerFixture
+) -> None:
     """It trucantes the file."""
     filename = "config1.yaml"
     d = tmp_path
@@ -30,7 +32,9 @@ def test_init_invalid_config(tmp_path: pathlib.Path, mock_os_join_path: MockerFi
     # os_truncate.assert_called_once_with(0)
 
 
-def test_save_invalid_yaml(tmp_path: pathlib.Path, mock_os_join_path: MockerFixture) -> None:
+def test_save_invalid_yaml(
+    tmp_path: pathlib.Path, mock_os_join_path: MockerFixture
+) -> None:
     """It trucantes the file."""
     filename = "config.yaml"
     content = (
@@ -47,7 +51,9 @@ def test_save_invalid_yaml(tmp_path: pathlib.Path, mock_os_join_path: MockerFixt
     # os_truncate.assert_called_once_with(0)
 
 
-def test_save_config_no_file(tmp_path: pathlib.Path, mock_os_join_path: MockerFixture) -> None:
+def test_save_config_no_file(
+    tmp_path: pathlib.Path, mock_os_join_path: MockerFixture
+) -> None:
     """It raises AttributeError."""
     d = tmp_path
     mock_os_join_path.side_effect = [str(d), str(d / "config.yaml")]

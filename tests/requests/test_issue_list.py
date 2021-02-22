@@ -23,7 +23,9 @@ def test_build_list_request_with_empty_filters() -> None:
 
 def test_build_list_request_with_incorrect_filter_keys() -> None:
     """It returns invalid request."""
-    request = cast(il.IssueListInvalidRequest, il.build_list_request(filters={"a": "1"}))
+    request = cast(
+        il.IssueListInvalidRequest, il.build_list_request(filters={"a": "1"})
+    )
 
     assert request.has_errors()
     assert request.errors[0]["parameter"] == "filters"
