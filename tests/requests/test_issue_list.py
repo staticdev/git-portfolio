@@ -1,5 +1,6 @@
 """Test cases for the issue list requests."""
 from typing import cast
+
 import pytest
 
 import git_portfolio.request_objects.issue_list as il
