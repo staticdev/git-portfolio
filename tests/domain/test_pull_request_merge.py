@@ -4,7 +4,7 @@ import git_portfolio.domain.pull_request_merge as prm
 
 def test_pr_model_init() -> None:
     """Verify model initialization."""
-    head = "master"
+    head = "main"
     base = "node"
     prefix = "omg"
     delete = False
