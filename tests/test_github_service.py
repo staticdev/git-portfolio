@@ -603,7 +603,7 @@ def test_create_pull_request_from_repo_no_commits(
     def _initiate_mocked_exception(
         self: github3.exceptions.UnprocessableEntity,
     ) -> None:
-        self.errors = [{"message": "No commits between master and new-branch"}]
+        self.errors = [{"message": "No commits between main and new-branch"}]
         self.msg = "Validation Failed"
 
     mocker.patch.object(
@@ -617,7 +617,7 @@ def test_create_pull_request_from_repo_no_commits(
     ).create_pull_request_from_repo(REPO, domain_prs[1])
 
     assert response == (
-        f"{REPO}: Validation Failed. No commits between master and " "new-branch.\n"
+        f"{REPO}: Validation Failed. No commits between main and " "new-branch.\n"
     )
 
 
@@ -632,7 +632,7 @@ def test_create_pull_request_from_repo_no_commits_unpatched_exception(
     mocked_response = mocker.Mock()
     mocked_response.json.return_value = {
         "message": "Validation Failed",
-        "errors": [{"message": "No commits between master and new-branch"}],
+        "errors": [{"message": "No commits between main and new-branch"}],
     }
 
     repo = mock_github3_login.return_value.repositories.return_value[1]
@@ -644,7 +644,7 @@ def test_create_pull_request_from_repo_no_commits_unpatched_exception(
     ).create_pull_request_from_repo(REPO, domain_prs[1])
 
     assert response == (
-        f"{REPO}: Validation Failed. No commits between master and " "new-branch.\n"
+        f"{REPO}: Validation Failed. No commits between main and " "new-branch.\n"
     )
 
 

@@ -198,11 +198,11 @@ def test_checkout_success(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It calls checkout with master."""
-    runner.invoke(git_portfolio.__main__.main, ["checkout", "master"], prog_name="gitp")
+    """It calls checkout with main."""
+    runner.invoke(git_portfolio.__main__.main, ["checkout", "main"], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        [REPO], "checkout", ("master",)
+        [REPO], "checkout", ("main",)
     )
 
 
@@ -211,7 +211,7 @@ def test_checkout_new_branch(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It calls checkout with master."""
+    """It calls checkout with main."""
     runner.invoke(
         git_portfolio.__main__.main, ["checkout", "-b", "new-branch"], prog_name="gitp"
     )
@@ -270,13 +270,13 @@ def test_push_success(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It calls push with origin master."""
+    """It calls push with origin main."""
     runner.invoke(
-        git_portfolio.__main__.main, ["push", "origin", "master"], prog_name="gitp"
+        git_portfolio.__main__.main, ["push", "origin", "main"], prog_name="gitp"
     )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
-        [REPO], "push", ("origin", "master")
+        [REPO], "push", ("origin", "main")
     )
 
 

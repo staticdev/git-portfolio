@@ -10,7 +10,7 @@ def test_pr_model_init() -> None:
     link_issues = True
     issues_title_query = "query"
     inherit = True
-    head = "master"
+    head = "main"
     base = "node"
     draft = False
     test_pr = pr.PullRequest(

@@ -134,7 +134,7 @@ class InquirerPrompter:
             inquirer.Text(
                 "base",
                 message="Write base branch name (destination)",
-                default="master",
+                default="main",
                 validate=val.not_empty_validation,
             ),
             inquirer.Text(
@@ -234,7 +234,7 @@ class InquirerPrompter:
             inquirer.Text(
                 "base",
                 message="Write base branch name (destination)",
-                default="master",
+                default="main",
                 validate=val.not_empty_validation,
             ),
             inquirer.Text(
