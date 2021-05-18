@@ -46,7 +46,7 @@ reorder-python-imports = "^2.5.0"
 pre-commit-hooks = "^3.4.0"
 pytest_mock = "^3.6.1"
 black = "^21.5b1"
-sphinx-click = "^2.7.1"
+sphinx-click = "^3.0.0"
 
 [tool.poetry.scripts]
 gitp = "git_portfolio.__main__:main"
