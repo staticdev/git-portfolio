@@ -45,7 +45,7 @@ darglint = "^1.8.0"
 reorder-python-imports = "^2.5.0"
 pre-commit-hooks = "^4.0.1"
 pytest_mock = "^3.6.1"
-black = "^21.5b1"
+black = "^21.5b2"
 sphinx-click = "^3.0.0"
 
 [tool.poetry.scripts]
