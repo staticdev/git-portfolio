@@ -47,6 +47,7 @@ pre-commit-hooks = "^4.0.1"
 pytest_mock = "^3.6.1"
 black = "^21.6b0"
 sphinx-click = "^3.0.1"
+types-PyYAML = "^5.4.3"
 
 [tool.poetry.scripts]
 gitp = "git_portfolio.__main__:main"
