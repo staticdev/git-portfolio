@@ -29,7 +29,7 @@ pyyaml = "^5.3.1"
 pytest = "^6.2.4"
 coverage = {extras = ["toml"], version = "^5.5"}
 safety = "^1.10.0"
-mypy = "^0.812"
+mypy = "^0.902"
 typeguard = "^2.12.1"
 xdoctest = "^0.15.4"
 sphinx = "^4.0.2"
@@ -47,6 +47,7 @@ pre-commit-hooks = "^4.0.1"
 pytest_mock = "^3.6.1"
 black = "^21.6b0"
 sphinx-click = "^3.0.1"
+types-PyYAML = "^5.4.3"
 
 [tool.poetry.scripts]
 gitp = "git_portfolio.__main__:main"
