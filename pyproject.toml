@@ -44,7 +44,7 @@ darglint = "^1.8.0"
 reorder-python-imports = "^2.6.0"
 pre-commit-hooks = "^4.0.1"
 pytest_mock = "^3.6.1"
-black = "^21.8b0"
+black = "^21.9b0"
 sphinx-click = "^3.0.1"
 types-PyYAML = "^5.4.10"
 coverage = {version = "6.0b1", extras = ["toml"]}
