@@ -1077,7 +1077,7 @@ test = ["pytest", "typing-extensions", "mypy"]
 
 [[package]]
 name = "types-pyyaml"
-version = "5.4.10"
+version = "5.4.11"
 description = "Typing stubs for PyYAML"
 category = "dev"
 optional = false
@@ -1172,7 +1172,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.0"
-content-hash = "f764b266b14d7ee831a9b16cb047f720ebbb8110faa1c46f233d3c567bfd5681"
+content-hash = "6448ab1f69397a99a1a93519264a6f3f43b76857bf325fecf9f94ec718565de8"
 
 [metadata.files]
 alabaster = [
@@ -1877,8 +1877,8 @@ typeguard = [
     {file = "typeguard-2.13.0.tar.gz", hash = "sha256:04e38f92eb59410c9375d3be23df65e0a7643f2e8bcbd421423d808d2f9e99df"},
 ]
 types-pyyaml = [
-    {file = "types-PyYAML-5.4.10.tar.gz", hash = "sha256:1d9e431e9f1f78a65ea957c558535a3b15ad67ea4912bce48a6c1b613dcf81ad"},
-    {file = "types_PyYAML-5.4.10-py3-none-any.whl", hash = "sha256:f1d1357168988e45fa20c65aecb3911462246a84809015dd889ebf8b1db74124"},
+    {file = "types-PyYAML-5.4.11.tar.gz", hash = "sha256:802566879aa630b3199f33f3523d4ba069d248d04cea1a12cfa35ecd0dd86622"},
+    {file = "types_PyYAML-5.4.11-py3-none-any.whl", hash = "sha256:09b7e488b8057677b7cdf348d2ba5fdcf0952d2f468e86834631db56e5125058"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.2-py2-none-any.whl", hash = "sha256:d8226d10bc02a29bcc81df19a26e56a9647f8b0a6d4a83924139f4a8b01f17b7"},
