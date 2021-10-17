@@ -46,19 +46,19 @@ class GithubService:
         try:
             return connection.me()
         except github3.exceptions.AuthenticationFailed:
-            raise AttributeError("Invalid token.")
-        except github3.exceptions.ConnectionError:
-            raise ConnectionError()
+            raise AttributeError("Invalid token.") from None
+        except github3.exceptions.ConnectionError as github_error:
+            raise ConnectionError() from github_error
         except github3.exceptions.IncompleteResponse:
             raise AttributeError(
                 "Invalid response. Your token might not be properly scoped."
-            )
+            ) from None
 
     def _get_repo(self, repo_name: str) -> github3.repos.ShortRepository:
         for repo in self.repos:
             if repo.full_name == repo_name:
                 return repo
-        raise NameError(f"Repository {repo_name} not found.")
+        raise NameError(f"Repository {repo_name} not found.") from None
 
     def get_config(self) -> cs.GhConnectionSettings:
         """Get service config."""
@@ -94,7 +94,9 @@ class GithubService:
             else:
                 return f"{github_repo}: {client_error.msg}.\n"
         except github3.exceptions.GitHubError as github_error:
-            raise AttributeError(f"{github_repo}: {github_error.msg}\n")
+            raise AttributeError(
+                f"{github_repo}: {github_error.msg}\n"
+            ) from github_error
 
     def list_issues_from_repo(
         self,
@@ -200,7 +202,9 @@ class GithubService:
                     extra += f" Invalid field {error['field']}."
             return f"{github_repo}: {github_exception.msg}.{extra}\n"
         except github3.exceptions.GitHubError as github_error:
-            raise AttributeError(f"{github_repo}: {github_error.msg}\n")
+            raise AttributeError(
+                f"{github_repo}: {github_error.msg}\n"
+            ) from github_error
 
     @staticmethod
     def link_issues(
@@ -229,7 +233,9 @@ class GithubService:
         except github3.exceptions.NotFoundError as github_exception:
             return f"{github_repo}: {github_exception.msg}.\n"
         except github3.exceptions.GitHubError as github_error:
-            raise AttributeError(f"{github_repo}: {github_error.msg}\n")
+            raise AttributeError(
+                f"{github_repo}: {github_error.msg}\n"
+            ) from github_error
 
     def merge_pull_request_from_repo(
         self, github_repo: str, pr_merge: prm.PullRequestMerge
