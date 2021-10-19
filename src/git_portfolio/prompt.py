@@ -1,7 +1,8 @@
 """User prompting module."""
+from __future__ import annotations
+
 from typing import Any
 from typing import cast
-from typing import List
 
 import inquirer
 
@@ -36,7 +37,7 @@ class InquirerPrompter:
         )
 
     @staticmethod
-    def new_repos(github_selected_repos: List[str]) -> Any:
+    def new_repos(github_selected_repos: list[str]) -> Any:
         """Prompt question to know if you want to select new repositories."""
         message = "\nThe configured repos will be used:\n"
         for repo in github_selected_repos:
@@ -48,7 +49,7 @@ class InquirerPrompter:
         return answer
 
     @staticmethod
-    def select_repos(repo_names: List[str]) -> Any:
+    def select_repos(repo_names: list[str]) -> Any:
         """Prompt questions to select new repositories."""
         while True:
             message = "Which repos are you working on? (Select pressing space)"
@@ -67,7 +68,7 @@ class InquirerPrompter:
                 print("Please select with `space` at least one repo.\n")
 
     @staticmethod
-    def create_issues(github_selected_repos: List[str]) -> i.Issue:
+    def create_issues(github_selected_repos: list[str]) -> i.Issue:
         """Prompt questions to create issues."""
         questions = [
             inquirer.Text(
@@ -101,7 +102,7 @@ class InquirerPrompter:
         return i.Issue(0, answers["title"], answers["body"], labels)
 
     @staticmethod
-    def query_by_title(github_selected_repos: List[str], object_name: str) -> str:
+    def query_by_title(github_selected_repos: list[str], object_name: str) -> str:
         """Prompt questions to close/reopen issues or pull requests."""
         questions = [
             inquirer.Text(
@@ -127,7 +128,7 @@ class InquirerPrompter:
 
     @staticmethod
     def create_pull_requests(
-        github_selected_repos: List[str],
+        github_selected_repos: list[str],
     ) -> pr.PullRequest:
         """Prompt questions to create pull requests."""
         questions = [
@@ -202,7 +203,7 @@ class InquirerPrompter:
         )
 
     @staticmethod
-    def delete_branches(github_selected_repos: List[str]) -> str:
+    def delete_branches(github_selected_repos: list[str]) -> str:
         """Prompt questions to delete branches."""
         questions = [
             inquirer.Text(
@@ -227,7 +228,7 @@ class InquirerPrompter:
 
     @staticmethod
     def merge_pull_requests(
-        github_username: str, github_selected_repos: List[str]
+        github_username: str, github_selected_repos: list[str]
     ) -> prm.PullRequestMerge:
         """Prompt questions to merge pull requests."""
         questions = [

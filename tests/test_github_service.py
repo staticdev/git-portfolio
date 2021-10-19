@@ -1,6 +1,7 @@
 """Test cases for the Github service module."""
+from __future__ import annotations
+
 import unittest
-from typing import List
 
 import github3
 import pytest
@@ -21,7 +22,7 @@ NO_FILTER_REQUEST_ISSUES = il.IssueListValidRequest()
 
 
 @pytest.fixture
-def domain_gh_conn_settings() -> List[cs.GhConnectionSettings]:
+def domain_gh_conn_settings() -> list[cs.GhConnectionSettings]:
     """Github connection settings fixture."""
     gh_conn_settings = [
         cs.GhConnectionSettings(
@@ -37,7 +38,7 @@ def domain_gh_conn_settings() -> List[cs.GhConnectionSettings]:
 
 
 @pytest.fixture
-def domain_issues() -> List[i.Issue]:
+def domain_issues() -> list[i.Issue]:
     """Issues fixture."""
     issues = [
         i.Issue(
@@ -55,7 +56,7 @@ def domain_issues() -> List[i.Issue]:
 
 
 @pytest.fixture
-def domain_prs() -> List[pr.PullRequest]:
+def domain_prs() -> list[pr.PullRequest]:
     """Pull requests fixture."""
     prs = [
         pr.PullRequest(
@@ -117,7 +118,7 @@ def mock_github3_enterprise_login(mocker: MockerFixture) -> MockerFixture:
 
 
 def test_init_github_com(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -125,7 +126,7 @@ def test_init_github_com(
 
 
 def test_init_github_entreprise(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_enterprise_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -134,7 +135,7 @@ def test_init_github_entreprise(
 
 def test_init_invalid_token(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns invalid token message."""
@@ -149,7 +150,7 @@ def test_init_invalid_token(
 
 def test_init_invalid_token_scope(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns invalid response message."""
@@ -166,7 +167,7 @@ def test_init_invalid_token_scope(
 
 def test_init_connection_error(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -178,7 +179,7 @@ def test_init_connection_error(
 
 
 def test_get_config(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns service config."""
@@ -189,7 +190,7 @@ def test_get_config(
 
 
 def test_get_repo_no_repo(
-    mocker: MockerFixture, domain_gh_conn_settings: List[cs.GhConnectionSettings]
+    mocker: MockerFixture, domain_gh_conn_settings: list[cs.GhConnectionSettings]
 ) -> None:
     """It returns None."""
     mock = mocker.patch("github3.login", autospec=True)
@@ -201,7 +202,7 @@ def test_get_repo_no_repo(
 
 def test_get_repo_url_success(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns url."""
@@ -212,7 +213,7 @@ def test_get_repo_url_success(
 
 
 def test_get_repo_url_no_repo(
-    mocker: MockerFixture, domain_gh_conn_settings: List[cs.GhConnectionSettings]
+    mocker: MockerFixture, domain_gh_conn_settings: list[cs.GhConnectionSettings]
 ) -> None:
     """It returns None."""
     mock = mocker.patch("github3.login", autospec=True)
@@ -223,7 +224,7 @@ def test_get_repo_url_no_repo(
 
 
 def test_get_repo_names(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns list of strings."""
@@ -234,7 +235,7 @@ def test_get_repo_names(
 
 
 def test_get_username(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns user name."""
@@ -246,9 +247,9 @@ def test_get_username(
 
 
 def test_create_issue_from_repo_success(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_issues: List[i.Issue],
+    domain_issues: list[i.Issue],
 ) -> None:
     """It succeeds."""
     response = gc.GithubService(domain_gh_conn_settings[0]).create_issue_from_repo(
@@ -260,9 +261,9 @@ def test_create_issue_from_repo_success(
 
 def test_create_issue_from_repo_fork(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_issues: List[i.Issue],
+    domain_issues: list[i.Issue],
 ) -> None:
     """It gives a message error telling it is a fork."""
     exception_mock = mocker.Mock()
@@ -280,9 +281,9 @@ def test_create_issue_from_repo_fork(
 
 def test_create_issue_from_repo_other_client_error(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_issues: List[i.Issue],
+    domain_issues: list[i.Issue],
 ) -> None:
     """It gives the message error returned from the API."""
     exception_mock = mocker.Mock()
@@ -298,9 +299,9 @@ def test_create_issue_from_repo_other_client_error(
 
 def test_create_issue_from_repo_other_error(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_issues: List[i.Issue],
+    domain_issues: list[i.Issue],
 ) -> None:
     """It gives the message error returned from the API."""
     exception_mock = mocker.Mock()
@@ -316,8 +317,8 @@ def test_create_issue_from_repo_other_error(
 
 def test_list_issues_from_repo_title_filter(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -361,8 +362,8 @@ def test_list_issues_from_repo_title_filter(
 def test_list_issues_from_repo_obj_filter(
     value: str,
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -402,8 +403,8 @@ def test_list_issues_from_repo_obj_filter(
 
 
 def test_list_issues_from_repo_invalid_request(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns empty result."""
@@ -416,8 +417,8 @@ def test_list_issues_from_repo_invalid_request(
 
 def test_list_issues_from_repo_no_filter_request(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns empty result."""
@@ -443,8 +444,8 @@ def test_list_issues_from_repo_no_filter_request(
 
 
 def test_close_issues_from_repo_success(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -457,8 +458,8 @@ def test_close_issues_from_repo_success(
 
 
 def test_close_issues_from_repo_no_issue(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns a not issue message."""
@@ -471,8 +472,8 @@ def test_close_issues_from_repo_no_issue(
 
 
 def test_close_issues_from_repo_already_closed(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -485,8 +486,8 @@ def test_close_issues_from_repo_already_closed(
 
 
 def test_reopen_issues_from_repo_success(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -498,8 +499,8 @@ def test_reopen_issues_from_repo_success(
 
 
 def test_reopen_issues_from_repo_no_issue(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns a not issue message."""
@@ -511,9 +512,9 @@ def test_reopen_issues_from_repo_no_issue(
 
 
 def test_create_pull_request_from_repo_success(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It succeeds."""
     response = gc.GithubService(
@@ -524,9 +525,9 @@ def test_create_pull_request_from_repo_success(
 
 
 def test_create_pull_request_from_repo_with_labels(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It succeeds."""
     response = gc.GithubService(
@@ -540,9 +541,9 @@ def test_create_pull_request_from_repo_with_labels(
 # stackoverflow.com/questions/64226516/how-to-set-mocked-exception-behavior-on-python
 def test_create_pull_request_from_repo_invalid_branch(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It gives the message error informing the invalid field head."""
 
@@ -568,9 +569,9 @@ def test_create_pull_request_from_repo_invalid_branch(
 @pytest.mark.e2e
 def test_create_pull_request_from_repo_invalid_branch_unpatched_exception(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It gives the message error informing the invalid field head."""
     mocked_response = mocker.Mock()
@@ -594,9 +595,9 @@ def test_create_pull_request_from_repo_invalid_branch_unpatched_exception(
 # stackoverflow.com/questions/64226516/how-to-set-mocked-exception-behavior-on-python
 def test_create_pull_request_from_repo_no_commits(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It gives the message error from the exception."""
 
@@ -624,9 +625,9 @@ def test_create_pull_request_from_repo_no_commits(
 @pytest.mark.e2e
 def test_create_pull_request_from_repo_no_commits_unpatched_exception(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It gives the message error from the exception."""
     mocked_response = mocker.Mock()
@@ -650,9 +651,9 @@ def test_create_pull_request_from_repo_no_commits_unpatched_exception(
 
 def test_create_pull_request_from_repo_other_error(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It gives the message error returned from the API."""
     exception_mock = mocker.Mock()
@@ -667,9 +668,9 @@ def test_create_pull_request_from_repo_other_error(
 
 
 def test_link_issue_success(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
-    domain_prs: List[pr.PullRequest],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
+    domain_prs: list[pr.PullRequest],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds."""
@@ -685,9 +686,9 @@ def test_link_issue_success(
 
 
 def test_link_issue_no_link(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
-    domain_issues: List[i.Issue],
-    domain_prs: List[pr.PullRequest],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    domain_issues: list[i.Issue],
+    domain_prs: list[pr.PullRequest],
     mock_github3_login: MockerFixture,
 ) -> None:
     """It succeeds without any linked issue."""
@@ -698,7 +699,7 @@ def test_link_issue_no_link(
 
 def test_delete_branch_from_repo_success(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
     domain_branch: str,
 ) -> None:
@@ -712,7 +713,7 @@ def test_delete_branch_from_repo_success(
 
 def test_delete_branch_from_repo_branch_not_found(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
     domain_branch: str,
 ) -> None:
@@ -739,7 +740,7 @@ def test_delete_branch_from_repo_branch_not_found(
 
 def test_delete_branch_from_repo_other_error(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
     domain_branch: str,
 ) -> None:
@@ -757,7 +758,7 @@ def test_delete_branch_from_repo_other_error(
 
 def test_merge_pull_request_from_repo_success(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
     domain_mpr: mpr.PullRequestMerge,
 ) -> None:
@@ -777,7 +778,7 @@ def test_merge_pull_request_from_repo_error_merging() -> None:
 
 
 def test_merge_pull_request_from_repo_not_found(
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
     domain_mpr: mpr.PullRequestMerge,
 ) -> None:
@@ -793,7 +794,7 @@ def test_merge_pull_request_from_repo_not_found(
 
 def test_merge_pull_request_from_repo_ambiguous(
     mocker: MockerFixture,
-    domain_gh_conn_settings: List[cs.GhConnectionSettings],
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
     domain_mpr: mpr.PullRequestMerge,
 ) -> None:

@@ -1,6 +1,7 @@
 """Config model."""
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List
 
 
 @dataclass
@@ -9,4 +10,4 @@ class Config:
 
     github_hostname: str
     github_access_token: str
-    github_selected_repos: List[str]
+    github_selected_repos: list[str]

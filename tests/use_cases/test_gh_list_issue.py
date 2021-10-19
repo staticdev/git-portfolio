@@ -1,5 +1,5 @@
 """Test cases for the Github list issue use case."""
-from typing import List
+from __future__ import annotations
 
 import pytest
 from pytest_mock import MockerFixture
@@ -12,7 +12,7 @@ import git_portfolio.use_cases.gh_list_issue as li
 
 
 @pytest.fixture
-def domain_issues() -> List[i.Issue]:
+def domain_issues() -> list[i.Issue]:
     """Issues fixture."""
     issue_1 = i.Issue(
         0,
@@ -51,7 +51,7 @@ def test_action_without_parameters(
     mocker: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    domain_issues: List[i.Issue],
+    domain_issues: list[i.Issue],
 ) -> None:
     """It returns a list of issues."""
     repo = mocker.Mock()
@@ -72,7 +72,7 @@ def test_action_with_filters(
     mocker: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    domain_issues: List[i.Issue],
+    domain_issues: list[i.Issue],
 ) -> None:
     """It returns a list of issues."""
     repo = mocker.Mock()

@@ -1,7 +1,8 @@
 """Github service module."""
+from __future__ import annotations
+
 import copy
 from typing import Any
-from typing import List
 from typing import Union
 
 import github3
@@ -64,7 +65,7 @@ class GithubService:
         """Get service config."""
         return self.config
 
-    def get_repo_names(self) -> List[str]:
+    def get_repo_names(self) -> list[str]:
         """Get list of repository names."""
         return [repo.full_name for repo in self.repos]
 
@@ -102,7 +103,7 @@ class GithubService:
         self,
         github_repo: str,
         request: Union[il.IssueListValidRequest, il.IssueListInvalidRequest],
-    ) -> List[i.Issue]:
+    ) -> list[i.Issue]:
         """Return list of issues from one repository."""
         if isinstance(request, il.IssueListValidRequest):
             repo = self._get_repo(github_repo)
@@ -140,7 +141,7 @@ class GithubService:
         return []
 
     def close_issues_from_repo(
-        self, github_repo: str, domain_issues: List[i.Issue]
+        self, github_repo: str, domain_issues: list[i.Issue]
     ) -> str:
         """Close issues from one repository."""
         connection = self._get_connection()
@@ -158,7 +159,7 @@ class GithubService:
         return f"{github_repo}: close issues successful.\n"
 
     def reopen_issues_from_repo(
-        self, github_repo: str, domain_issues: List[i.Issue]
+        self, github_repo: str, domain_issues: list[i.Issue]
     ) -> str:
         """Reopen issues from one repository."""
         connection = self._get_connection()
@@ -208,7 +209,7 @@ class GithubService:
 
     @staticmethod
     def link_issues(
-        pr_base: pr.PullRequest, filtered_issues: List[i.Issue]
+        pr_base: pr.PullRequest, filtered_issues: list[i.Issue]
     ) -> pr.PullRequest:
         """Return a new PR with body message and labels of linked issues."""
         pr = copy.deepcopy(pr_base)

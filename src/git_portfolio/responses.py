@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from typing import Any
-from typing import Dict
 from typing import Optional
 from typing import Union
 
@@ -40,11 +39,11 @@ class ResponseFailure:
         return msg
 
     @property
-    def value(self) -> Dict[str, Optional[str]]:
+    def value(self) -> dict[str, Optional[str]]:
         """Value property.
 
         Returns:
-            Dict[str, str]: type and message.
+            dict[str, str]: type and message.
         """
         return {"type": self.type, "message": self.message}
 

@@ -1,5 +1,5 @@
 """Test cases for the Github create PR use case."""
-from typing import List
+from __future__ import annotations
 
 import pytest
 from pytest_mock import MockerFixture
@@ -43,7 +43,7 @@ def mock_gh_list_issue_use_case(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
-def domain_prs() -> List[pr.PullRequest]:
+def domain_prs() -> list[pr.PullRequest]:
     """Pull requests fixture."""
     prs = [
         pr.PullRequest(
@@ -77,7 +77,7 @@ def test_action_link_issue_failed(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     mock_gh_list_issue_use_case: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
@@ -95,7 +95,7 @@ def test_action_link_issue_failed(
 def test_action(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
@@ -111,7 +111,7 @@ def test_action_link_issue(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     mock_gh_list_issue_use_case: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
@@ -128,7 +128,7 @@ def test_action_link_issue(
 def test_action_link_issue_e2e(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    domain_prs: List[pr.PullRequest],
+    domain_prs: list[pr.PullRequest],
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value

@@ -1,18 +1,19 @@
 """Prompt validation module."""
+from __future__ import annotations
+
 from typing import Any
-from typing import Dict
 
 
-def ignore_if_not_confirmed(answers: Dict[str, Any]) -> bool:
+def ignore_if_not_confirmed(answers: dict[str, Any]) -> bool:
     """Ignore if not confirmed question."""
     return not answers["confirmation"]
 
 
-def not_empty_validation(answers: Dict[str, Any], current: str) -> bool:
+def not_empty_validation(answers: dict[str, Any], current: str) -> bool:
     """Validade if current answer is not just spaces.
 
     Args:
-        answers (Dict[str, Any]): answers to previous questions (ignored).
+        answers (dict[str, Any]): answers to previous questions (ignored).
         current (str): answer to current question.
 
     Returns:

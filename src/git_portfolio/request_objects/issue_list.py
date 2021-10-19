@@ -1,7 +1,7 @@
 """Request for list of issues and/or pull requests."""
+from __future__ import annotations
+
 from collections.abc import Mapping
-from typing import Dict
-from typing import List
 from typing import Optional
 from typing import Union
 
@@ -11,7 +11,7 @@ class IssueListInvalidRequest:
 
     def __init__(self) -> None:
         """Initializer."""
-        self.errors: List[Dict[str, str]] = []
+        self.errors: list[dict[str, str]] = []
 
     def add_error(self, parameter: str, message: str) -> None:
         """Add error to error list."""
@@ -29,7 +29,7 @@ class IssueListInvalidRequest:
 class IssueListValidRequest:
     """Valid request for list."""
 
-    def __init__(self, filters: Optional[Dict[str, str]] = None) -> None:
+    def __init__(self, filters: Optional[dict[str, str]] = None) -> None:
         """Initializer."""
         self.filters = filters
 
@@ -39,7 +39,7 @@ class IssueListValidRequest:
 
 
 def build_list_request(
-    filters: Optional[Dict[str, str]] = None
+    filters: Optional[dict[str, str]] = None
 ) -> Union[IssueListInvalidRequest, IssueListValidRequest]:
     """Create request from filters."""
     accepted_filters = ["obj__eq", "state__eq", "title__contains"]

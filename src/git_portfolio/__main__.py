@@ -1,10 +1,11 @@
 """Command-line interface."""
+from __future__ import annotations
+
 import functools
 import sys
 from typing import Any
 from typing import Callable
 from typing import cast
-from typing import Tuple
 from typing import TypeVar
 from typing import Union
 
@@ -27,6 +28,8 @@ import git_portfolio.use_cases.gh_merge_pr as ghmp
 import git_portfolio.use_cases.gh_reopen_issue as ghri
 import git_portfolio.use_cases.git as git
 import git_portfolio.use_cases.git_clone as gcuc
+import git_portfolio.use_cases.poetry as poetry
+
 
 F = TypeVar("F", bound=Callable[..., Any])
 CONFIG_MANAGER = cm.ConfigManager()
@@ -95,7 +98,7 @@ def _get_github_service(config: c.Config) -> ghs.GithubService:
 @main.command("add")
 @click.argument("args", nargs=-1)
 @gitp_config_check
-def add(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+def add(args: tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git add` command."""
     return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "add", args
@@ -105,7 +108,7 @@ def add(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @main.command("checkout", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @gitp_config_check
-def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+def checkout(args: tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git checkout` command."""
     return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "checkout", args
@@ -115,7 +118,7 @@ def checkout(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess
 @main.command("commit", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @gitp_config_check
-def commit(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+def commit(args: tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git commit` command."""
     return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "commit", args
@@ -125,7 +128,7 @@ def commit(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @main.command("pull", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @gitp_config_check
-def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+def pull(args: tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git pull` command."""
     return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "pull", args
@@ -135,7 +138,7 @@ def pull(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @main.command("push", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @gitp_config_check
-def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+def push(args: tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git push` command."""
     return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "push", args
@@ -145,7 +148,7 @@ def push(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @main.command("reset", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @gitp_config_check
-def reset(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+def reset(args: tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git reset` command."""
     return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "reset", args
@@ -155,7 +158,7 @@ def reset(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
 @main.command("status")
 @click.argument("args", nargs=-1)
 @gitp_config_check
-def status(args: Tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+def status(args: tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
     """Batch `git status` command."""
     return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, "status", args
@@ -293,6 +296,16 @@ def reopen_issues() -> Union[res.ResponseFailure, res.ResponseSuccess]:
     )
     return ghri.GhReopenIssueUseCase(CONFIG_MANAGER, github_service).execute(
         list_request
+    )
+
+
+@main.command("poetry")
+@click.argument("args", nargs=-1)
+@gitp_config_check
+def poetry_cmd(args: tuple[str]) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    """Batch `poetry` command."""
+    return poetry.PoetryUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "poetry", args
     )
 
 

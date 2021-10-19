@@ -1,4 +1,4 @@
-"""Local git use case."""
+"""Poetry use case."""
 from __future__ import annotations
 
 import os
@@ -10,21 +10,21 @@ import git_portfolio.responses as res
 import git_portfolio.use_cases.command_checker as command_checker
 
 
-class GitUseCase:
-    """Execution of git use case."""
+class PoetryUseCase:
+    """Execution of poetry use case."""
 
     def __init__(self) -> None:
         """Constructor."""
-        self.err_output = command_checker.CommandChecker().check("git")
+        self.err_output = command_checker.CommandChecker().check("poetry")
 
     def execute(
         self, git_selected_repos: list[str], command: str, args: tuple[str]
     ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
-        """Batch `git` command.
+        """Batch `poetry` command.
 
         Args:
             git_selected_repos: list of configured repo names.
-            command: git command eg. checkout, pull, push...
+            command: poetry command eg. install, version, update...
             args: command arguments.
 
         Returns:
@@ -39,14 +39,14 @@ class GitUseCase:
             output += f"{folder_name}: "
             try:
                 popen = subprocess.Popen(  # noqa: S603, S607
-                    ["git", command, *args],
+                    [command, *args],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     cwd=os.path.join(cwd, folder_name),
                 )
                 stdout, error = popen.communicate()
                 if popen.returncode == 0:
-                    # case for command with no output on success such as `git add .`
+                    # case for command with no output on success
                     if not stdout:
                         output += f"{command} successful.\n"
                     else:

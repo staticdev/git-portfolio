@@ -127,6 +127,15 @@ def mock_gh_delete_branch_use_case(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
+def mock_poetry_use_case(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking PoetryUseCase."""
+    return mocker.patch(
+        "git_portfolio.use_cases.poetry.PoetryUseCase",
+        autospec=True,
+    )
+
+
+@pytest.fixture
 def mock_prompt_inquirer_prompter(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking prompt.InquirerPrompter."""
     return mocker.patch("git_portfolio.prompt.InquirerPrompter", autospec=True)
@@ -190,6 +199,19 @@ def test_add_success(
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
         [REPO], "add", (".",)
+    )
+
+
+def test_poetry_success(
+    mock_poetry_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls poetry with 'version'."""
+    runner.invoke(git_portfolio.__main__.main, ["poetry", "version"], prog_name="gitp")
+
+    mock_poetry_use_case.return_value.execute.assert_called_once_with(
+        [REPO], "poetry", ("version",)
     )
 
 
