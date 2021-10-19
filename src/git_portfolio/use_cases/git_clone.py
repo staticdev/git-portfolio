@@ -1,12 +1,13 @@
 """Git clone use case."""
+from __future__ import annotations
+
 import pathlib
 import subprocess  # noqa: S404
-from typing import List
 from typing import Union
 
 import git_portfolio.github_service as ghs
 import git_portfolio.responses as res
-import git_portfolio.use_cases.git as git
+import git_portfolio.use_cases.command_checker as command_checker
 
 
 class GitCloneUseCase:
@@ -15,10 +16,10 @@ class GitCloneUseCase:
     def __init__(self, github_service: ghs.GithubService) -> None:
         """Constructor."""
         self.github_service = github_service
-        self.err_output = git.GitUseCase.check_command_installed("git")
+        self.err_output = command_checker.CommandChecker().check("git")
 
     def execute(
-        self, git_selected_repos: List[str]
+        self, git_selected_repos: list[str]
     ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
         """Batch `git clone` command.
 

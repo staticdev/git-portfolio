@@ -1,5 +1,6 @@
 """Config repositories use case."""
-from typing import List
+from __future__ import annotations
+
 from typing import Union
 
 import git_portfolio.config_manager as cm
@@ -15,7 +16,7 @@ class ConfigReposUseCase:
         self.config_manager = config_manager
 
     def execute(
-        self, github_config: cs.GhConnectionSettings, selected_repos: List[str]
+        self, github_config: cs.GhConnectionSettings, selected_repos: list[str]
     ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
         """Configuration of git repositories."""
         self.config_manager.config.github_access_token = github_config.access_token

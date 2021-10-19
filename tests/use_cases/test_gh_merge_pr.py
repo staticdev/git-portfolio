@@ -1,5 +1,5 @@
 """Test cases for the Github merge PR use case."""
-from typing import List
+from __future__ import annotations
 
 import pytest
 from pytest_mock import MockerFixture
@@ -38,7 +38,7 @@ def mock_gh_delete_branch_use_case(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
-def domain_mprs() -> List[mpr.PullRequestMerge]:
+def domain_mprs() -> list[mpr.PullRequestMerge]:
     """Pull request merge fixture."""
     mprs = [
         mpr.PullRequestMerge("branch", "main", "org name", False),
@@ -50,7 +50,7 @@ def domain_mprs() -> List[mpr.PullRequestMerge]:
 def test_action(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    domain_mprs: List[mpr.PullRequestMerge],
+    domain_mprs: list[mpr.PullRequestMerge],
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
@@ -65,7 +65,7 @@ def test_action_delete_branch(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
     mock_gh_delete_branch_use_case: MockerFixture,
-    domain_mprs: List[mpr.PullRequestMerge],
+    domain_mprs: list[mpr.PullRequestMerge],
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value

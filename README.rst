@@ -42,6 +42,7 @@ Features
 * Configure multiple working repositories.
 * Batch git_ command with subcommands `add`, `checkout`, `commit`, `pull`, `push`, `reset` and `status`.
 * Batch create/close/reopen issues, create pull requests, merge pull requests and delete branches by name on GitHub.
+* Batch poetry commands such as `version patch`, `install`, `update` or `add`.
 
 
 Requirements
@@ -86,6 +87,7 @@ Basic usage
 
    $ gitp create issues  # create same issue for all projects
    $ gitp checkout -b new-branch  # checks out new branch new-branch in all projects
+   $ gitp poetry version minor  # bumps minor version of all projects that have pyproject.toml version
 
 
 .. end-basic-usage

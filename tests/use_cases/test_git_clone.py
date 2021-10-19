@@ -23,17 +23,17 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
-def mock_check_command_installed(mocker: MockerFixture) -> Any:
-    """Fixture for mocking GitUseCase.check_command_installed."""
+def mock_command_checker(mocker: MockerFixture) -> Any:
+    """Fixture for mocking CommandChecker.check."""
     return mocker.patch(
-        "git_portfolio.use_cases.git.GitUseCase.check_command_installed",
+        "git_portfolio.use_cases.command_checker.CommandChecker.check",
         return_value="",
     )
 
 
 def test_execute_success(
     mock_github_service: MockerFixture,
-    mock_check_command_installed: MockerFixture,
+    mock_command_checker: MockerFixture,
     mock_popen: MockerFixture,
 ) -> None:
     """It returns success messages."""
@@ -48,16 +48,14 @@ def test_execute_success(
 
 def test_execute_git_not_installed(
     mock_github_service: MockerFixture,
-    mock_check_command_installed: MockerFixture,
-    mock_popen: MockerFixture,
+    mock_command_checker: MockerFixture,
 ) -> None:
     """It returns failure with git not installed message."""
-    mock_check_command_installed.return_value = "some error msg"
+    mock_command_checker.return_value = "some error msg"
     github_service = mock_github_service.return_value
-    mock_popen.side_effect = FileNotFoundError
     response = gcuc.GitCloneUseCase(github_service).execute(["staticdev/omg"])
 
-    mock_check_command_installed.assert_called_with("git")
+    mock_command_checker.assert_called_with("git")
     assert bool(response) is False
     assert "some error msg" == response.value["message"]
 
@@ -80,7 +78,7 @@ def test_execute_git_not_installed_e2e(
 
 def test_execute_error_during_execution(
     mock_github_service: MockerFixture,
-    mock_check_command_installed: MockerFixture,
+    mock_command_checker: MockerFixture,
     mock_popen: MockerFixture,
 ) -> None:
     """It returns success message with the error on output."""
