@@ -51,7 +51,7 @@ def test_execute_poetry_not_installed(mock_command_checker: MockerFixture) -> No
     """It returns failure with poetry not installed message."""
     mock_command_checker.return_value = "error"
     response = poetry.PoetryUseCase().execute(
-        ["staticdev/notcloned"], "poetry", ("version")
+        ["staticdev/notcloned"], "poetry", ("version",)
     )
 
     assert bool(response) is False
