@@ -57,6 +57,7 @@ def gitp_config_check(func: F) -> F:
 
 
 @click.group("cli")
+@click.version_option()
 def main() -> None:
     """Git Portfolio."""
     pass
