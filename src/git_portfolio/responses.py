@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 from typing import Any
-from typing import Optional
-from typing import Union
 
 import git_portfolio.request_objects.issue_list as il
 
@@ -20,12 +18,12 @@ class ResponseTypes:
 class ResponseFailure:
     """Response failure class."""
 
-    def __init__(self, type_: str, message: Union[str, Exception, None]) -> None:
+    def __init__(self, type_: str, message: str | Exception | None) -> None:
         """Constructor."""
         self.type = type_
         self.message = self._format_message(message)
 
-    def _format_message(self, msg: Union[str, Exception, None]) -> Optional[str]:
+    def _format_message(self, msg: str | Exception | None) -> str | None:
         """Format message when it is an exception.
 
         Args:
@@ -39,7 +37,7 @@ class ResponseFailure:
         return msg
 
     @property
-    def value(self) -> dict[str, Optional[str]]:
+    def value(self) -> dict[str, str | None]:
         """Value property.
 
         Returns:

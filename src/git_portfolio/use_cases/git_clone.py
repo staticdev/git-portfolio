@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import pathlib
 import subprocess  # noqa: S404
-from typing import Union
 
 import git_portfolio.github_service as ghs
 import git_portfolio.responses as res
@@ -20,7 +19,7 @@ class GitCloneUseCase:
 
     def execute(
         self, git_selected_repos: list[str]
-    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    ) -> res.ResponseFailure | res.ResponseSuccess:
         """Batch `git clone` command.
 
         Args:

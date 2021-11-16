@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Optional
-from typing import Union
 
 
 class IssueListInvalidRequest:
@@ -29,7 +27,7 @@ class IssueListInvalidRequest:
 class IssueListValidRequest:
     """Valid request for list."""
 
-    def __init__(self, filters: Optional[dict[str, str]] = None) -> None:
+    def __init__(self, filters: dict[str, str] | None = None) -> None:
         """Initializer."""
         self.filters = filters
 
@@ -39,8 +37,8 @@ class IssueListValidRequest:
 
 
 def build_list_request(
-    filters: Optional[dict[str, str]] = None
-) -> Union[IssueListInvalidRequest, IssueListValidRequest]:
+    filters: dict[str, str] | None = None
+) -> IssueListInvalidRequest | IssueListValidRequest:
     """Create request from filters."""
     accepted_filters = ["obj__eq", "state__eq", "title__contains"]
     invalid_req = IssueListInvalidRequest()

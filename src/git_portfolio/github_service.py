@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import copy
 from typing import Any
-from typing import Union
 
 import github3
 
@@ -24,7 +23,7 @@ class GithubService:
         self.user = self._test_connection(self.connection)
         self.repos = self.connection.repositories()
 
-    def _get_connection(self) -> Union[github3.GitHub, github3.GitHubEnterprise]:
+    def _get_connection(self) -> github3.GitHub | github3.GitHubEnterprise:
         """Get Github connection, create one if does not exist."""
         if hasattr(self, "connection"):
             return self.connection
@@ -41,7 +40,7 @@ class GithubService:
 
     @staticmethod
     def _test_connection(
-        connection: Union[github3.GitHub, github3.GitHubEnterprise]
+        connection: github3.GitHub | github3.GitHubEnterprise,
     ) -> github3.users.AuthenticatedUser:
         """Test connection by returning user."""
         try:
@@ -102,7 +101,7 @@ class GithubService:
     def list_issues_from_repo(
         self,
         github_repo: str,
-        request: Union[il.IssueListValidRequest, il.IssueListInvalidRequest],
+        request: il.IssueListValidRequest | il.IssueListInvalidRequest,
     ) -> list[i.Issue]:
         """Return list of issues from one repository."""
         if isinstance(request, il.IssueListValidRequest):
@@ -112,7 +111,7 @@ class GithubService:
             if not request.filters:
                 issues = list(repo.issues())
                 for issue in issues:
-                    labels = set(label.name for label in issue.labels())
+                    labels = {label.name for label in issue.labels()}
                     domain_issues.append(
                         i.Issue(issue.number, issue.title, issue.body, labels)
                     )
@@ -132,7 +131,7 @@ class GithubService:
                 issues = [issue for issue in issues if title_query in issue.title]
 
             for issue in issues:
-                labels = set(label.name for label in issue.labels())
+                labels = {label.name for label in issue.labels()}
                 domain_issues.append(
                     i.Issue(issue.number, issue.title, issue.body, labels)
                 )
