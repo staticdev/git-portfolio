@@ -75,3 +75,19 @@ def test_action_delete_branch(
 
     assert "success message\n" == use_case.output
     mock_gh_delete_branch_use_case.assert_called_once()
+
+
+@pytest.mark.integration
+def test_action_delete_branch_integration(
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
+    domain_mprs: list[mpr.PullRequestMerge],
+) -> None:
+    """It returns success."""
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
+    use_case.action(REPO, domain_mprs[1])
+
+    assert "success message\n" == use_case.output
+    github_service.delete_branch_from_repo.assert_called_once()
