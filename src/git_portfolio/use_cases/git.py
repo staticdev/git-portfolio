@@ -4,7 +4,6 @@ from __future__ import annotations
 import os
 import pathlib
 import subprocess  # noqa: S404
-from typing import Union
 
 import git_portfolio.responses as res
 import git_portfolio.use_cases.command_checker as command_checker
@@ -19,7 +18,7 @@ class GitUseCase:
 
     def execute(
         self, git_selected_repos: list[str], command: str, args: tuple[str]
-    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    ) -> res.ResponseFailure | res.ResponseSuccess:
         """Batch `git` command.
 
         Args:

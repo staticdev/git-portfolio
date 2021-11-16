@@ -48,6 +48,7 @@ black = "^21.10b0"
 sphinx-click = "^3.0.2"
 types-PyYAML = "^6.0.1"
 coverage = {version = "6.1.2", extras = ["toml"]}
+pyupgrade = "^2.29.1"
 
 [tool.poetry.scripts]
 gitp = "git_portfolio.__main__:main"

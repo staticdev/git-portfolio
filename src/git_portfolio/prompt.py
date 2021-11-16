@@ -95,7 +95,7 @@ class InquirerPrompter:
             correct = answers["correct"]
 
         labels = (
-            set(label.strip() for label in answers["labels"].split(","))
+            {label.strip() for label in answers["labels"].split(",")}
             if answers["labels"]
             else set()
         )
@@ -186,7 +186,7 @@ class InquirerPrompter:
             correct = answers["correct"]
 
         labels = (
-            set(label.strip() for label in answers["labels"].split(","))
+            {label.strip() for label in answers["labels"].split(",")}
             if answers["labels"]
             else set()
         )

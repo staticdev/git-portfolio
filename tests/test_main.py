@@ -484,10 +484,8 @@ def test_config_repos_connection_error(
     )
 
     assert result.output.startswith(
-        (
-            "Error(s) found during execution:\nUnable to reach server. Please check "
-            "your network and credentials and try again.\n"
-        )
+        "Error(s) found during execution:\nUnable to reach server. Please check "
+        "your network and credentials and try again.\n"
     )
     assert type(result.exception) == SystemExit
 
