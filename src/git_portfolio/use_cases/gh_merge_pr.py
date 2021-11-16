@@ -19,4 +19,4 @@ class GhMergePrUseCase(gh.GhUseCase):
             delete_branch_use_case = dbr.GhDeleteBranchUseCase(
                 self.config_manager, self.github_service
             )
-            delete_branch_use_case.execute(pr_merge.head, github_repo)
+            delete_branch_use_case.execute(pr_merge.head)
