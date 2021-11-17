@@ -38,12 +38,10 @@ def test_execute_success(
 ) -> None:
     """It returns success messages."""
     github_service = mock_github_service.return_value
-    response = gcuc.GitCloneUseCase(github_service).execute(
-        ["staticdev/omg", "staticdev/omg2"]
-    )
+    response = gcuc.GitCloneUseCase(github_service).execute(["user/repo", "user/repo2"])
 
     assert bool(response) is True
-    assert response.value == "omg: clone successful.\nomg2: clone successful.\n"
+    assert response.value == "repo: clone successful.\nrepo2: clone successful.\n"
 
 
 def test_execute_git_not_installed(
@@ -53,7 +51,7 @@ def test_execute_git_not_installed(
     """It returns failure with git not installed message."""
     mock_command_checker.return_value = "some error msg"
     github_service = mock_github_service.return_value
-    response = gcuc.GitCloneUseCase(github_service).execute(["staticdev/omg"])
+    response = gcuc.GitCloneUseCase(github_service).execute(["user/repo"])
 
     mock_command_checker.assert_called_with("git")
     assert bool(response) is False
@@ -67,7 +65,7 @@ def test_execute_git_not_installed_e2e(
     """It returns failure with git not installed message."""
     github_service = mock_github_service.return_value
     mock_popen.side_effect = FileNotFoundError
-    response = gcuc.GitCloneUseCase(github_service).execute(["staticdev/omg"])
+    response = gcuc.GitCloneUseCase(github_service).execute(["user/repo"])
 
     assert bool(response) is False
     assert (
@@ -88,7 +86,7 @@ def test_execute_error_during_execution(
         b"",
         b"fatal: destination path 'x' already exists and is not an empty directory.\n",
     )
-    response = gcuc.GitCloneUseCase(github_service).execute(["staticdev/x"])
+    response = gcuc.GitCloneUseCase(github_service).execute(["user/x"])
 
     assert bool(response) is True
     assert response.value == (

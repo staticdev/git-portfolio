@@ -17,7 +17,7 @@ class GitUseCase:
         self.err_output = command_checker.CommandChecker().check("git")
 
     def execute(
-        self, git_selected_repos: list[str], command: str, args: tuple[str]
+        self, git_selected_repos: list[str], command: str, args: tuple[str, ...]
     ) -> res.ResponseFailure | res.ResponseSuccess:
         """Batch `git` command.
 
@@ -45,15 +45,18 @@ class GitUseCase:
                 )
                 stdout, error = popen.communicate()
                 if popen.returncode == 0:
-                    # case for command with no output on success such as `git add .`
-                    if not stdout:
+                    if stdout:
+                        stdout_str = stdout.decode("utf-8")
+                        output += f"{stdout_str}\n"
+                    else:
                         output += f"{command} successful.\n"
+                else:
+                    if error:
+                        error_str = error.decode("utf-8")
+                        output += f"{error_str}"
                     else:
                         stdout_str = stdout.decode("utf-8")
                         output += f"{stdout_str}\n"
-                else:
-                    error_str = error.decode("utf-8")
-                    output += f"{error_str}"
             except FileNotFoundError as fnf_error:
                 output += f"{fnf_error.strerror}: {fnf_error.filename}\n"
         return res.ResponseSuccess(output)

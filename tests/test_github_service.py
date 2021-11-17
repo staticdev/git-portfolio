@@ -239,8 +239,8 @@ def test_get_username(
     mock_github3_login: MockerFixture,
 ) -> None:
     """It returns user name."""
-    expected = "staticdev"
-    mock_github3_login.return_value.me.return_value.login = "staticdev"
+    expected = "user"
+    mock_github3_login.return_value.me.return_value.login = "user"
     result = gc.GithubService(domain_gh_conn_settings[0]).get_username()
 
     assert result == expected

@@ -168,7 +168,7 @@ def test_merge_pull_requests(mock_inquirer_prompt: MockerFixture) -> None:
         "delete_branch": True,
         "correct": True,
     }
-    result = p.InquirerPrompter.merge_pull_requests("staticdev", [REPO])
+    result = p.InquirerPrompter.merge_pull_requests("user", [REPO])
     expected = prm.PullRequestMerge("branch", "main", "org name", True)
 
     assert result == expected
