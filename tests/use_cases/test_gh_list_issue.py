@@ -33,9 +33,7 @@ def domain_issues() -> list[i.Issue]:
 def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking CONFIG_MANAGER."""
     mock = mocker.patch("git_portfolio.config_manager.ConfigManager", autospec=True)
-    mock.return_value.config = c.Config(
-        "", "my-token", ["staticdev/omg", "staticdev/omg2"]
-    )
+    mock.return_value.config = c.Config("", "my-token", ["user/repo", "user/repo2"])
     return mock
 
 

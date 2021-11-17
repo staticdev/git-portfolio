@@ -29,7 +29,6 @@ def test_init_invalid_config(
     p.write_text("in:valid")
     mock_os_join_path.side_effect = [str(d), str(p)]
     cm.ConfigManager()
-    # os_truncate.assert_called_once_with(0)
 
 
 def test_save_invalid_yaml(
@@ -41,14 +40,13 @@ def test_save_invalid_yaml(
         "github_access_token: aaaaabbbbbccccc12345"
         "github_hostname: ''"
         "github_selected_repos:"
-        " - staticdev/test"
+        " - user/test"
     )
     d = tmp_path
     p = d / filename
     p.write_text(content)
     mock_os_join_path.side_effect = [str(d), str(p)]
     cm.ConfigManager()
-    # os_truncate.assert_called_once_with(0)
 
 
 def test_save_config_no_file(
@@ -87,7 +85,7 @@ def test_save_config_success(
         "github_access_token: aaaaabbbbbccccc12345\n"
         "github_hostname: ''\n"
         "github_selected_repos:\n"
-        " - staticdev/test\n"
+        " - user/test\n"
     )
     d = tmp_path
     p = d / filename

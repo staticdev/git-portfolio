@@ -598,7 +598,7 @@ def test_merge_prs(
     """It executes gh_merge_pr."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    github_service.github_username = "staticdev"
+    github_service.github_username = "user"
     github_service.config = c.Config("", "abc", [REPO])
     runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
 

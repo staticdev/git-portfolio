@@ -26,11 +26,11 @@ def test_execute_success(
     """It returns success messages."""
     mock_command_checker.return_value = ""
     response = poetry.PoetryUseCase().execute(
-        ["staticdev/omg", "staticdev/omg2"], "poetry", ("version",)
+        ["user/repo", "user/repo2"], "poetry", ("version",)
     )
 
     assert bool(response) is True
-    assert response.value == "omg: some output\nomg2: some output\n"
+    assert response.value == "repo: some output\nrepo2: some output\n"
 
 
 # TODO: this is only to maintain logic from git use case
@@ -40,18 +40,18 @@ def test_execute_success_no_output(mock_popen: MockerFixture) -> None:
     """It returns success message."""
     mock_popen.return_value.communicate.return_value = (b"", b"")
     response = poetry.PoetryUseCase().execute(
-        ["staticdev/omg", "staticdev/omg2"], "poetry", ("someoptionwithoutoutput",)
+        ["user/repo", "user/repo2"], "poetry", ("someoptionwithoutoutput",)
     )
 
     assert bool(response) is True
-    assert response.value == "omg: poetry successful.\nomg2: poetry successful.\n"
+    assert response.value == "repo: poetry successful.\nrepo2: poetry successful.\n"
 
 
 def test_execute_poetry_not_installed(mock_command_checker: MockerFixture) -> None:
     """It returns failure with poetry not installed message."""
     mock_command_checker.return_value = "error"
     response = poetry.PoetryUseCase().execute(
-        ["staticdev/notcloned"], "poetry", ("version",)
+        ["user/notcloned"], "poetry", ("version",)
     )
 
     assert bool(response) is False
@@ -66,7 +66,7 @@ def test_execute_no_folder(
     mock_exception = FileNotFoundError(2, "No such file or directory")
     mock_exception.filename = "/path/x"
     mock_popen.side_effect = mock_exception
-    response = poetry.PoetryUseCase().execute(["staticdev/x"], "poetry", ("version",))
+    response = poetry.PoetryUseCase().execute(["user/x"], "poetry", ("version",))
 
     assert bool(response) is True
     assert response.value == "x: No such file or directory: /path/x\n"
@@ -80,7 +80,7 @@ def test_execute_error_during_execution(mock_popen: MockerFixture) -> None:
         b"error: pathspec 'xyz' did not match any file(s) known to poetry",
     )
     response = poetry.PoetryUseCase().execute(
-        ["staticdev/notcloned"], "poetry", ("version",)
+        ["user/notcloned"], "poetry", ("version",)
     )
 
     assert bool(response) is True

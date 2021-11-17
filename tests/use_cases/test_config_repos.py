@@ -30,7 +30,7 @@ def test_execute(
     config_manager = mock_config_manager.return_value
     config_manager.config = c.Config("", "abc", [])
     response = cr.ConfigReposUseCase(config_manager).execute(
-        domain_gh_conn_settings, ["staticdev/omg"]
+        domain_gh_conn_settings, ["user/repo"]
     )
 
     assert bool(response) is True
