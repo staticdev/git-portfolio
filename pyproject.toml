@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "git-portfolio"
-version = "0.15.2"
+version = "0.15.3"
 description = "Git Portfolio"
 authors = ["staticdev <staticdev-support@protonmail.com>"]
 license = "MIT"
