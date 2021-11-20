@@ -40,7 +40,7 @@ Features
 --------
 
 * Configure multiple working repositories.
-* Batch git_ command with subcommands `add`, `checkout`, `commit`, `pull`, `push`, `reset` and `status`.
+* Batch git_ command with subcommands `add`, `checkout`, `commit`, `diff`, `pull`, `push`, `reset` and `status`.
 * Batch create/close/reopen issues, create pull requests, merge pull requests and delete branches by name on GitHub.
 * Batch poetry commands such as `version patch`, `install`, `update` or `add`.
 
