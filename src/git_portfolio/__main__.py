@@ -125,6 +125,16 @@ def commit(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     )
 
 
+@main.command("diff", context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+@gitp_config_check
+def diff(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git diff` command."""
+    return git.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, "diff", args
+    )
+
+
 @main.command("pull", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @gitp_config_check
