@@ -31,25 +31,22 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
-def mock_gh_list_issue_use_case(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking GhListIssueUseCase."""
+def mock_views_issues(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking views.issues."""
     return mocker.patch(
-        "git_portfolio.use_cases.gh_list_issue.GhListIssueUseCase",
-        autospec=True,
+        "git_portfolio.views.issues",
     )
 
 
 def test_action(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    mock_gh_list_issue_use_case: MockerFixture,
+    mock_views_issues: MockerFixture,
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    mock_gh_list_issue_use_case.return_value.execute.return_value = (
-        res.ResponseSuccess()
-    )
+    mock_views_issues.return_value = res.ResponseSuccess()
     use_case = ghci.GhCloseIssueUseCase(config_manager, github_service)
     use_case.action(REPO, REQUEST_ISSUES)
 
@@ -59,12 +56,12 @@ def test_action(
 def test_action_failed(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    mock_gh_list_issue_use_case: MockerFixture,
+    mock_views_issues: MockerFixture,
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    mock_gh_list_issue_use_case.return_value.execute.return_value = res.ResponseFailure(
+    mock_views_issues.return_value = res.ResponseFailure(
         res.ResponseTypes.PARAMETERS_ERROR, "msg"
     )
     use_case = ghci.GhCloseIssueUseCase(config_manager, github_service)
