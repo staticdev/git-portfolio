@@ -215,6 +215,23 @@ def test_poetry_success(
     )
 
 
+def test_poetry_with_options_success(
+    mock_poetry_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls poetry with 'add pytest --group test'."""
+    runner.invoke(
+        git_portfolio.__main__.main,
+        ["poetry", "add", "pytest", "--group", "test"],
+        prog_name="gitp",
+    )
+
+    mock_poetry_use_case.return_value.execute.assert_called_once_with(
+        [REPO], "poetry", ("add", "pytest", "--group", "test")
+    )
+
+
 def test_checkout_success(
     mock_git_use_case: MockerFixture,
     mock_config_manager: MockerFixture,
