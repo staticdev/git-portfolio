@@ -309,7 +309,7 @@ def reopen_issues() -> res.ResponseFailure | res.ResponseSuccess:
     )
 
 
-@main.command("poetry")
+@main.command("poetry", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
 @gitp_config_check
 def poetry_cmd(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
