@@ -1,4 +1,5 @@
 """Base Github use case."""
+import traceback
 from typing import Any
 from typing import Union
 
@@ -28,9 +29,16 @@ class GhUseCase:
         try:
             method_to_call = getattr(self.github_service, method)
             self.output += method_to_call(*args, **kwargs)
-        except AttributeError as ae:
+        except ghs.GithubServiceError as gse:
             self.error = True
-            self.output += str(ae)
+            self.output += str(gse)
+        except Exception:
+            self.error = True
+            self.output += (
+                "An unexpected error occured. Please report at "
+                "https://github.com/staticdev/git-portfolio/issues/new "
+                f"with the following info:\n{traceback.format_exc()}"
+            )
 
     def generate_response(self) -> Union[res.ResponseFailure, res.ResponseSuccess]:
         """Create appropriate response object."""

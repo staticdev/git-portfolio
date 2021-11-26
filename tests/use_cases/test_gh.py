@@ -3,6 +3,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 import git_portfolio.domain.config as c
+import git_portfolio.github_service as gs
 import git_portfolio.use_cases.gh as gh
 
 
@@ -56,7 +57,9 @@ def test_call_github_service_error(
     """It outputs error message from Github."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    github_service.create_issue_from_repo.side_effect = AttributeError("some error")
+    github_service.create_issue_from_repo.side_effect = gs.GithubServiceError(
+        "some error"
+    )
     gh_use_case = gh.GhUseCase(config_manager, github_service)
 
     gh_use_case.call_github_service(
@@ -64,6 +67,28 @@ def test_call_github_service_error(
     )
 
     assert gh_use_case.output == "some error"
+
+
+def test_call_github_service_unexpected_error(
+    mocker: MockerFixture,
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
+) -> None:
+    """It outputs instructions for issue creation."""
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    error_msg = "some error"
+    github_service.create_issue_from_repo.side_effect = Exception(error_msg)
+    gh_use_case = gh.GhUseCase(config_manager, github_service)
+
+    gh_use_case.call_github_service(
+        "create_issue_from_repo", mocker.Mock(), mocker.Mock()
+    )
+
+    assert gh_use_case.output.startswith(
+        "An unexpected error occured. Please report at "
+    )
+    assert gh_use_case.output.endswith(f"{error_msg}\n")
 
 
 def test_generate_response_success(

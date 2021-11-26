@@ -13,6 +13,12 @@ import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.request_objects.issue_list as il
 
 
+class GithubServiceError(Exception):
+    """Generic error for GithubService."""
+
+    pass
+
+
 class GithubService:
     """Github service class."""
 
@@ -46,11 +52,11 @@ class GithubService:
         try:
             return connection.me()
         except github3.exceptions.AuthenticationFailed:
-            raise AttributeError("Invalid token.") from None
+            raise GithubServiceError("Invalid token.") from None
         except github3.exceptions.ConnectionError as github_error:
             raise ConnectionError() from github_error
         except github3.exceptions.IncompleteResponse:
-            raise AttributeError(
+            raise GithubServiceError(
                 "Invalid response. Your token might not be properly scoped."
             ) from None
 
@@ -94,7 +100,7 @@ class GithubService:
             else:
                 return f"{github_repo}: {client_error.msg}.\n"
         except github3.exceptions.GitHubError as github_error:
-            raise AttributeError(
+            raise GithubServiceError(
                 f"{github_repo}: {github_error.msg}\n"
             ) from github_error
 
@@ -202,7 +208,7 @@ class GithubService:
                     extra += f" Invalid field {error['field']}."
             return f"{github_repo}: {github_exception.msg}.{extra}\n"
         except github3.exceptions.GitHubError as github_error:
-            raise AttributeError(
+            raise GithubServiceError(
                 f"{github_repo}: {github_error.msg}\n"
             ) from github_error
 
@@ -233,7 +239,7 @@ class GithubService:
         except github3.exceptions.NotFoundError as github_exception:
             return f"{github_repo}: {github_exception.msg}.\n"
         except github3.exceptions.GitHubError as github_error:
-            raise AttributeError(
+            raise GithubServiceError(
                 f"{github_repo}: {github_error.msg}\n"
             ) from github_error
 
@@ -256,9 +262,14 @@ class GithubService:
         elif len(pulls) == 1:
             pull = pulls[0]
             output = ""
-            pull.merge()
-            output += f"{github_repo}: merge PR successful.\n"
-            return output
+            try:
+                pull.merge()
+                output += f"{github_repo}: merge PR successful.\n"
+                return output
+            except github3.exceptions.MethodNotAllowed as github_exception:
+                raise GithubServiceError(
+                    f"{github_repo}: {github_exception.msg}\n"
+                ) from github_exception
         else:
             return (
                 f"{github_repo}: unexpected number of PRs for "
