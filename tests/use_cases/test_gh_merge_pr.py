@@ -56,6 +56,7 @@ def test_action(
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
+
     use_case.action(REPO, domain_mprs[0])
 
     assert "success message\n" == use_case.output
@@ -71,10 +72,28 @@ def test_action_delete_branch(
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
+
     use_case.action(REPO, domain_mprs[1])
 
     assert "success message\n" == use_case.output
     mock_gh_delete_branch_use_case.assert_called_once()
+
+
+def test_action_delete_branch_with_error(
+    mock_config_manager: MockerFixture,
+    mock_github_service: MockerFixture,
+    mock_gh_delete_branch_use_case: MockerFixture,
+    domain_mprs: list[mpr.PullRequestMerge],
+) -> None:
+    """It returns does not call delete branch."""
+    config_manager = mock_config_manager.return_value
+    github_service = mock_github_service.return_value
+    use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
+    use_case.error = True
+
+    use_case.action(REPO, domain_mprs[1])
+
+    assert not mock_gh_delete_branch_use_case.called
 
 
 @pytest.mark.integration
@@ -87,6 +106,7 @@ def test_action_delete_branch_integration(
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
+
     use_case.action(REPO, domain_mprs[1])
 
     assert "success message\n" == use_case.output
