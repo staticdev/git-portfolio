@@ -59,14 +59,6 @@ def mock_git_clone_use_case(mocker: MockerFixture) -> MockerFixture:
 
 
 @pytest.fixture
-def mock_git_status_use_case(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking GitStatusUseCase."""
-    return mocker.patch(
-        "git_portfolio.use_cases.git_status_use_case.GitStatusUseCase", autospec=True
-    )
-
-
-@pytest.fixture
 def mock_git_use_case(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GitUseCase."""
     return mocker.patch("git_portfolio.use_cases.git.GitUseCase", autospec=True)
@@ -176,12 +168,6 @@ def test_gitp_config_check_no_repos(
     mock_config_manager: MockerFixture, runner: CliRunner
 ) -> None:
     """It outputs no repos selected error message."""
-
-    @git_portfolio.__main__.main.command("test")
-    @git_portfolio.__main__.gitp_config_check
-    def _() -> res.ResponseFailure:
-        return res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, "some error msg")
-
     mock_config_manager.config_is_empty.return_value = True
     result = runner.invoke(git_portfolio.__main__.main, ["test"], prog_name="gitp")
 
