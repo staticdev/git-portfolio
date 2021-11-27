@@ -56,10 +56,11 @@ gitp = "git_portfolio.__main__:main"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
+tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["git_portfolio"]
+source = ["git_portfolio", "tests"]
 
 [tool.coverage.report]
 show_missing = true

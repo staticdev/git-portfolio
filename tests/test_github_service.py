@@ -397,7 +397,7 @@ def test_list_issues_from_repo_obj_filter(
     if value == "issue":
         assert response[0].number == domain_issues[3].number
         assert response[0].title == domain_issues[3].title
-    elif value == "pr":
+    if value == "pull request":
         assert response[0].number == domain_issues[4].number
         assert response[0].title == domain_issues[4].title
 
