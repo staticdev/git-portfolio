@@ -797,11 +797,13 @@ def test_merge_pull_request_from_repo_not_found(
     """It gives error message."""
     repo = mock_github3_login.return_value.repositories.return_value[1]
     repo.pull_requests.return_value = []
-    response = gs.GithubService(
-        domain_gh_conn_settings[0]
-    ).merge_pull_request_from_repo(REPO, domain_mpr)
 
-    assert response == f"{REPO}: no open PR found for branch:main.\n"
+    with pytest.raises(
+        gs.GithubServiceError, match=f"{REPO}: no open PR found for branch:main.\n"
+    ):
+        gs.GithubService(domain_gh_conn_settings[0]).merge_pull_request_from_repo(
+            REPO, domain_mpr
+        )
 
 
 def test_merge_pull_request_from_repo_ambiguous(
