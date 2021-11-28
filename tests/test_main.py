@@ -5,6 +5,7 @@ from pytest_mock import MockerFixture
 
 import git_portfolio.__main__
 import git_portfolio.domain.config as c
+import git_portfolio.github_service as gs
 import git_portfolio.responses as res
 
 
@@ -31,6 +32,16 @@ def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
 def mock_github_service(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GithubService."""
     return mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
+
+
+@pytest.fixture
+def mock_github_service_error(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking GithubService with error."""
+    return mocker.patch(
+        "git_portfolio.github_service.GithubService",
+        autospec=True,
+        side_effect=gs.GithubServiceError,
+    )
 
 
 @pytest.fixture
@@ -407,7 +418,7 @@ def test_config_init_wrong_token(
     assert result.output == "Error: message\nsuccess message\n"
 
 
-def test_config_init_connection_error(
+def test_config_init_service_error(
     mock_prompt_inquirer_prompter: MockerFixture,
     mock_config_manager: MockerFixture,
     mock_config_init_use_case: MockerFixture,
@@ -462,45 +473,19 @@ def test_config_repos_do_not_change(
     assert result.exit_code == 0
 
 
-def test_config_repos_wrong_token(
+def test_config_repos_service_error(
     mock_prompt_inquirer_prompter: MockerFixture,
-    mock_github_service: MockerFixture,
+    mock_github_service_error: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It executes _get_github_service with token error."""
+    """It raises system exit."""
     mock_config_manager.config_is_empty.return_value = False
     mock_prompt_inquirer_prompter.new_repos.return_value = True
-    mock_github_service.side_effect = AttributeError
     result = runner.invoke(
         git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
     )
 
-    assert result.output.startswith(
-        "Error(s) found during execution:\nWrong GitHub permissions. Please check your"
-        " token.\n"
-    )
-    assert type(result.exception) == SystemExit
-
-
-def test_config_repos_connection_error(
-    mock_prompt_inquirer_prompter: MockerFixture,
-    mock_github_service: MockerFixture,
-    mock_config_manager: MockerFixture,
-    runner: CliRunner,
-) -> None:
-    """It executes _get_github_service with token error."""
-    mock_config_manager.config_is_empty.return_value = False
-    mock_prompt_inquirer_prompter.new_repos.return_value = True
-    mock_github_service.side_effect = ConnectionError
-    result = runner.invoke(
-        git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
-    )
-
-    assert result.output.startswith(
-        "Error(s) found during execution:\nUnable to reach server. Please check "
-        "your network and credentials and try again.\n"
-    )
     assert type(result.exception) == SystemExit
 
 
@@ -515,6 +500,17 @@ def test_clone_success(
     runner.invoke(git_portfolio.__main__.main, ["clone"], prog_name="gitp")
 
     mock_git_clone_use_case(github_service).execute.assert_called_once_with([REPO])
+
+
+def test_clone_service_error(
+    mock_github_service_error: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It raises system exit."""
+    result = runner.invoke(git_portfolio.__main__.main, ["clone"], prog_name="gitp")
+
+    assert type(result.exception) == SystemExit
 
 
 def test_create_issues(
@@ -534,6 +530,17 @@ def test_create_issues(
     ).execute.assert_called_once()
 
 
+def test_create_issues_service_error(
+    mock_github_service_error: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It raises system exit."""
+    result = runner.invoke(git_portfolio.__main__.create, ["issues"], prog_name="gitp")
+
+    assert type(result.exception) == SystemExit
+
+
 def test_close_issues(
     mock_gh_close_issue_use_case: MockerFixture,
     mock_github_service: MockerFixture,
@@ -549,6 +556,17 @@ def test_close_issues(
     mock_gh_close_issue_use_case(
         config_manager, github_service
     ).execute.assert_called_once()
+
+
+def test_close_issues_service_error(
+    mock_github_service_error: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It raises system exit."""
+    result = runner.invoke(git_portfolio.__main__.close, ["issues"], prog_name="gitp")
+
+    assert type(result.exception) == SystemExit
 
 
 def test_reopen_issues(
@@ -568,6 +586,17 @@ def test_reopen_issues(
     ).execute.assert_called_once()
 
 
+def test_reopen_issues_service_error(
+    mock_github_service_error: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It raises system exit."""
+    result = runner.invoke(git_portfolio.__main__.reopen, ["issues"], prog_name="gitp")
+
+    assert type(result.exception) == SystemExit
+
+
 def test_create_prs(
     mock_gh_create_pr_use_case: MockerFixture,
     mock_github_service: MockerFixture,
@@ -585,6 +614,17 @@ def test_create_prs(
     ).execute.assert_called_once()
 
 
+def test_create_prs_service_error(
+    mock_github_service_error: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It raises system exit."""
+    result = runner.invoke(git_portfolio.__main__.create, ["prs"], prog_name="gitp")
+
+    assert type(result.exception) == SystemExit
+
+
 def test_close_prs(
     mock_gh_close_issue_use_case: MockerFixture,
     mock_github_service: MockerFixture,
@@ -600,6 +640,17 @@ def test_close_prs(
     mock_gh_close_issue_use_case(
         config_manager, github_service
     ).execute.assert_called_once()
+
+
+def test_close_prs_service_error(
+    mock_github_service_error: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It raises system exit."""
+    result = runner.invoke(git_portfolio.__main__.close, ["prs"], prog_name="gitp")
+
+    assert type(result.exception) == SystemExit
 
 
 def test_merge_prs(
@@ -621,6 +672,17 @@ def test_merge_prs(
     ).execute.assert_called_once()
 
 
+def test_merge_prs_service_error(
+    mock_github_service_error: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It raises system exit."""
+    result = runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
+
+    assert type(result.exception) == SystemExit
+
+
 def test_delete_branches(
     mock_gh_delete_branch_use_case: MockerFixture,
     mock_github_service: MockerFixture,
@@ -636,3 +698,16 @@ def test_delete_branches(
     mock_gh_delete_branch_use_case(
         config_manager, github_service
     ).execute.assert_called_once()
+
+
+def test_delete_branches_service_error(
+    mock_github_service_error: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It raises system exit."""
+    result = runner.invoke(
+        git_portfolio.__main__.delete, ["branches"], prog_name="gitp"
+    )
+
+    assert type(result.exception) == SystemExit

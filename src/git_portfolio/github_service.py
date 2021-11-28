@@ -52,9 +52,14 @@ class GithubService:
         try:
             return connection.me()
         except github3.exceptions.AuthenticationFailed:
-            raise GithubServiceError("Invalid token.") from None
+            raise GithubServiceError(
+                "Wrong GitHub permissions. Please check your token."
+            ) from None
         except github3.exceptions.ConnectionError as github_error:
-            raise ConnectionError() from github_error
+            raise GithubServiceError(
+                "Unable to reach server. Please check your network and credentials. "
+                "This also happens when Github is offline, then try again later."
+            ) from github_error
         except github3.exceptions.IncompleteResponse:
             raise GithubServiceError(
                 "Invalid response. Your token might not be properly scoped."
