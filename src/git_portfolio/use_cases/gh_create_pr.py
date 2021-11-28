@@ -1,5 +1,5 @@
 """Create pull request on Github use case."""
-from typing import Union
+from __future__ import annotations
 
 import git_portfolio.domain.pull_request as pr
 import git_portfolio.request_objects.issue_list as il
@@ -15,7 +15,7 @@ class GhCreatePrUseCase(gh.GhUseCase):
         self,
         github_repo: str,
         pr_obj: pr.PullRequest,
-        request_object: Union[il.IssueListValidRequest, il.IssueListInvalidRequest],
+        request_object: il.IssueListValidRequest | il.IssueListInvalidRequest,
     ) -> None:
         """Create pull requests."""
         github_service_method = "create_pull_request_from_repo"

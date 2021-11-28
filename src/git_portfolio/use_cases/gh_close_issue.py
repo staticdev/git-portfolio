@@ -1,5 +1,5 @@
 """Close issue on Github use case."""
-from typing import Union
+from __future__ import annotations
 
 import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
@@ -13,7 +13,7 @@ class GhCloseIssueUseCase(gh.GhUseCase):
     def action(  # type: ignore[override]
         self,
         github_repo: str,
-        request_object: Union[il.IssueListValidRequest, il.IssueListInvalidRequest],
+        request_object: il.IssueListValidRequest | il.IssueListInvalidRequest,
     ) -> None:
         """Close issues."""
         github_service_method = "close_issues_from_repo"

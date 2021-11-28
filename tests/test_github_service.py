@@ -145,7 +145,7 @@ def test_init_invalid_token(
     with pytest.raises(gs.GithubServiceError) as excinfo:
         gs.GithubService(domain_gh_conn_settings[0])
 
-    assert "Invalid token." == str(excinfo.value)
+    assert "Wrong GitHub permissions. Please check your token." == str(excinfo.value)
 
 
 def test_init_invalid_token_scope(
@@ -174,7 +174,7 @@ def test_init_connection_error(
     mock_github3_login.return_value.me.side_effect = github3.exceptions.ConnectionError(
         mocker.Mock()
     )
-    with pytest.raises(ConnectionError):
+    with pytest.raises(gs.GithubServiceError):
         gs.GithubService(domain_gh_conn_settings[0])
 
 

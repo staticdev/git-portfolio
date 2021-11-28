@@ -1,5 +1,5 @@
 """Initialize config use case."""
-from typing import Union
+from __future__ import annotations
 
 import git_portfolio.config_manager as cm
 import git_portfolio.domain.gh_connection_settings as gcs
@@ -18,7 +18,7 @@ class ConfigInitUseCase:
 
     def execute(
         self, request: gcs.GhConnectionSettings
-    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    ) -> res.ResponseFailure | res.ResponseSuccess:
         """Initialize app configuration."""
         try:
             new_github_service = ghs.GithubService(request)

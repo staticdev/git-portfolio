@@ -72,27 +72,8 @@ def _echo_outputs(response: res.ResponseFailure | res.ResponseSuccess) -> None:
         )
 
 
-def _get_github_service(config: c.Config) -> ghs.GithubService:
-    settings = cs.GhConnectionSettings(
-        config.github_access_token, config.github_hostname
-    )
-    try:
-        return ghs.GithubService(settings)
-    except AttributeError:
-        response = res.ResponseFailure(
-            res.ResponseTypes.PARAMETERS_ERROR,
-            "Wrong GitHub permissions. Please check your token.",
-        )
-    except ConnectionError:
-        response = res.ResponseFailure(
-            res.ResponseTypes.SYSTEM_ERROR,
-            (
-                "Unable to reach server. Please check your network and credentials and "
-                "try again."
-            ),
-        )
-    _echo_outputs(response)
-    raise click.ClickException("")
+def _get_connection_settings(config: c.Config) -> cs.GhConnectionSettings:
+    return cs.GhConnectionSettings(config.github_access_token, config.github_hostname)
 
 
 @main.command("add")
@@ -238,7 +219,12 @@ def config_repos() -> res.ResponseFailure | res.ResponseSuccess:
     )
     if not new_repos:
         return res.ResponseSuccess()
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     repo_names = github_service.get_repo_names()
     selected_repos = p.InquirerPrompter.select_repos(repo_names)
     return cr.ConfigReposUseCase(CONFIG_MANAGER).execute(
@@ -250,7 +236,12 @@ def config_repos() -> res.ResponseFailure | res.ResponseSuccess:
 @gitp_config_check
 def clone() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git clone` command on current folder. Does not accept aditional args."""
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     return gcuc.GitCloneUseCase(github_service).execute(
         CONFIG_MANAGER.config.github_selected_repos
     )
@@ -260,7 +251,12 @@ def clone() -> res.ResponseFailure | res.ResponseSuccess:
 @gitp_config_check
 def create_issues() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch creation of issues on GitHub."""
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     issue = p.InquirerPrompter.create_issues(
         CONFIG_MANAGER.config.github_selected_repos
     )
@@ -271,7 +267,12 @@ def create_issues() -> res.ResponseFailure | res.ResponseSuccess:
 @gitp_config_check
 def close_issues() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch close issues on GitHub."""
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     list_object = "issue"
     title_query = p.InquirerPrompter.query_by_title(
         CONFIG_MANAGER.config.github_selected_repos, list_object
@@ -292,7 +293,12 @@ def close_issues() -> res.ResponseFailure | res.ResponseSuccess:
 @gitp_config_check
 def reopen_issues() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch reopen issues on GitHub."""
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     list_object = "issue"
     title_query = p.InquirerPrompter.query_by_title(
         CONFIG_MANAGER.config.github_selected_repos, list_object
@@ -323,7 +329,12 @@ def poetry_cmd(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
 @gitp_config_check
 def create_prs() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch creation of pull requests on GitHub."""
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     pr = p.InquirerPrompter.create_pull_requests(
         CONFIG_MANAGER.config.github_selected_repos
     )
@@ -344,7 +355,12 @@ def create_prs() -> res.ResponseFailure | res.ResponseSuccess:
 @gitp_config_check
 def close_prs() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch close pull requests on GitHub."""
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     list_object = "pull request"
     title_query = p.InquirerPrompter.query_by_title(
         CONFIG_MANAGER.config.github_selected_repos, list_object
@@ -365,7 +381,12 @@ def close_prs() -> res.ResponseFailure | res.ResponseSuccess:
 @gitp_config_check
 def merge_prs() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch merge of pull requests on GitHub."""
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     pr_merge = p.InquirerPrompter.merge_pull_requests(
         github_service.get_username(),
         CONFIG_MANAGER.config.github_selected_repos,
@@ -377,7 +398,12 @@ def merge_prs() -> res.ResponseFailure | res.ResponseSuccess:
 @gitp_config_check
 def delete_branches() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch deletion of branches on GitHub."""
-    github_service = _get_github_service(CONFIG_MANAGER.config)
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
     branch = p.InquirerPrompter.delete_branches(
         CONFIG_MANAGER.config.github_selected_repos
     )

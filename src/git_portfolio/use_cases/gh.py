@@ -1,7 +1,8 @@
 """Base Github use case."""
+from __future__ import annotations
+
 import traceback
 from typing import Any
-from typing import Union
 
 import git_portfolio.config_manager as cm
 import git_portfolio.github_service as ghs
@@ -40,7 +41,7 @@ class GhUseCase:
                 f"with the following info:\n{traceback.format_exc()}"
             )
 
-    def generate_response(self) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    def generate_response(self) -> res.ResponseFailure | res.ResponseSuccess:
         """Create appropriate response object."""
         if self.error:
             return res.ResponseFailure(res.ResponseTypes.PARAMETERS_ERROR, self.output)
@@ -52,7 +53,7 @@ class GhUseCase:
 
     def execute(
         self, *args: Any, **kwargs: Any
-    ) -> Union[res.ResponseFailure, res.ResponseSuccess]:
+    ) -> res.ResponseFailure | res.ResponseSuccess:
         """Execute GitHubUseCase."""
         if self.github_repo:
             self.action(self.github_repo, *args, **kwargs)

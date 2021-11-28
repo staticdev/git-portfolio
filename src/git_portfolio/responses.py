@@ -30,7 +30,7 @@ class ResponseFailure:
             msg: string, exception or None.
 
         Returns:
-            Union[str, None]: formatted message or None.
+            str | None: formatted message or None.
         """
         if isinstance(msg, Exception):
             return f"{msg.__class__.__name__}: {msg}"

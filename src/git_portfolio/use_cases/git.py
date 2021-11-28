@@ -27,7 +27,7 @@ class GitUseCase:
             args: command arguments.
 
         Returns:
-            Union[res.ResponseFailure, res.ResponseSuccess]: final result.
+            res.ResponseFailure | res.ResponseSuccess: final result.
         """
         if self.err_output:
             return res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, self.err_output)
