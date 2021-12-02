@@ -61,19 +61,19 @@ def test_execute_poetry_not_installed(mock_command_checker: MockerFixture) -> No
 def test_execute_no_folder(
     mock_command_checker: MockerFixture, mock_popen: MockerFixture
 ) -> None:
-    """It returns that file does not exist."""
+    """It returns error with msg file does not exist."""
     mock_command_checker.return_value = ""
     mock_exception = FileNotFoundError(2, "No such file or directory")
     mock_exception.filename = "/path/x"
     mock_popen.side_effect = mock_exception
     response = poetry.PoetryUseCase().execute(["user/x"], "poetry", ("version",))
 
-    assert bool(response) is True
-    assert response.value == "x: No such file or directory: /path/x\n"
+    assert bool(response) is False
+    assert response.value["message"] == "x: No such file or directory: /path/x\n"
 
 
 def test_execute_error_during_execution(mock_popen: MockerFixture) -> None:
-    """It returns success message with the error on output."""
+    """It returns error message."""
     mock_popen.return_value.returncode = 1
     mock_popen().communicate.return_value = (
         b"",
@@ -83,8 +83,8 @@ def test_execute_error_during_execution(mock_popen: MockerFixture) -> None:
         ["user/notcloned"], "poetry", ("version",)
     )
 
-    assert bool(response) is True
+    assert bool(response) is False
     assert (
-        response.value
+        response.value["message"]
         == "notcloned: error: pathspec 'xyz' did not match any file(s) known to poetry"
     )
