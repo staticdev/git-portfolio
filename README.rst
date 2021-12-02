@@ -41,8 +41,8 @@ Features
 
 * Configure multiple working repositories.
 * Batch git_ command with subcommands `add`, `checkout`, `commit`, `diff`, `pull`, `push`, `reset` and `status`.
-* Batch create/close/reopen issues, create pull requests, merge pull requests and delete branches by name on GitHub.
-* Batch poetry commands such as `version patch`, `install`, `update` or `add`.
+* Batch create/close/reopen `issues`, create/merge `pull requests` and delete `branches` by name on GitHub.
+* Batch Poetry_ commands such as `version patch`, `install`, `update` or `add`.
 
 
 Requirements
@@ -131,6 +131,7 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _Hypermodern Python Cookiecutter: https://github.com/cjolowicz/cookiecutter-hypermodern-python
 .. _file an issue: https://github.com/staticdev/git-portfolio/issues
 .. _pip: https://pip.pypa.io/
+.. _Poetry: https://python-poetry.org/
 .. _git-portfolio.readthedocs.io: https://git-portfolio.readthedocs.io
 .. github-only
 .. _Contributor Guide: CONTRIBUTING.rst
