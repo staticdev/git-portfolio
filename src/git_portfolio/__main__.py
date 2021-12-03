@@ -34,6 +34,16 @@ F = TypeVar("F", bound=Callable[..., Any])
 CONFIG_MANAGER = cm.ConfigManager()
 
 
+def _echo_outputs(response: res.ResponseFailure | res.ResponseSuccess) -> None:
+    if bool(response):
+        success = cast(res.ResponseSuccess, response)
+        click.secho(success.value)
+    else:
+        click.secho(
+            f"Error(s) found during execution:\n{response.value['message']}", fg="red"
+        )
+
+
 def gitp_config_check(func: F) -> F:
     """Validate if there are selected repos and outputs success."""
 
@@ -62,98 +72,88 @@ def main() -> None:
     pass
 
 
-def _echo_outputs(response: res.ResponseFailure | res.ResponseSuccess) -> None:
-    if bool(response):
-        success = cast(res.ResponseSuccess, response)
-        click.secho(success.value)
-    else:
-        click.secho(
-            f"Error(s) found during execution:\n{response.value['message']}", fg="red"
-        )
-
-
 def _get_connection_settings(config: c.Config) -> cs.GhConnectionSettings:
     return cs.GhConnectionSettings(config.github_access_token, config.github_hostname)
 
 
-@main.command("add")
-@click.argument("args", nargs=-1)
 @gitp_config_check
+def _call_git_use_case(
+    command: str, args: tuple[str]
+) -> res.ResponseFailure | res.ResponseSuccess:
+    return git.GitUseCase().execute(
+        CONFIG_MANAGER.config.github_selected_repos, command, args
+    )
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
 def add(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git add` command."""
-    return git.GitUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, "add", args
-    )
+    return _call_git_use_case("add", args)
 
 
-@main.command("checkout", context_settings={"ignore_unknown_options": True})
+@main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
-@gitp_config_check
 def checkout(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git checkout` command."""
-    return git.GitUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, "checkout", args
+    return _call_git_use_case("checkout", args)
+
+
+@main.command()
+@gitp_config_check
+def clone() -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git clone` command on current folder. Does not accept aditional args."""
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
+
+    return gcuc.GitCloneUseCase(github_service).execute(
+        CONFIG_MANAGER.config.github_selected_repos
     )
 
 
-@main.command("commit", context_settings={"ignore_unknown_options": True})
+@main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
-@gitp_config_check
 def commit(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git commit` command."""
-    return git.GitUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, "commit", args
-    )
+    return _call_git_use_case("commit", args)
 
 
-@main.command("diff", context_settings={"ignore_unknown_options": True})
+@main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
-@gitp_config_check
 def diff(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git diff` command."""
-    return git.GitUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, "diff", args
-    )
+    return _call_git_use_case("diff", args)
 
 
-@main.command("pull", context_settings={"ignore_unknown_options": True})
+@main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
-@gitp_config_check
 def pull(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git pull` command."""
-    return git.GitUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, "pull", args
-    )
+    return _call_git_use_case("pull", args)
 
 
-@main.command("push", context_settings={"ignore_unknown_options": True})
+@main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
-@gitp_config_check
 def push(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git push` command."""
-    return git.GitUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, "push", args
-    )
+    return _call_git_use_case("push", args)
 
 
-@main.command("reset", context_settings={"ignore_unknown_options": True})
+@main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
-@gitp_config_check
 def reset(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git reset` command."""
-    return git.GitUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, "reset", args
-    )
+    return _call_git_use_case("reset", args)
 
 
-@main.command("status")
+@main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
-@gitp_config_check
 def status(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git status` command."""
-    return git.GitUseCase().execute(
-        CONFIG_MANAGER.config.github_selected_repos, "status", args
-    )
+    return _call_git_use_case("status", args)
 
 
 @click.group("config")
@@ -229,21 +229,6 @@ def config_repos() -> res.ResponseFailure | res.ResponseSuccess:
     selected_repos = p.InquirerPrompter.select_repos(repo_names)
     return cr.ConfigReposUseCase(CONFIG_MANAGER).execute(
         github_service.get_config(), selected_repos
-    )
-
-
-@main.command("clone")
-@gitp_config_check
-def clone() -> res.ResponseFailure | res.ResponseSuccess:
-    """Batch `git clone` command on current folder. Does not accept aditional args."""
-    settings = _get_connection_settings(CONFIG_MANAGER.config)
-    try:
-        github_service = ghs.GithubService(settings)
-    except ghs.GithubServiceError as gse:
-        return res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)
-
-    return gcuc.GitCloneUseCase(github_service).execute(
-        CONFIG_MANAGER.config.github_selected_repos
     )
 
 

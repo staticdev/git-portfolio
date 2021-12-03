@@ -40,9 +40,9 @@ Features
 --------
 
 * Configure multiple working repositories.
-* Batch git_ command with subcommands `add`, `checkout`, `commit`, `diff`, `pull`, `push`, `reset` and `status`.
-* Batch create/close/reopen `issues`, create/merge `pull requests` and delete `branches` by name on GitHub.
-* Batch Poetry_ commands such as `version patch`, `install`, `update` or `add`.
+* Batch git_ command with subcommands ``add``, ``branch``, ``checkout``, ``commit``, ``diff``, ``fetch``, ``init``, ``mv``, ``pull``, ``push``, ``rebase``, ``reset``, ``rm``, ``show``, ``switch`` and ``status``.
+* Batch create/close/reopen ``issues``, create/merge ``pull requests`` and delete ``branches`` by name on GitHub.
+* Batch Poetry_ commands such as ``add``, ``version patch``, ``install`` or ``update``.
 
 
 Requirements
