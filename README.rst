@@ -41,7 +41,7 @@ Features
 
 * Configure multiple working repositories.
 * Batch git_ commands with subcommands: ``add``, ``branch``, ``checkout``, ``commit``, ``diff``, ``fetch``, ``init``, ``merge``, ``mv``, ``pull``, ``push``, ``rebase``, ``reset``, ``rm``, ``show``, ``switch``, ``status`` and ``tag``.
-* Batch API calls on GitHub_: create/close/reopen ``issues``, create/merge ``pull requests`` and delete ``branches`` by name on GitHub_.
+* Batch API calls on GitHub_: create/close/reopen ``issues``, create/merge ``pull requests`` and delete ``branches`` by name.
 * Batch Poetry_ commands such as: ``add``, ``version patch``, ``install`` or ``update``.
 
 
@@ -90,7 +90,7 @@ Basic usage
    $ gitp poetry version minor  # bumps minor version of all projects that have pyproject.toml version
 
 Note: by convention GitHub_ commands are always the resource name and action: eg. ``branches delete``, ``issues create`` and ``prs merge`` (for pull requests).
-This avoid conflicts with batch ``git_`` commands, as in ``gitp branch`` (executes git command) and ``gitp branches delete`` (execute operations using GitHub_ API).
+This avoid conflicts with batch git_ commands, as in ``gitp branch`` (executes git command) and ``gitp branches delete`` (execute operations using GitHub_ API).
 
 
 .. end-basic-usage
