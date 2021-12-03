@@ -41,7 +41,7 @@ Features
 
 * Configure multiple working repositories.
 * Batch git_ commands with subcommands: ``add``, ``branch``, ``checkout``, ``commit``, ``diff``, ``fetch``, ``init``, ``merge``, ``mv``, ``pull``, ``push``, ``rebase``, ``reset``, ``rm``, ``show``, ``switch``, ``status`` and ``tag``.
-* Batch API calls on GitHub: create/close/reopen ``issues``, create/merge ``pull requests`` and delete ``branches`` by name on GitHub.
+* Batch API calls on GitHub_: create/close/reopen ``issues``, create/merge ``pull requests`` and delete ``branches`` by name on GitHub_.
 * Batch Poetry_ commands such as: ``add``, ``version patch``, ``install`` or ``update``.
 
 
@@ -89,8 +89,8 @@ Basic usage
    $ gitp checkout -b new-branch  # checks out new branch new-branch in all projects
    $ gitp poetry version minor  # bumps minor version of all projects that have pyproject.toml version
 
-Note: by convention GitHub commands are always the resource name and action: eg. ``branches delete``, ``issues create`` and ``prs merge`` (for pull requests).
-This avoid conflicts with batch ``git`` commands, as in ``gitp branch`` (executes git command) and ``gitp branches delete`` (execute operations using GitHub API).
+Note: by convention GitHub_ commands are always the resource name and action: eg. ``branches delete``, ``issues create`` and ``prs merge`` (for pull requests).
+This avoid conflicts with batch ``git_`` commands, as in ``gitp branch`` (executes git command) and ``gitp branches delete`` (execute operations using GitHub_ API).
 
 
 .. end-basic-usage
@@ -129,6 +129,7 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _@cjolowicz: https://github.com/cjolowicz
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _git: https://git-scm.com
+.. _GitHub: https://github.com
 .. _MIT: http://opensource.org/licenses/MIT
 .. _PyPI: https://pypi.org/
 .. _Hypermodern Python Cookiecutter: https://github.com/cjolowicz/cookiecutter-hypermodern-python
