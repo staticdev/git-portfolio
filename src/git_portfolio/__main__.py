@@ -94,6 +94,13 @@ def add(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
 
 @main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
+def branch(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git branch` command."""
+    return _call_git_use_case("branch", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
 def checkout(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git checkout` command."""
     return _call_git_use_case("checkout", args)
@@ -130,6 +137,34 @@ def diff(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
 
 @main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
+def fetch(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git fetch` command."""
+    return _call_git_use_case("fetch", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+def init(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git init` command."""
+    return _call_git_use_case("init", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+def merge(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git merge` command."""
+    return _call_git_use_case("merge", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+def mv(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git mv` command."""
+    return _call_git_use_case("mv", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
 def pull(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git pull` command."""
     return _call_git_use_case("pull", args)
@@ -144,9 +179,30 @@ def push(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
 
 @main.command(context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
+def rebase(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git rebase` command."""
+    return _call_git_use_case("rebase", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
 def reset(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     """Batch `git reset` command."""
     return _call_git_use_case("reset", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+def rm(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git rm` command."""
+    return _call_git_use_case("rm", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+def show(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git show` command."""
+    return _call_git_use_case("show", args)
 
 
 @main.command(context_settings={"ignore_unknown_options": True})
@@ -156,43 +212,45 @@ def status(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     return _call_git_use_case("status", args)
 
 
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+def switch(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git switch` command."""
+    return _call_git_use_case("switch", args)
+
+
+@main.command(context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1)
+def tag(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
+    """Batch `git tag` command."""
+    return _call_git_use_case("tag", args)
+
+
 @click.group("config")
-def configure() -> None:
+def group_config() -> None:
     """Config command group."""
     pass
 
 
-@click.group("create")
-def create() -> None:
-    """Create command group."""
+@click.group("branches")
+def group_branches() -> None:
+    """Branches command group."""
     pass
 
 
-@click.group("merge")
-def merge() -> None:
-    """Merge command group."""
+@click.group("issues")
+def group_issues() -> None:
+    """Issues command group."""
     pass
 
 
-@click.group("close")
-def close() -> None:
-    """Close command group."""
+@click.group("prs")
+def group_prs() -> None:
+    """Pull requests command group."""
     pass
 
 
-@click.group("delete")
-def delete() -> None:
-    """Delete command group."""
-    pass
-
-
-@click.group("reopen")
-def reopen() -> None:
-    """Reopen command group."""
-    pass
-
-
-@configure.command("init")
+@group_config.command("init")
 def config_init() -> None:
     """Initialize `gitp` config."""
     while True:
@@ -210,7 +268,7 @@ def config_init() -> None:
                 click.ClickException("")
 
 
-@configure.command("repos")
+@group_config.command("repos")
 @gitp_config_check
 def config_repos() -> res.ResponseFailure | res.ResponseSuccess:
     """Configure current working `gitp` repositories."""
@@ -232,7 +290,7 @@ def config_repos() -> res.ResponseFailure | res.ResponseSuccess:
     )
 
 
-@create.command("issues")
+@group_issues.command("create")
 @gitp_config_check
 def create_issues() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch creation of issues on GitHub."""
@@ -248,7 +306,7 @@ def create_issues() -> res.ResponseFailure | res.ResponseSuccess:
     return ghci.GhCreateIssueUseCase(CONFIG_MANAGER, github_service).execute(issue)
 
 
-@close.command("issues")
+@group_issues.command("close")
 @gitp_config_check
 def close_issues() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch close issues on GitHub."""
@@ -274,7 +332,7 @@ def close_issues() -> res.ResponseFailure | res.ResponseSuccess:
     )
 
 
-@reopen.command("issues")
+@group_issues.command("reopen")
 @gitp_config_check
 def reopen_issues() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch reopen issues on GitHub."""
@@ -310,7 +368,7 @@ def poetry_cmd(args: tuple[str]) -> res.ResponseFailure | res.ResponseSuccess:
     )
 
 
-@create.command("prs")
+@group_prs.command("create")
 @gitp_config_check
 def create_prs() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch creation of pull requests on GitHub."""
@@ -336,7 +394,7 @@ def create_prs() -> res.ResponseFailure | res.ResponseSuccess:
     )
 
 
-@close.command("prs")
+@group_prs.command("close")
 @gitp_config_check
 def close_prs() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch close pull requests on GitHub."""
@@ -362,7 +420,7 @@ def close_prs() -> res.ResponseFailure | res.ResponseSuccess:
     )
 
 
-@merge.command("prs")
+@group_prs.command("merge")
 @gitp_config_check
 def merge_prs() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch merge of pull requests on GitHub."""
@@ -379,7 +437,7 @@ def merge_prs() -> res.ResponseFailure | res.ResponseSuccess:
     return ghmp.GhMergePrUseCase(CONFIG_MANAGER, github_service).execute(pr_merge)
 
 
-@delete.command("branches")
+@group_branches.command("delete")
 @gitp_config_check
 def delete_branches() -> res.ResponseFailure | res.ResponseSuccess:
     """Batch deletion of branches on GitHub."""
@@ -395,12 +453,10 @@ def delete_branches() -> res.ResponseFailure | res.ResponseSuccess:
     return ghdb.GhDeleteBranchUseCase(CONFIG_MANAGER, github_service).execute(branch)
 
 
-main.add_command(configure)
-main.add_command(create)
-main.add_command(close)
-main.add_command(merge)
-main.add_command(delete)
-main.add_command(reopen)
+main.add_command(group_config)
+main.add_command(group_branches)
+main.add_command(group_issues)
+main.add_command(group_prs)
 
 
 if __name__ == "__main__":

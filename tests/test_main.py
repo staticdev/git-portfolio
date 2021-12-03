@@ -191,11 +191,24 @@ def test_add_success(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It calls add with '.'."""
+    """It calls add."""
     runner.invoke(git_portfolio.__main__.main, ["add", "."], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
         [REPO], "add", (".",)
+    )
+
+
+def test_branch_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls branch."""
+    runner.invoke(git_portfolio.__main__.main, ["branch", "-a"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with(
+        [REPO], "branch", ("-a",)
     )
 
 
@@ -234,7 +247,7 @@ def test_checkout_success(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It calls checkout with main."""
+    """It calls checkout."""
     runner.invoke(git_portfolio.__main__.main, ["checkout", "main"], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
@@ -247,7 +260,7 @@ def test_checkout_new_branch(
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It calls checkout with main."""
+    """It calls checkout to create new branch."""
     runner.invoke(
         git_portfolio.__main__.main, ["checkout", "-b", "new-branch"], prog_name="gitp"
     )
@@ -286,6 +299,50 @@ def test_diff_success(
     runner.invoke(git_portfolio.__main__.main, ["diff"], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "diff", ())
+
+
+def test_fetch_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls fetch."""
+    runner.invoke(git_portfolio.__main__.main, ["fetch"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "fetch", ())
+
+
+def test_init_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls init."""
+    runner.invoke(git_portfolio.__main__.main, ["init"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "init", ())
+
+
+def test_merge_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls merge."""
+    runner.invoke(git_portfolio.__main__.main, ["merge"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "merge", ())
+
+
+def test_mv_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls mv."""
+    runner.invoke(git_portfolio.__main__.main, ["mv"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "mv", ())
 
 
 def test_pull_success(
@@ -344,12 +401,23 @@ def test_push_with_extra_arguments(
     )
 
 
+def test_rebase_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls rebase."""
+    runner.invoke(git_portfolio.__main__.main, ["rebase"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "rebase", ())
+
+
 def test_reset_success(
     mock_git_use_case: MockerFixture,
     mock_config_manager: MockerFixture,
     runner: CliRunner,
 ) -> None:
-    """It calls reset with HEAD^."""
+    """It calls reset."""
     runner.invoke(git_portfolio.__main__.main, ["reset", "HEAD^"], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
@@ -372,6 +440,28 @@ def test_reset_success_with_hard(
     )
 
 
+def test_rm_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls rm."""
+    runner.invoke(git_portfolio.__main__.main, ["rm"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "rm", ())
+
+
+def test_show_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls show."""
+    runner.invoke(git_portfolio.__main__.main, ["show"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "show", ())
+
+
 def test_status_success(
     mock_git_use_case: MockerFixture,
     mock_config_manager: MockerFixture,
@@ -381,6 +471,28 @@ def test_status_success(
     runner.invoke(git_portfolio.__main__.main, ["status"], prog_name="gitp")
 
     mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "status", ())
+
+
+def test_switch_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls switch."""
+    runner.invoke(git_portfolio.__main__.main, ["switch"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "switch", ())
+
+
+def test_tag_success(
+    mock_git_use_case: MockerFixture,
+    mock_config_manager: MockerFixture,
+    runner: CliRunner,
+) -> None:
+    """It calls tag."""
+    runner.invoke(git_portfolio.__main__.main, ["tag"], prog_name="gitp")
+
+    mock_git_use_case.return_value.execute.assert_called_once_with([REPO], "tag", ())
 
 
 def test_config_init_success(
@@ -394,7 +506,9 @@ def test_config_init_success(
     mock_config_init_use_case(
         config_manager
     ).execute.return_value = res.ResponseSuccess("success message")
-    result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_config, ["init"], prog_name="gitp"
+    )
 
     mock_config_init_use_case(config_manager).execute.assert_called_once()
     assert result.output == "success message\n"
@@ -412,7 +526,9 @@ def test_config_init_wrong_token(
         res.ResponseFailure(res.ResponseTypes.PARAMETERS_ERROR, "message"),
         res.ResponseSuccess("success message"),
     ]
-    result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_config, ["init"], prog_name="gitp"
+    )
 
     assert mock_config_init_use_case(config_manager).execute.call_count == 2
     assert result.output == "Error: message\nsuccess message\n"
@@ -430,7 +546,9 @@ def test_config_init_service_error(
         res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, "message"),
         res.ResponseSuccess("success message"),
     ]
-    result = runner.invoke(git_portfolio.__main__.configure, ["init"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_config, ["init"], prog_name="gitp"
+    )
 
     assert mock_config_init_use_case(config_manager).execute.call_count == 2
     assert result.output == "Error: message\nsuccess message\n"
@@ -451,7 +569,7 @@ def test_config_repos_success(
         config_manager
     ).execute.return_value = res.ResponseSuccess("success message")
     result = runner.invoke(
-        git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
+        git_portfolio.__main__.group_config, ["repos"], prog_name="gitp"
     )
 
     mock_config_repos_use_case(config_manager).execute.assert_called_once()
@@ -467,7 +585,7 @@ def test_config_repos_do_not_change(
     mock_config_manager.config_is_empty.return_value = False
     mock_prompt_inquirer_prompter.new_repos.return_value = False
     result = runner.invoke(
-        git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
+        git_portfolio.__main__.group_config, ["repos"], prog_name="gitp"
     )
 
     assert result.exit_code == 0
@@ -483,7 +601,7 @@ def test_config_repos_service_error(
     mock_config_manager.config_is_empty.return_value = False
     mock_prompt_inquirer_prompter.new_repos.return_value = True
     result = runner.invoke(
-        git_portfolio.__main__.configure, ["repos"], prog_name="gitp"
+        git_portfolio.__main__.group_config, ["repos"], prog_name="gitp"
     )
 
     assert type(result.exception) == SystemExit
@@ -523,7 +641,7 @@ def test_create_issues(
     """It executes gh_create_issue."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    runner.invoke(git_portfolio.__main__.create, ["issues"], prog_name="gitp")
+    runner.invoke(git_portfolio.__main__.group_issues, ["create"], prog_name="gitp")
 
     mock_gh_create_issue_use_case(
         config_manager, github_service
@@ -536,7 +654,9 @@ def test_create_issues_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(git_portfolio.__main__.create, ["issues"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_issues, ["create"], prog_name="gitp"
+    )
 
     assert type(result.exception) == SystemExit
 
@@ -551,7 +671,7 @@ def test_close_issues(
     """It executes gh_close_issue."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    runner.invoke(git_portfolio.__main__.close, ["issues"], prog_name="gitp")
+    runner.invoke(git_portfolio.__main__.group_issues, ["close"], prog_name="gitp")
 
     mock_gh_close_issue_use_case(
         config_manager, github_service
@@ -564,7 +684,9 @@ def test_close_issues_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(git_portfolio.__main__.close, ["issues"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_issues, ["close"], prog_name="gitp"
+    )
 
     assert type(result.exception) == SystemExit
 
@@ -579,7 +701,7 @@ def test_reopen_issues(
     """It executes gh_reopen_issue."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    runner.invoke(git_portfolio.__main__.reopen, ["issues"], prog_name="gitp")
+    runner.invoke(git_portfolio.__main__.group_issues, ["reopen"], prog_name="gitp")
 
     mock_gh_reopen_issue_use_case(
         config_manager, github_service
@@ -592,7 +714,9 @@ def test_reopen_issues_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(git_portfolio.__main__.reopen, ["issues"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_issues, ["reopen"], prog_name="gitp"
+    )
 
     assert type(result.exception) == SystemExit
 
@@ -607,7 +731,7 @@ def test_create_prs(
     """It executes gh_create_pr."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    runner.invoke(git_portfolio.__main__.create, ["prs"], prog_name="gitp")
+    runner.invoke(git_portfolio.__main__.group_prs, ["create"], prog_name="gitp")
 
     mock_gh_create_pr_use_case(
         config_manager, github_service
@@ -620,7 +744,9 @@ def test_create_prs_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(git_portfolio.__main__.create, ["prs"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_prs, ["create"], prog_name="gitp"
+    )
 
     assert type(result.exception) == SystemExit
 
@@ -635,7 +761,7 @@ def test_close_prs(
     """It executes gh_close_issue."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    runner.invoke(git_portfolio.__main__.close, ["prs"], prog_name="gitp")
+    runner.invoke(git_portfolio.__main__.group_prs, ["close"], prog_name="gitp")
 
     mock_gh_close_issue_use_case(
         config_manager, github_service
@@ -648,7 +774,9 @@ def test_close_prs_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(git_portfolio.__main__.close, ["prs"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_prs, ["close"], prog_name="gitp"
+    )
 
     assert type(result.exception) == SystemExit
 
@@ -665,7 +793,7 @@ def test_merge_prs(
     github_service = mock_github_service.return_value
     github_service.github_username = "user"
     github_service.config = c.Config("", "abc", [REPO])
-    runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
+    runner.invoke(git_portfolio.__main__.group_prs, ["merge"], prog_name="gitp")
 
     mock_gh_merge_pr_use_case(
         config_manager, github_service
@@ -678,7 +806,9 @@ def test_merge_prs_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(git_portfolio.__main__.merge, ["prs"], prog_name="gitp")
+    result = runner.invoke(
+        git_portfolio.__main__.group_prs, ["merge"], prog_name="gitp"
+    )
 
     assert type(result.exception) == SystemExit
 
@@ -693,7 +823,7 @@ def test_delete_branches(
     """It call delete_branches from pm.GithubService."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    runner.invoke(git_portfolio.__main__.delete, ["branches"], prog_name="gitp")
+    runner.invoke(git_portfolio.__main__.group_branches, ["delete"], prog_name="gitp")
 
     mock_gh_delete_branch_use_case(
         config_manager, github_service
@@ -707,7 +837,7 @@ def test_delete_branches_service_error(
 ) -> None:
     """It raises system exit."""
     result = runner.invoke(
-        git_portfolio.__main__.delete, ["branches"], prog_name="gitp"
+        git_portfolio.__main__.group_branches, ["delete"], prog_name="gitp"
     )
 
     assert type(result.exception) == SystemExit
