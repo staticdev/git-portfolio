@@ -40,15 +40,15 @@ Features
 --------
 
 * Configure multiple working repositories.
-* Batch git_ command with subcommands `add`, `checkout`, `commit`, `diff`, `pull`, `push`, `reset` and `status`.
-* Batch create/close/reopen `issues`, create/merge `pull requests` and delete `branches` by name on GitHub.
-* Batch Poetry_ commands such as `version patch`, `install`, `update` or `add`.
+* Batch git_ commands with subcommands: ``add``, ``branch``, ``checkout``, ``commit``, ``diff``, ``fetch``, ``init``, ``merge``, ``mv``, ``pull``, ``push``, ``rebase``, ``reset``, ``rm``, ``show``, ``switch``, ``status`` and ``tag``.
+* Batch API calls on GitHub: create/close/reopen ``issues``, create/merge ``pull requests`` and delete ``branches`` by name on GitHub.
+* Batch Poetry_ commands such as: ``add``, ``version patch``, ``install`` or ``update``.
 
 
 Requirements
 ------------
 
-* `Create an auth token for GitHub`_, with the `repo` privileges enabled by clicking on Generate new token. You will be asked to select scopes for the token. Which scopes you choose will determine what information and actions you will be able to perform against the API. You should be careful with the ones prefixed with write:, delete: and admin: as these might be quite destructive. You can find description of each scope in docs here.
+* `Create an auth token for GitHub`_, with the ``repo`` privileges enabled by clicking on Generate new token. You will be asked to select scopes for the token. Which scopes you choose will determine what information and actions you will be able to perform against the API. You should be careful with the ones prefixed with write:, delete: and admin: as these might be quite destructive. You can find description of each scope in docs here.
 
 Important: safeguard your token (once created you won't be able to see it again).
 
@@ -85,9 +85,12 @@ Basic usage
 
 .. code:: console
 
-   $ gitp create issues  # create same issue for all projects
+   $ gitp issues create  # create same issue for all projects
    $ gitp checkout -b new-branch  # checks out new branch new-branch in all projects
    $ gitp poetry version minor  # bumps minor version of all projects that have pyproject.toml version
+
+Note: by convention GitHub commands are always the resource name and action: eg. ``branches delete``, ``issues create`` and ``prs merge`` (for pull requests).
+This avoid conflicts with batch ``git`` commands, as in ``gitp branch`` (executes git command) and ``gitp branches delete`` (execute operations using GitHub API).
 
 
 .. end-basic-usage
