@@ -15,7 +15,7 @@ class ConfigReposUseCase:
 
     def execute(
         self, github_config: cs.GhConnectionSettings, selected_repos: list[str]
-    ) -> res.ResponseFailure | res.ResponseSuccess:
+    ) -> res.Response:
         """Configuration of git repositories."""
         self.config_manager.config.github_access_token = github_config.access_token
         self.config_manager.config.github_hostname = github_config.hostname

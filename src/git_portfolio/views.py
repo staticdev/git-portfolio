@@ -1,14 +1,14 @@
 """List issue on Github use case."""
 from __future__ import annotations
 
-import git_portfolio.github_service as ghs
+import git_portfolio.github_service as gs
 import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
 
 
 def issues(
     github_repo: str,
-    github_service: ghs.GithubService,
+    github_service: gs.AbstractGithubService,
     request: il.IssueListValidRequest | il.IssueListInvalidRequest,
 ) -> res.ResponseSuccess | res.ResponseFailure:
     """Return a list of matching issues."""

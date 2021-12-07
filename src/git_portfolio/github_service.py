@@ -1,6 +1,7 @@
 """Github service module."""
 from __future__ import annotations
 
+import abc
 import copy
 from typing import Any
 
@@ -19,7 +20,28 @@ class GithubServiceError(Exception):
     pass
 
 
-class GithubService:
+class AbstractGithubService(abc.ABC):
+    """Abstract Github service class."""
+
+    @abc.abstractmethod
+    def list_issues_from_repo(
+        self,
+        github_repo: str,
+        request: il.IssueListValidRequest | il.IssueListInvalidRequest,
+    ) -> list[i.Issue]:
+        """Return list of issues from one repository."""
+        raise NotImplementedError
+
+    @staticmethod
+    @abc.abstractmethod
+    def link_issues(
+        pr_base: pr.PullRequest, filtered_issues: list[i.Issue]
+    ) -> pr.PullRequest:
+        """Return a new PR with body message and labels of linked issues."""
+        raise NotImplementedError
+
+
+class GithubService(AbstractGithubService):
     """Github service class."""
 
     def __init__(self, github_config: cs.GhConnectionSettings) -> None:

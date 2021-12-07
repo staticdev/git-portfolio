@@ -15,7 +15,13 @@ class ResponseTypes:
     SUCCESS = "Success"
 
 
-class ResponseFailure:
+class Response:
+    """General response class."""
+
+    pass
+
+
+class ResponseFailure(Response):
     """Response failure class."""
 
     def __init__(self, type_: str, message: str | Exception | None) -> None:
@@ -50,7 +56,7 @@ class ResponseFailure:
         return False
 
 
-class ResponseSuccess:
+class ResponseSuccess(Response):
     """Response success class."""
 
     def __init__(self, value: Any = None) -> None:

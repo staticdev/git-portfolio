@@ -3,6 +3,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 import git_portfolio.domain.config as c
+import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_delete_branch as ghdb
 
 
@@ -41,5 +42,7 @@ def test_action(
     github_service = mock_github_service.return_value
     use_case = ghdb.GhDeleteBranchUseCase(config_manager, github_service)
     use_case.action(REPO, domain_branch)
+    response = use_case.responses[0]
 
-    assert "success message\n" == use_case.output
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value

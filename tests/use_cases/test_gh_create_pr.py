@@ -86,9 +86,12 @@ def test_action_link_issue_failed(
     )
     request = domain_prs[1]
     use_case = ghcp.GhCreatePrUseCase(config_manager, github_service)
-    use_case.action(REPO, request, REQUEST_ISSUES)
 
-    assert "success message\n" == use_case.output
+    use_case.action(REPO, request, REQUEST_ISSUES)
+    response = use_case.responses[0]
+
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value
 
 
 def test_action(
@@ -101,9 +104,12 @@ def test_action(
     github_service = mock_github_service.return_value
     request = domain_prs[0]
     use_case = ghcp.GhCreatePrUseCase(config_manager, github_service)
-    use_case.action(REPO, request, REQUEST_ISSUES)
 
-    assert "success message\n" == use_case.output
+    use_case.action(REPO, request, REQUEST_ISSUES)
+    response = use_case.responses[0]
+
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value
 
 
 def test_action_link_issue(
@@ -118,9 +124,12 @@ def test_action_link_issue(
     mock_views_issues.return_value.action.return_value = res.ResponseSuccess()
     request = domain_prs[1]
     use_case = ghcp.GhCreatePrUseCase(config_manager, github_service)
-    use_case.action(REPO, request, REQUEST_ISSUES)
 
-    assert "success message\n" == use_case.output
+    use_case.action(REPO, request, REQUEST_ISSUES)
+    response = use_case.responses[0]
+
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value
 
 
 @pytest.mark.e2e
@@ -134,6 +143,9 @@ def test_action_link_issue_e2e(
     github_service = mock_github_service.return_value
     request = domain_prs[1]
     use_case = ghcp.GhCreatePrUseCase(config_manager, github_service)
-    use_case.action(REPO, request, REQUEST_ISSUES)
 
-    assert "success message\n" == use_case.output
+    use_case.action(REPO, request, REQUEST_ISSUES)
+    response = use_case.responses[0]
+
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value

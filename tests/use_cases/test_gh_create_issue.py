@@ -4,11 +4,13 @@ from pytest_mock import MockerFixture
 
 import git_portfolio.domain.config as c
 import git_portfolio.domain.issue as i
+import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_create_issue as ghci
 
 
 REPO = "org/repo-name"
 REPO2 = "org/repo-name2"
+SUCCESS_MSG = f"{REPO}: success output"
 
 
 @pytest.fixture
@@ -23,7 +25,7 @@ def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
 def mock_github_service(mocker: MockerFixture) -> MockerFixture:
     """Fixture for mocking GithubService."""
     mock = mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
-    mock.return_value.create_issue_from_repo.return_value = "success message\n"
+    mock.return_value.create_issue_from_repo.return_value = SUCCESS_MSG
     return mock
 
 
@@ -48,6 +50,9 @@ def test_action(
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     use_case = ghci.GhCreateIssueUseCase(config_manager, github_service)
-    use_case.action(REPO, domain_issue)
 
-    assert "success message\n" == use_case.output
+    use_case.action(REPO, domain_issue)
+    response = use_case.responses[0]
+
+    assert isinstance(response, res.ResponseSuccess)
+    assert SUCCESS_MSG == response.value

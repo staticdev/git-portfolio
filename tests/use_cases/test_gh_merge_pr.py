@@ -6,6 +6,8 @@ from pytest_mock import MockerFixture
 
 import git_portfolio.domain.config as c
 import git_portfolio.domain.pull_request_merge as mpr
+import git_portfolio.github_service as gs
+import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_merge_pr as ghmp
 
 
@@ -58,8 +60,10 @@ def test_action(
     use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
 
     use_case.action(REPO, domain_mprs[0])
+    response = use_case.responses[0]
 
-    assert "success message\n" == use_case.output
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value
 
 
 def test_action_delete_branch(
@@ -74,8 +78,10 @@ def test_action_delete_branch(
     use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
 
     use_case.action(REPO, domain_mprs[1])
+    response = use_case.responses[0]
 
-    assert "success message\n" == use_case.output
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value
     mock_gh_delete_branch_use_case.assert_called_once()
 
 
@@ -89,10 +95,12 @@ def test_action_delete_branch_with_error(
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
-    use_case.error = True
+    github_service.merge_pull_request_from_repo.side_effect = gs.GithubServiceError
 
     use_case.action(REPO, domain_mprs[1])
+    response = use_case.responses[0]
 
+    assert isinstance(response, res.ResponseFailure)
     assert not mock_gh_delete_branch_use_case.called
 
 
@@ -108,6 +116,8 @@ def test_action_delete_branch_integration(
     use_case = ghmp.GhMergePrUseCase(config_manager, github_service)
 
     use_case.action(REPO, domain_mprs[1])
+    response = use_case.responses[0]
 
-    assert "success message\n" == use_case.output
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value
     github_service.delete_branch_from_repo.assert_called_once()

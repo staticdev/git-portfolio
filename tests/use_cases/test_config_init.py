@@ -57,7 +57,7 @@ def test_execute_success(
     config_manager.config = mocker.Mock()
     response = ci.ConfigInitUseCase(config_manager).execute(domain_gh_conn_settings)
 
-    assert bool(response) is True
+    assert isinstance(response, res.ResponseSuccess)
     assert "gitp successfully configured." == response.value
 
 
@@ -73,7 +73,7 @@ def test_execute_attribute_error(
     mock_github_service.side_effect = AttributeError("msg")
     response = ci.ConfigInitUseCase(config_manager).execute(domain_gh_conn_settings)
 
-    assert bool(response) is False
+    assert isinstance(response, res.ResponseFailure)
     assert response.type == res.ResponseTypes.PARAMETERS_ERROR
     assert response.value["message"] == "msg"
 
@@ -90,7 +90,7 @@ def test_execute_connection_error(
     mock_github_service.side_effect = ConnectionError
     response = ci.ConfigInitUseCase(config_manager).execute(domain_gh_conn_settings)
 
-    assert bool(response) is False
+    assert isinstance(response, res.ResponseFailure)
     assert response.type == res.ResponseTypes.SYSTEM_ERROR
     assert (
         response.value["message"]

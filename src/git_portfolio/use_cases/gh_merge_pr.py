@@ -14,8 +14,8 @@ class GhMergePrUseCase(gh.GhUseCase):
     ) -> None:
         """Merge pull requests."""
         github_service_method = "merge_pull_request_from_repo"
-        self.call_github_service(github_service_method, github_repo, pr_merge)
-        if pr_merge.delete_branch and not self.error:
+        resp = self.call_github_service(github_service_method, github_repo, pr_merge)
+        if pr_merge.delete_branch and bool(resp):
             delete_branch_use_case = dbr.GhDeleteBranchUseCase(
                 self.config_manager, self.github_service
             )
