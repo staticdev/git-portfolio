@@ -4,15 +4,12 @@ from __future__ import annotations
 import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
+from tests.conftest import REPO
 
 import git_portfolio.__main__
 import git_portfolio.domain.config as c
 import git_portfolio.github_service as gs
 import git_portfolio.responses as res
-
-
-REPO = "org/repo-name"
-REPO2 = "org/repo-name2"
 
 
 @pytest.fixture

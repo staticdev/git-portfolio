@@ -1,14 +1,12 @@
 """Test cases for poetry use case."""
 import pytest
 from pytest_mock import MockerFixture
+from tests.conftest import REPO
+from tests.conftest import REPO2
+from tests.conftest import REPO_NAME
 
 import git_portfolio.responses as res
 import git_portfolio.use_cases.poetry as poetry
-
-
-REPO_NAME = "repo-name"
-REPO = f"org/{REPO_NAME}"
-REPO2 = f"org/{REPO_NAME}2"
 
 
 @pytest.fixture

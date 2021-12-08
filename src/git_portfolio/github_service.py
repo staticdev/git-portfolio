@@ -30,7 +30,7 @@ class AbstractGithubService(abc.ABC):
         request: il.IssueListValidRequest | il.IssueListInvalidRequest,
     ) -> list[i.Issue]:
         """Return list of issues from one repository."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @staticmethod
     @abc.abstractmethod
@@ -38,7 +38,7 @@ class AbstractGithubService(abc.ABC):
         pr_base: pr.PullRequest, filtered_issues: list[i.Issue]
     ) -> pr.PullRequest:
         """Return a new PR with body message and labels of linked issues."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class GithubService(AbstractGithubService):

@@ -3,49 +3,15 @@ from __future__ import annotations
 
 import pytest
 from pytest_mock import MockerFixture
+from tests.conftest import ERROR_MSG
+from tests.conftest import REPO
+from tests.conftest import REPO2
+from tests.conftest import SUCCESS_MSG
+from tests.test_github_service import FakeGithubService
 
 import git_portfolio.domain.config as c
-import git_portfolio.domain.issue as i
-import git_portfolio.domain.pull_request as pr
-import git_portfolio.github_service as gs
-import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh as gh
-
-
-REPO = "org/repo-name"
-REPO2 = "org/repo-name2"
-SUCCESS_MSG = f"{REPO}: success output"
-ERROR_MSG = "some error"
-
-
-class FakeGithubService(gs.AbstractGithubService):
-    """Fake Github Service."""
-
-    def fake_success(self, _: str) -> str:
-        """Fake success method."""
-        return SUCCESS_MSG
-
-    def fake_error(self, _: str) -> str:
-        """Fake expected error method."""
-        raise gs.GithubServiceError(ERROR_MSG)
-
-    def fake_unexpected_error(self, _: str) -> str:
-        """Fake expected error method."""
-        raise Exception(ERROR_MSG)
-
-    def list_issues_from_repo(
-        self, _: str, __: il.IssueListValidRequest | il.IssueListInvalidRequest
-    ) -> list[i.Issue]:
-        """Fake issues list method."""
-        return [i.Issue(1, "Test", "", set())]
-
-    @staticmethod
-    def link_issues(_: pr.PullRequest, __: list[i.Issue]) -> pr.PullRequest:
-        """Fake link issues method."""
-        return pr.PullRequest(
-            "Title", "", set(), False, "query", False, "main", "origin", False
-        )
 
 
 class FakeGhUseCase(gh.GhUseCase):

@@ -1,16 +1,13 @@
 """Test cases for the Github create issue use case."""
 import pytest
 from pytest_mock import MockerFixture
+from tests.conftest import DOMAIN_ISSUES
+from tests.conftest import REPO
+from tests.conftest import SUCCESS_MSG
 
 import git_portfolio.domain.config as c
-import git_portfolio.domain.issue as i
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_create_issue as ghci
-
-
-REPO = "org/repo-name"
-REPO2 = "org/repo-name2"
-SUCCESS_MSG = f"{REPO}: success output"
 
 
 @pytest.fixture
@@ -29,29 +26,16 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
     return mock
 
 
-@pytest.fixture
-def domain_issue() -> i.Issue:
-    """Issue fixture."""
-    issue = i.Issue(
-        0,
-        "my title",
-        "my body",
-        {"testing", "refactor"},
-    )
-    return issue
-
-
 def test_action(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    domain_issue: i.Issue,
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     use_case = ghci.GhCreateIssueUseCase(config_manager, github_service)
 
-    use_case.action(REPO, domain_issue)
+    use_case.action(REPO, DOMAIN_ISSUES[0])
     response = use_case.responses[0]
 
     assert isinstance(response, res.ResponseSuccess)

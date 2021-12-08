@@ -10,7 +10,7 @@ def issues(
     github_repo: str,
     github_service: gs.AbstractGithubService,
     request: il.IssueListValidRequest | il.IssueListInvalidRequest,
-) -> res.ResponseSuccess | res.ResponseFailure:
+) -> res.Response:
     """Return a list of matching issues."""
     if isinstance(request, il.IssueListInvalidRequest):
         return res.build_response_from_invalid_request(request)

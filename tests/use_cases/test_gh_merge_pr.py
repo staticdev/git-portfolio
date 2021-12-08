@@ -3,15 +3,13 @@ from __future__ import annotations
 
 import pytest
 from pytest_mock import MockerFixture
+from tests.conftest import REPO
 
 import git_portfolio.domain.config as c
 import git_portfolio.domain.pull_request_merge as mpr
 import git_portfolio.github_service as gs
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_merge_pr as ghmp
-
-
-REPO = "org/repo-name"
 
 
 @pytest.fixture
