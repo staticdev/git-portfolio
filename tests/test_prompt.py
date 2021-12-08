@@ -1,16 +1,13 @@
 """Test cases for user prompting module."""
 import pytest
 from pytest_mock import MockerFixture
+from tests.conftest import REPO
 
 import git_portfolio.domain.gh_connection_settings as gcs
 import git_portfolio.domain.issue as i
 import git_portfolio.domain.pull_request as pr
 import git_portfolio.domain.pull_request_merge as prm
 import git_portfolio.prompt as p
-
-
-REPO = "org/repo-name"
-REPO2 = "org/repo-name2"
 
 
 @pytest.fixture

@@ -21,4 +21,9 @@ class GhCloseIssueUseCase(gh.GhUseCase):
         if isinstance(response, res.ResponseSuccess):
             self.call_github_service(github_service_method, github_repo, response.value)
         else:
-            self.output += f"{github_repo}: no issues match search.\n"
+            self.responses.append(
+                res.ResponseFailure(
+                    res.ResponseTypes.RESOURCE_ERROR,
+                    f"{github_repo}: no issues match search.\n",
+                )
+            )

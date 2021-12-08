@@ -1,6 +1,7 @@
 """Pull request model."""
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Set
 
 
 @dataclass
@@ -9,7 +10,7 @@ class PullRequest:
 
     title: str
     body: str
-    labels: Set[str]
+    labels: set[str]
     link_issues: bool
     issues_title_query: str
     inherit_labels: bool

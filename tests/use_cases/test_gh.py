@@ -1,14 +1,25 @@
 """Test Github use case error handling."""
+from __future__ import annotations
+
 import pytest
 from pytest_mock import MockerFixture
+from tests.conftest import ERROR_MSG
+from tests.conftest import REPO
+from tests.conftest import REPO2
+from tests.conftest import SUCCESS_MSG
+from tests.test_github_service import FakeGithubService
 
 import git_portfolio.domain.config as c
-import git_portfolio.github_service as gs
+import git_portfolio.responses as res
 import git_portfolio.use_cases.gh as gh
 
 
-REPO = "org/repo-name"
-REPO2 = "org/repo-name2"
+class FakeGhUseCase(gh.GhUseCase):
+    """Github fake use case."""
+
+    def action(self, github_repo: str) -> None:  # type: ignore[override]
+        """Fake action."""
+        self.call_github_service("fake_success", github_repo)
 
 
 @pytest.fixture
@@ -19,137 +30,71 @@ def mock_config_manager(mocker: MockerFixture) -> MockerFixture:
     return mock
 
 
-@pytest.fixture
-def mock_github_service(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking GithubService."""
-    return mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
-
-
-@pytest.fixture
-def mock_action(mocker: MockerFixture) -> MockerFixture:
-    """Fixture for mocking GhUseCase.action."""
-    return mocker.patch("git_portfolio.use_cases.gh.GhUseCase.action")
-
-
 def test_call_github_service_ok(
-    mocker: MockerFixture,
     mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
 ) -> None:
     """It ouputs success message."""
     config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    github_service.create_issue_from_repo.return_value = "success message\n"
-    gh_use_case = gh.GhUseCase(config_manager, github_service)
+    gh_use_case = FakeGhUseCase(config_manager, FakeGithubService())
 
-    gh_use_case.call_github_service(
-        "create_issue_from_repo", mocker.Mock(), mocker.Mock()
-    )
+    response = gh_use_case.call_github_service("fake_success", REPO)
 
-    assert gh_use_case.output == "success message\n"
+    assert isinstance(response, res.ResponseSuccess)
+    assert response.value == SUCCESS_MSG
 
 
 def test_call_github_service_error(
-    mocker: MockerFixture,
     mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
 ) -> None:
     """It outputs error message from Github."""
     config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    github_service.create_issue_from_repo.side_effect = gs.GithubServiceError(
-        "some error"
-    )
-    gh_use_case = gh.GhUseCase(config_manager, github_service)
+    gh_use_case = FakeGhUseCase(config_manager, FakeGithubService())
 
-    gh_use_case.call_github_service(
-        "create_issue_from_repo", mocker.Mock(), mocker.Mock()
-    )
+    response = gh_use_case.call_github_service("fake_error", REPO)
 
-    assert gh_use_case.output == "some error"
+    assert isinstance(response, res.ResponseFailure)
+    assert response.value["message"] == ERROR_MSG
 
 
 def test_call_github_service_unexpected_error(
-    mocker: MockerFixture,
     mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
 ) -> None:
     """It outputs instructions for issue creation."""
     config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    error_msg = "some error"
-    github_service.create_issue_from_repo.side_effect = Exception(error_msg)
-    gh_use_case = gh.GhUseCase(config_manager, github_service)
+    gh_use_case = FakeGhUseCase(config_manager, FakeGithubService())
 
-    gh_use_case.call_github_service(
-        "create_issue_from_repo", mocker.Mock(), mocker.Mock()
-    )
+    response = gh_use_case.call_github_service("fake_unexpected_error", REPO)
 
-    assert gh_use_case.output.startswith(
+    assert isinstance(response, res.ResponseFailure)
+    assert isinstance(response.value["message"], str)
+    assert response.value["message"].startswith(
         "An unexpected error occured. Please report at "
     )
-    assert gh_use_case.output.endswith(f"{error_msg}\n")
-
-
-def test_generate_response_success(
-    mock_config_manager: MockerFixture, mock_github_service: MockerFixture
-) -> None:
-    """It returns a response success."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    gh_use_case = gh.GhUseCase(config_manager, github_service)
-    gh_use_case.error = False
-    gh_use_case.output = "good output"
-
-    response = gh_use_case.generate_response()
-
-    assert bool(response) is True
-    assert response.value == "good output"
-
-
-def test_generate_response_failure(
-    mock_config_manager: MockerFixture, mock_github_service: MockerFixture
-) -> None:
-    """It returns a response failure."""
-    config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    gh_use_case = gh.GhUseCase(config_manager, github_service)
-    gh_use_case.error = True
-    gh_use_case.output = "bad output"
-
-    response = gh_use_case.generate_response()
-
-    assert bool(response) is False
-    assert response.value["message"] == "bad output"
+    assert response.value["message"].endswith(f"{ERROR_MSG}\n")
 
 
 def test_execute_for_all_repos(
     mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    mock_action: MockerFixture,
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    gh_use_case = gh.GhUseCase(config_manager, github_service)
+    gh_use_case = FakeGhUseCase(config_manager, FakeGithubService())
 
-    response = gh_use_case.execute()
+    responses = gh_use_case.execute()
 
-    assert mock_action.call_count == 2
-    assert bool(response) is True
+    assert len(responses) == 2
+    for response in responses:
+        assert bool(response) is True
 
 
 def test_execute_for_specific_repo(
     mock_config_manager: MockerFixture,
-    mock_github_service: MockerFixture,
-    mock_action: MockerFixture,
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
-    github_service = mock_github_service.return_value
-    gh_use_case = gh.GhUseCase(config_manager, github_service, REPO)
+    gh_use_case = FakeGhUseCase(config_manager, FakeGithubService(), REPO)
 
-    response = gh_use_case.execute()
+    responses = gh_use_case.execute()
 
-    assert mock_action.call_count == 1
-    assert bool(response) is True
+    assert len(responses) == 1
+    assert bool(responses[0]) is True

@@ -1,12 +1,12 @@
 """Test cases for the Github delete branch use case."""
 import pytest
 from pytest_mock import MockerFixture
+from tests.conftest import BRANCH_NAME
+from tests.conftest import REPO
 
 import git_portfolio.domain.config as c
+import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_delete_branch as ghdb
-
-
-REPO = "org/repo-name"
 
 
 @pytest.fixture
@@ -25,21 +25,17 @@ def mock_github_service(mocker: MockerFixture) -> MockerFixture:
     return mock
 
 
-@pytest.fixture
-def domain_branch() -> str:
-    """Branch fixture."""
-    return "my-branch"
-
-
 def test_action(
     mock_config_manager: MockerFixture,
     mock_github_service: MockerFixture,
-    domain_branch: str,
 ) -> None:
     """It returns success."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
     use_case = ghdb.GhDeleteBranchUseCase(config_manager, github_service)
-    use_case.action(REPO, domain_branch)
 
-    assert "success message\n" == use_case.output
+    use_case.action(REPO, BRANCH_NAME)
+    response = use_case.responses[0]
+
+    assert isinstance(response, res.ResponseSuccess)
+    assert "success message\n" == response.value

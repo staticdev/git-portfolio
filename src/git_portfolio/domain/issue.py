@@ -1,6 +1,7 @@
 """Issue model."""
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Set
 
 
 @dataclass
@@ -10,4 +11,4 @@ class Issue:
     number: int
     title: str
     body: str
-    labels: Set[str]
+    labels: set[str]

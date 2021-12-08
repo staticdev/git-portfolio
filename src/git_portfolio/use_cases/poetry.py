@@ -14,7 +14,7 @@ class PoetryUseCase:
 
     def execute(
         self, git_selected_repos: list[str], command: str, args: tuple[str]
-    ) -> res.ResponseFailure | res.ResponseSuccess:
+    ) -> list[res.Response]:
         """Batch `poetry` command.
 
         Args:
@@ -23,17 +23,16 @@ class PoetryUseCase:
             args: command arguments.
 
         Returns:
-            res.ResponseFailure | res.ResponseSuccess: final result.
+            list[res.Response]: final results.
         """
         err_output = command_checker.CommandChecker().check("poetry")
         if err_output:
-            return res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, err_output)
-        output = ""
-        error = False
+            return [res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, err_output)]
+        responses: list[res.Response] = []
         cwd = pathlib.Path().absolute()
         for repo_name in git_selected_repos:
             folder_name = repo_name.split("/")[1]
-            output += f"{folder_name}: "
+            output = f"{folder_name}: "
             try:
                 popen = subprocess.Popen(  # noqa: S603, S607
                     [command, *args],
@@ -41,7 +40,7 @@ class PoetryUseCase:
                     stderr=subprocess.PIPE,
                     cwd=os.path.join(cwd, folder_name),
                 )
-                stdout, err = popen.communicate()
+                stdout, error = popen.communicate()
                 if popen.returncode == 0:
                     # case for command with no output on success
                     if not stdout:
@@ -49,13 +48,16 @@ class PoetryUseCase:
                     else:
                         stdout_str = stdout.decode("utf-8")
                         output += f"{stdout_str}\n"
+                    responses.append(res.ResponseSuccess(output))
                 else:
-                    error = True
-                    error_str = err.decode("utf-8")
+                    error_str = error.decode("utf-8")
                     output += f"{error_str}"
+                    responses.append(
+                        res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, output)
+                    )
             except FileNotFoundError as fnf_error:
-                error = True
                 output += f"{fnf_error.strerror}: {fnf_error.filename}\n"
-        if error:
-            return res.ResponseFailure(res.ResponseTypes.PARAMETERS_ERROR, output)
-        return res.ResponseSuccess(output)
+                responses.append(
+                    res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, output)
+                )
+        return responses

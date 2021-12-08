@@ -4,6 +4,7 @@ from pytest_mock import MockerFixture
 
 import git_portfolio.domain.config as c
 import git_portfolio.domain.gh_connection_settings as cs
+import git_portfolio.responses as res
 import git_portfolio.use_cases.config_repos as cr
 
 
@@ -33,5 +34,5 @@ def test_execute(
         domain_gh_conn_settings, ["user/repo"]
     )
 
-    assert bool(response) is True
+    assert isinstance(response, res.ResponseSuccess)
     assert "gitp repositories successfully configured." == response.value

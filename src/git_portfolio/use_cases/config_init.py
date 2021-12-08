@@ -16,9 +16,7 @@ class ConfigInitUseCase:
         """Initializer."""
         self.config_manager = config_manager
 
-    def execute(
-        self, request: gcs.GhConnectionSettings
-    ) -> res.ResponseFailure | res.ResponseSuccess:
+    def execute(self, request: gcs.GhConnectionSettings) -> res.Response:
         """Initialize app configuration."""
         try:
             new_github_service = ghs.GithubService(request)

@@ -1,16 +1,15 @@
 """Test cases for the __main__ module."""
+from __future__ import annotations
+
 import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
+from tests.conftest import REPO
 
 import git_portfolio.__main__
 import git_portfolio.domain.config as c
 import git_portfolio.github_service as gs
 import git_portfolio.responses as res
-
-
-REPO = "org/repo-name"
-REPO2 = "org/repo-name2"
 
 
 @pytest.fixture
@@ -151,8 +150,8 @@ def test_gitp_config_check_success(
 
     @git_portfolio.__main__.main.command("test")
     @git_portfolio.__main__.gitp_config_check
-    def _() -> res.ResponseSuccess:
-        return res.ResponseSuccess("success message")
+    def _() -> list[res.ResponseSuccess]:
+        return [res.ResponseSuccess("success message")]
 
     result = runner.invoke(git_portfolio.__main__.main, ["test"], prog_name="gitp")
 
@@ -166,12 +165,12 @@ def test_gitp_config_check_execute_error(
 
     @git_portfolio.__main__.main.command("test")
     @git_portfolio.__main__.gitp_config_check
-    def _() -> res.ResponseFailure:
-        return res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, "some error msg")
+    def _() -> list[res.ResponseFailure]:
+        return [res.ResponseFailure(res.ResponseTypes.SYSTEM_ERROR, "some error msg")]
 
     result = runner.invoke(git_portfolio.__main__.main, ["test"], prog_name="gitp")
 
-    assert "Error(s) found during execution:\nsome error msg" in result.output
+    assert "some error msg" in result.output
     assert result.exit_code == 4
 
 
