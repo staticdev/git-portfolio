@@ -137,4 +137,5 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _pip: https://pip.pypa.io/
 .. _Poetry: https://python-poetry.org/
 .. _git-portfolio.readthedocs.io: https://git-portfolio.readthedocs.io
+.. github-only
 .. _Contributor Guide: https://git-portfolio.readthedocs.io/en/latest/contributing.html
