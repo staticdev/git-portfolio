@@ -13,7 +13,7 @@ class PoetryUseCase:
     """Execution of poetry use case."""
 
     def execute(
-        self, git_selected_repos: list[str], command: str, args: tuple[str]
+        self, git_selected_repos: list[str], command: str, args: tuple[str, ...]
     ) -> list[res.Response]:
         """Batch `poetry` command.
 
@@ -35,23 +35,18 @@ class PoetryUseCase:
             output = f"{folder_name}: "
             try:
                 popen = subprocess.Popen(  # noqa: S603, S607
-                    [command, *args],
+                    # --ansi option makes output with colors
+                    [command, *args, "--ansi"],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     cwd=os.path.join(cwd, folder_name),
                 )
-                stdout, error = popen.communicate()
+                stdout, _ = popen.communicate()
+                stdout_str = stdout.decode("utf-8")
+                output += f"{stdout_str}"
                 if popen.returncode == 0:
-                    # case for command with no output on success
-                    if not stdout:
-                        output += f"{command} successful.\n"
-                    else:
-                        stdout_str = stdout.decode("utf-8")
-                        output += f"{stdout_str}\n"
                     responses.append(res.ResponseSuccess(output))
                 else:
-                    error_str = error.decode("utf-8")
-                    output += f"{error_str}"
                     responses.append(
                         res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, output)
                     )

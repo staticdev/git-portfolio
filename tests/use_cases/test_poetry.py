@@ -34,22 +34,7 @@ def test_execute_success(
 
     assert len(responses) == 2
     assert isinstance(responses[0], res.ResponseSuccess)
-    assert responses[0].value == f"{REPO_NAME}: some output\n"
-
-
-# TODO: this is only to maintain logic from git use case
-# no known poetry command has no output when merging
-# with GitUseCase remove this non-sense example.
-def test_execute_success_no_output(mock_popen: MockerFixture) -> None:
-    """It returns success message."""
-    mock_popen.return_value.communicate.return_value = (b"", b"")
-
-    responses = poetry.PoetryUseCase().execute(
-        [REPO], "poetry", ("someoptionwithoutoutput",)
-    )
-
-    assert isinstance(responses[0], res.ResponseSuccess)
-    assert responses[0].value == f"{REPO_NAME}: poetry successful.\n"
+    assert responses[0].value == f"{REPO_NAME}: some output"
 
 
 def test_execute_poetry_not_installed(mock_command_checker: MockerFixture) -> None:
@@ -71,23 +56,27 @@ def test_execute_no_folder(
     mock_exception.filename = "/path/x"
     mock_popen.side_effect = mock_exception
 
-    responses = poetry.PoetryUseCase().execute(["user/x"], "poetry", ("version",))
+    responses = poetry.PoetryUseCase().execute([REPO], "poetry", ("version",))
 
     assert isinstance(responses[0], res.ResponseFailure)
-    assert responses[0].value["message"] == "x: No such file or directory: /path/x\n"
+    assert (
+        responses[0].value["message"]
+        == f"{REPO_NAME}: No such file or directory: /path/x\n"
+    )
 
 
 def test_execute_error_during_execution(mock_popen: MockerFixture) -> None:
     """It returns error message."""
     mock_popen.return_value.returncode = 1
     mock_popen().communicate.return_value = (
+        b"ValueError\n\nPackage nonexistingpackage not found",
         b"",
-        b"error: pathspec 'xyz' did not match any file(s) known to poetry",
     )
-    responses = poetry.PoetryUseCase().execute([REPO], "poetry", ("version",))
+    responses = poetry.PoetryUseCase().execute(
+        [REPO], "poetry", ("remove", "nonexistingpackage")
+    )
 
     assert isinstance(responses[0], res.ResponseFailure)
     assert responses[0].value["message"] == (
-        f"{REPO_NAME}: error: pathspec 'xyz' did not match any file(s) known to "
-        "poetry"
+        f"{REPO_NAME}: ValueError\n\nPackage nonexistingpackage not found"
     )
