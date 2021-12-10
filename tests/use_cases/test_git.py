@@ -30,7 +30,7 @@ def test_execute_success(mock_popen: MockerFixture) -> None:
 
     assert len(responses) == 2
     assert isinstance(responses[0], res.ResponseSuccess)
-    assert responses[0].value == f"{REPO_NAME}: some output\n"
+    assert responses[0].value == f"{REPO_NAME}: some output"
 
 
 def test_execute_success_no_output(mock_popen: MockerFixture) -> None:
