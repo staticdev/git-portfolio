@@ -27,7 +27,7 @@ class AbstractGithubService(abc.ABC):
     def list_issues_from_repo(
         self,
         github_repo: str,
-        request: il.IssueListValidRequest | il.IssueListInvalidRequest,
+        request: il.IssueListValidRequest,
     ) -> list[i.Issue]:
         """Return list of issues from one repository."""
         raise NotImplementedError  # pragma: no cover
@@ -134,43 +134,39 @@ class GithubService(AbstractGithubService):
     def list_issues_from_repo(
         self,
         github_repo: str,
-        request: il.IssueListValidRequest | il.IssueListInvalidRequest,
+        request: il.IssueListValidRequest,
     ) -> list[i.Issue]:
         """Return list of issues from one repository."""
-        if isinstance(request, il.IssueListValidRequest):
-            repo = self._get_repo(github_repo)
+        repo = self._get_repo(github_repo)
 
-            domain_issues = []
-            if not request.filters:
-                issues = list(repo.issues())
-                for issue in issues:
-                    labels = {label.name for label in issue.labels()}
-                    domain_issues.append(
-                        i.Issue(issue.number, issue.title, issue.body, labels)
-                    )
-                return issues
-
-            obj = request.filters.get("obj__eq")
-            state = request.filters.get("state__eq")
-            title_query = request.filters.get("title__contains")
-            issues = list(repo.issues(state=state))
-
-            if obj == "issue":
-                issues = [issue for issue in issues if issue.pull_request_urls is None]
-            elif obj == "pull request":
-                issues = [issue for issue in issues if issue.pull_request_urls]
-
-            if title_query:
-                issues = [issue for issue in issues if title_query in issue.title]
-
+        domain_issues = []
+        if not request.filters:
+            issues = list(repo.issues())
             for issue in issues:
                 labels = {label.name for label in issue.labels()}
                 domain_issues.append(
                     i.Issue(issue.number, issue.title, issue.body, labels)
                 )
+            return issues
 
-            return domain_issues
-        return []
+        obj = request.filters.get("obj__eq")
+        state = request.filters.get("state__eq")
+        title_query = request.filters.get("title__contains")
+        issues = list(repo.issues(state=state))
+
+        if obj == "issue":
+            issues = [issue for issue in issues if issue.pull_request_urls is None]
+        elif obj == "pull request":
+            issues = [issue for issue in issues if issue.pull_request_urls]
+
+        if title_query:
+            issues = [issue for issue in issues if title_query in issue.title]
+
+        for issue in issues:
+            labels = {label.name for label in issue.labels()}
+            domain_issues.append(i.Issue(issue.number, issue.title, issue.body, labels))
+
+        return domain_issues
 
     def close_issues_from_repo(
         self, github_repo: str, domain_issues: list[i.Issue]

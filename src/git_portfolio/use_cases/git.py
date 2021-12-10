@@ -44,7 +44,7 @@ class GitUseCase:
                 if popen.returncode == 0:
                     if stdout:
                         stdout_str = stdout.decode("utf-8")
-                        output += f"{stdout_str}\n"
+                        output += f"{stdout_str}"
                     else:
                         output += f"{command} successful.\n"
                     responses.append(res.ResponseSuccess(output))
