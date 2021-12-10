@@ -379,18 +379,6 @@ def test_list_issues_from_repo_obj_filter(
         assert response[0].title == DOMAIN_ISSUES[3].title
 
 
-# def test_list_issues_from_repo_invalid_request(
-#     domain_gh_conn_settings: list[cs.GhConnectionSettings],
-#     mock_github3_login: MockerFixture,
-# ) -> None:
-#     """It returns empty result."""
-#     response = gs.GithubService(domain_gh_conn_settings[0]).list_issues_from_repo(
-#         REPO, il.IssueListInvalidRequest()
-#     )
-
-#     assert response == []
-
-
 def test_list_issues_from_repo_no_filter_request(
     mocker: MockerFixture,
     domain_gh_conn_settings: list[cs.GhConnectionSettings],
