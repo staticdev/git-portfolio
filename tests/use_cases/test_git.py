@@ -36,7 +36,7 @@ def test_execute_success(mock_popen: MockerFixture) -> None:
 def test_execute_success_no_output(mock_popen: MockerFixture) -> None:
     """It returns success message."""
     mock_popen.return_value.communicate.return_value = (b"", b"")
-    # case where command success has no output with `gitp add .`
+    # case where command success has no output with `add .`
     responses = git.GitUseCase().execute([REPO, REPO2], "add", (".",))
 
     assert len(responses) == 2
@@ -77,7 +77,7 @@ def test_execute_error_during_execution(mock_popen: MockerFixture) -> None:
         b"",
         b"fatal: A branch named 'existingbranch' already exists.",
     )
-    # case where create branch already exists with `gitp checkout -b existingbranch`
+    # case where create branch already exists with `checkout -b existingbranch`
     responses = git.GitUseCase().execute([REPO], "checkout", ("-b", "existingbranch"))
 
     assert isinstance(responses[0], res.ResponseFailure)
@@ -97,7 +97,7 @@ def test_execute_error_no_stderr(mock_popen: MockerFixture) -> None:
         ),
         b"",
     )
-    # case where is nothing to commit with `gitp commit`
+    # case where is nothing to commit with `commit`
     responses = git.GitUseCase().execute([REPO], "commit", ("",))
 
     assert isinstance(responses[0], res.ResponseSuccess)

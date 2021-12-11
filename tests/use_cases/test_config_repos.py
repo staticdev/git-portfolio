@@ -1,6 +1,7 @@
-"""Test cases for the gitp repositories config use case."""
+"""Test cases for the repositories config use case."""
 import pytest
 from pytest_mock import MockerFixture
+from tests.conftest import CLI_COMMAND
 
 import git_portfolio.domain.config as c
 import git_portfolio.domain.gh_connection_settings as cs
@@ -35,4 +36,4 @@ def test_execute(
     )
 
     assert isinstance(response, res.ResponseSuccess)
-    assert "gitp repositories successfully configured." == response.value
+    assert response.value == f"{CLI_COMMAND} repositories successfully configured."

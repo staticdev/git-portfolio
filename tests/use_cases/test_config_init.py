@@ -1,4 +1,4 @@
-"""Test cases for the gitp config initialization use case."""
+"""Test cases for the config initialization use case."""
 import pytest
 from pytest_mock import MockerFixture
 

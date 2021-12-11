@@ -44,7 +44,7 @@ def _echo_outputs(responses: list[res.Response]) -> None:
             click.secho(f"{failure.value['message']}", fg="red")
 
 
-def gitp_config_check(func: F) -> F:
+def command_config_check(func: F) -> F:
     """Validate if there are selected repos and outputs success."""
 
     @functools.wraps(func)
@@ -77,7 +77,7 @@ def _get_connection_settings(config: c.Config) -> cs.GhConnectionSettings:
     return cs.GhConnectionSettings(config.github_access_token, config.github_hostname)
 
 
-@gitp_config_check
+@command_config_check
 def _call_git_use_case(command: str, args: tuple[str]) -> list[res.Response]:
     return git.GitUseCase().execute(
         CONFIG_MANAGER.config.github_selected_repos, command, args
@@ -106,7 +106,7 @@ def checkout(args: tuple[str]) -> list[res.Response]:
 
 
 @main.command()
-@gitp_config_check
+@command_config_check
 def clone() -> list[res.Response]:
     """Batch `git clone` command on current folder. Does not accept aditional args."""
     settings = _get_connection_settings(CONFIG_MANAGER.config)
@@ -269,7 +269,7 @@ def config_init() -> None:
 
 
 @group_config.command("repos")
-@gitp_config_check
+@command_config_check
 def config_repos() -> list[res.Response]:
     """Configure current working `gitp` repositories."""
     new_repos = p.InquirerPrompter.new_repos(
@@ -293,7 +293,7 @@ def config_repos() -> list[res.Response]:
 
 
 @group_issues.command("create")
-@gitp_config_check
+@command_config_check
 def create_issues() -> list[res.Response]:
     """Batch creation of issues on GitHub."""
     settings = _get_connection_settings(CONFIG_MANAGER.config)
@@ -309,7 +309,7 @@ def create_issues() -> list[res.Response]:
 
 
 @group_issues.command("close")
-@gitp_config_check
+@command_config_check
 def close_issues() -> list[res.Response]:
     """Batch close issues on GitHub."""
     settings = _get_connection_settings(CONFIG_MANAGER.config)
@@ -335,7 +335,7 @@ def close_issues() -> list[res.Response]:
 
 
 @group_issues.command("reopen")
-@gitp_config_check
+@command_config_check
 def reopen_issues() -> list[res.Response]:
     """Batch reopen issues on GitHub."""
     settings = _get_connection_settings(CONFIG_MANAGER.config)
@@ -362,7 +362,7 @@ def reopen_issues() -> list[res.Response]:
 
 @main.command("poetry", context_settings={"ignore_unknown_options": True})
 @click.argument("args", nargs=-1)
-@gitp_config_check
+@command_config_check
 def poetry_cmd(args: tuple[str]) -> list[res.Response]:
     """Batch `poetry` command."""
     return poetry.PoetryUseCase().execute(
@@ -371,7 +371,7 @@ def poetry_cmd(args: tuple[str]) -> list[res.Response]:
 
 
 @group_prs.command("create")
-@gitp_config_check
+@command_config_check
 def create_prs() -> list[res.Response]:
     """Batch creation of pull requests on GitHub."""
     settings = _get_connection_settings(CONFIG_MANAGER.config)
@@ -397,7 +397,7 @@ def create_prs() -> list[res.Response]:
 
 
 @group_prs.command("close")
-@gitp_config_check
+@command_config_check
 def close_prs() -> list[res.Response]:
     """Batch close pull requests on GitHub."""
     settings = _get_connection_settings(CONFIG_MANAGER.config)
@@ -422,8 +422,34 @@ def close_prs() -> list[res.Response]:
     )
 
 
+@group_prs.command("reopen")
+@command_config_check
+def reopen_prs() -> list[res.Response]:
+    """Batch reopen pull requests on GitHub."""
+    settings = _get_connection_settings(CONFIG_MANAGER.config)
+    try:
+        github_service = ghs.GithubService(settings)
+    except ghs.GithubServiceError as gse:
+        return [res.ResponseFailure(res.ResponseTypes.RESOURCE_ERROR, gse)]
+
+    list_object = "pull request"
+    title_query = p.InquirerPrompter.query_by_title(
+        CONFIG_MANAGER.config.github_selected_repos, list_object
+    )
+    list_request = il.build_list_request(
+        filters={
+            "obj__eq": list_object,
+            "state__eq": "closed",
+            "title__contains": title_query,
+        }
+    )
+    return ghri.GhReopenIssueUseCase(CONFIG_MANAGER, github_service).execute(
+        list_request
+    )
+
+
 @group_prs.command("merge")
-@gitp_config_check
+@command_config_check
 def merge_prs() -> list[res.Response]:
     """Batch merge of pull requests on GitHub."""
     settings = _get_connection_settings(CONFIG_MANAGER.config)
@@ -440,7 +466,7 @@ def merge_prs() -> list[res.Response]:
 
 
 @group_branches.command("delete")
-@gitp_config_check
+@command_config_check
 def delete_branches() -> list[res.Response]:
     """Batch deletion of branches on GitHub."""
     settings = _get_connection_settings(CONFIG_MANAGER.config)
