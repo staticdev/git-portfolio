@@ -12,6 +12,7 @@ def pytest_configure(config: _pytest.config.Config) -> None:
     config.addinivalue_line("markers", "integration: mark as integration test.")
 
 
+CLI_COMMAND = "gitp"
 REPO_NAME = "repo-name"
 REPO = f"org/{REPO_NAME}"
 REPO2 = f"org/{REPO_NAME}2"

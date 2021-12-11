@@ -41,7 +41,7 @@ Features
 
 * Configure multiple working repositories.
 * Batch git_ commands with subcommands: ``add``, ``branch``, ``checkout``, ``commit``, ``diff``, ``fetch``, ``init``, ``merge``, ``mv``, ``pull``, ``push``, ``rebase``, ``reset``, ``rm``, ``show``, ``switch``, ``status`` and ``tag``.
-* Batch API calls on GitHub_: create/close/reopen ``issues``, create/merge ``pull requests`` and delete ``branches`` by name.
+* Batch API calls on GitHub_: create/close/reopen ``issues``, create/close/reopen/merge ``pull requests`` and delete ``branches`` by name.
 * Batch Poetry_ commands such as: ``add``, ``version patch``, ``install`` or ``update``.
 
 
