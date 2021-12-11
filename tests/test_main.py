@@ -218,7 +218,9 @@ def test_poetry_success(
     runner: CliRunner,
 ) -> None:
     """It calls poetry with 'version'."""
-    runner.invoke(git_portfolio.__main__.main, ["poetry", "version"], prog_name=CLI_COMMAND)
+    runner.invoke(
+        git_portfolio.__main__.main, ["poetry", "version"], prog_name=CLI_COMMAND
+    )
 
     mock_poetry_use_case.return_value.execute.assert_called_once_with(
         [REPO], "poetry", ("version",)
@@ -248,7 +250,9 @@ def test_checkout_success(
     runner: CliRunner,
 ) -> None:
     """It calls checkout."""
-    runner.invoke(git_portfolio.__main__.main, ["checkout", "main"], prog_name=CLI_COMMAND)
+    runner.invoke(
+        git_portfolio.__main__.main, ["checkout", "main"], prog_name=CLI_COMMAND
+    )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
         [REPO], "checkout", ("main",)
@@ -262,7 +266,9 @@ def test_checkout_new_branch(
 ) -> None:
     """It calls checkout to create new branch."""
     runner.invoke(
-        git_portfolio.__main__.main, ["checkout", "-b", "new-branch"], prog_name=CLI_COMMAND
+        git_portfolio.__main__.main,
+        ["checkout", "-b", "new-branch"],
+        prog_name=CLI_COMMAND,
     )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
@@ -362,7 +368,9 @@ def test_pull_rebase_success(
     runner: CliRunner,
 ) -> None:
     """It calls pull."""
-    runner.invoke(git_portfolio.__main__.main, ["pull", "--rebase"], prog_name=CLI_COMMAND)
+    runner.invoke(
+        git_portfolio.__main__.main, ["pull", "--rebase"], prog_name=CLI_COMMAND
+    )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
         [REPO], "pull", ("--rebase",)
@@ -418,7 +426,9 @@ def test_reset_success(
     runner: CliRunner,
 ) -> None:
     """It calls reset."""
-    runner.invoke(git_portfolio.__main__.main, ["reset", "HEAD^"], prog_name=CLI_COMMAND)
+    runner.invoke(
+        git_portfolio.__main__.main, ["reset", "HEAD^"], prog_name=CLI_COMMAND
+    )
 
     mock_git_use_case.return_value.execute.assert_called_once_with(
         [REPO], "reset", ("HEAD^",)
@@ -626,7 +636,9 @@ def test_clone_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(git_portfolio.__main__.main, ["clone"], prog_name=CLI_COMMAND)
+    result = runner.invoke(
+        git_portfolio.__main__.main, ["clone"], prog_name=CLI_COMMAND
+    )
 
     assert type(result.exception) == SystemExit
 
@@ -641,7 +653,9 @@ def test_create_issues(
     """It executes gh_create_issue."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    runner.invoke(git_portfolio.__main__.group_issues, ["create"], prog_name=CLI_COMMAND)
+    runner.invoke(
+        git_portfolio.__main__.group_issues, ["create"], prog_name=CLI_COMMAND
+    )
 
     mock_gh_create_issue_use_case(
         config_manager, github_service
@@ -692,9 +706,7 @@ def test_close_issues_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(
-        cli, ["close"], prog_name=CLI_COMMAND
-    )
+    result = runner.invoke(cli, ["close"], prog_name=CLI_COMMAND)
 
     assert type(result.exception) == SystemExit
 
@@ -730,9 +742,7 @@ def test_reopen_issues_service_error(
     runner: CliRunner,
 ) -> None:
     """It raises system exit."""
-    result = runner.invoke(
-        cli, ["reopen"], prog_name=CLI_COMMAND
-    )
+    result = runner.invoke(cli, ["reopen"], prog_name=CLI_COMMAND)
 
     assert type(result.exception) == SystemExit
 
@@ -807,7 +817,9 @@ def test_delete_branches(
     """It call delete_branches from pm.GithubService."""
     config_manager = mock_config_manager.return_value
     github_service = mock_github_service.return_value
-    runner.invoke(git_portfolio.__main__.group_branches, ["delete"], prog_name=CLI_COMMAND)
+    runner.invoke(
+        git_portfolio.__main__.group_branches, ["delete"], prog_name=CLI_COMMAND
+    )
 
     mock_gh_delete_branch_use_case(
         config_manager, github_service
