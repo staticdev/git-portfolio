@@ -1,0 +1,34 @@
+---
+name: Check documentation
+
+on:
+  schedule:
+    - cron: "0 1 * * *" # everyday at 1am
+  push:
+    paths:
+      - "**.rst"
+      - "docs/**"
+  pull_request:
+    paths:
+      - "**.rst"
+      - "docs/**"
+
+jobs:
+  docs:
+    name: Build documentation & check links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - uses: actions/setup-python@v2.3.1
+        with:
+          python-version: "3.10"
+      - run: |
+          pip install --constraint=.github/workflows/constraints.txt pip
+          pip install --constraint=.github/workflows/constraints.txt nox
+      - name: Build documentation
+        run: nox --force-color --session=docs-build
+      - name: Upload documentation
+        uses: actions/upload-artifact@v2.3.0
+        with:
+          name: docs
+          path: docs/_build
