@@ -200,7 +200,12 @@ class GithubService(AbstractGithubService):
             issue = connection.issue(
                 self.get_username(), repo_suffix, domain_issue.number
             )
-            issue.reopen()
+            try:
+                issue.reopen()
+            except github3.exceptions.UnprocessableEntity as ue:
+                raise GithubServiceError(
+                    f"{github_repo}: {ue.msg}. Probably the branch was deleted.\n"
+                ) from ue
         return f"{github_repo}: reopen issues successful.\n"
 
     def create_pull_request_from_repo(

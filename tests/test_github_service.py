@@ -94,6 +94,23 @@ def mock_github3_enterprise_login(mocker: MockerFixture) -> MockerFixture:
     return mocker.patch("github3.enterprise_login", autospec=True)
 
 
+# Details on mocking exception constructor at
+# stackoverflow.com/questions/64226516/how-to-set-mocked-exception-behavior-on-python
+@pytest.fixture
+def mock_github3_unprocessable_entity_exception(mocker: MockerFixture) -> MockerFixture:
+    """Fixture for mocking github3.exceptions.UnprocessableEntity."""
+
+    def _initiate_mocked_exception(
+        self: github3.exceptions.UnprocessableEntity,
+    ) -> None:
+        self.errors = [{"message": ERROR_MSG}]
+        self.msg = "Validation Failed"
+
+    return mocker.patch.object(
+        github3.exceptions.UnprocessableEntity, "__init__", _initiate_mocked_exception
+    )
+
+
 def test_init_github_com(
     domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
@@ -119,10 +136,11 @@ def test_init_invalid_token(
     mock_github3_login.return_value.me.side_effect = (
         github3.exceptions.AuthenticationFailed(mocker.Mock())
     )
-    with pytest.raises(gs.GithubServiceError) as excinfo:
+    with pytest.raises(
+        gs.GithubServiceError,
+        match="Wrong GitHub permissions. Please check your token.",
+    ):
         gs.GithubService(domain_gh_conn_settings[0])
-
-    assert "Wrong GitHub permissions. Please check your token." == str(excinfo.value)
 
 
 def test_init_invalid_token_scope(
@@ -469,6 +487,21 @@ def test_reopen_issues_from_repo_no_issue(
     assert response == f"{REPO}: no issues match.\n"
 
 
+def test_reopen_issues_from_repo_error(
+    mock_github3_unprocessable_entity_exception: MockerFixture,
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It returns a not issue message."""
+    repo = mock_github3_login.return_value.issue.return_value
+    repo.reopen.side_effect = github3.exceptions.UnprocessableEntity
+
+    with pytest.raises(gs.GithubServiceError):
+        gs.GithubService(domain_gh_conn_settings[0]).reopen_issues_from_repo(
+            REPO, DOMAIN_ISSUES
+        )
+
+
 def test_create_pull_request_from_repo_success(
     domain_gh_conn_settings: list[cs.GhConnectionSettings],
     mock_github3_login: MockerFixture,
@@ -493,8 +526,22 @@ def test_create_pull_request_from_repo_with_labels(
     assert response == f"{REPO}: create PR successful.\n"
 
 
-# Details on mocking exception constructor at
-# stackoverflow.com/questions/64226516/how-to-set-mocked-exception-behavior-on-python
+def test_create_pull_request_from_repo_no_commits(
+    mocker: MockerFixture,
+    mock_github3_unprocessable_entity_exception: MockerFixture,
+    domain_gh_conn_settings: list[cs.GhConnectionSettings],
+    mock_github3_login: MockerFixture,
+) -> None:
+    """It gives the message error from the exception."""
+    repo = mock_github3_login.return_value.repositories.return_value[1]
+    repo.create_pull.side_effect = github3.exceptions.UnprocessableEntity
+    response = gs.GithubService(
+        domain_gh_conn_settings[0]
+    ).create_pull_request_from_repo(REPO, DOMAIN_PRS[1])
+
+    assert response == (f"{REPO}: Validation Failed. {ERROR_MSG}.\n")
+
+
 def test_create_pull_request_from_repo_invalid_branch(
     mocker: MockerFixture,
     domain_gh_conn_settings: list[cs.GhConnectionSettings],
@@ -519,86 +566,6 @@ def test_create_pull_request_from_repo_invalid_branch(
     ).create_pull_request_from_repo(REPO, DOMAIN_PRS[1])
 
     assert response == f"{REPO}: Validation Failed. Invalid field head.\n"
-
-
-@pytest.mark.e2e
-def test_create_pull_request_from_repo_invalid_branch_unpatched_exception(
-    mocker: MockerFixture,
-    domain_gh_conn_settings: list[cs.GhConnectionSettings],
-    mock_github3_login: MockerFixture,
-) -> None:
-    """It gives the message error informing the invalid field head."""
-    mocked_response = mocker.Mock()
-    mocked_response.json.return_value = {
-        "message": "Validation Failed",
-        "errors": [{"field": "head"}],
-    }
-
-    repo = mock_github3_login.return_value.repositories.return_value[1]
-    repo.create_pull.side_effect = github3.exceptions.UnprocessableEntity(
-        mocked_response
-    )
-    response = gs.GithubService(
-        domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo(REPO, DOMAIN_PRS[1])
-
-    assert response == f"{REPO}: Validation Failed. Invalid field head.\n"
-
-
-# Details on mocking exception constructor at
-# stackoverflow.com/questions/64226516/how-to-set-mocked-exception-behavior-on-python
-def test_create_pull_request_from_repo_no_commits(
-    mocker: MockerFixture,
-    domain_gh_conn_settings: list[cs.GhConnectionSettings],
-    mock_github3_login: MockerFixture,
-) -> None:
-    """It gives the message error from the exception."""
-
-    def _initiate_mocked_exception(
-        self: github3.exceptions.UnprocessableEntity,
-    ) -> None:
-        self.errors = [{"message": "No commits between main and new-branch"}]
-        self.msg = "Validation Failed"
-
-    mocker.patch.object(
-        github3.exceptions.UnprocessableEntity, "__init__", _initiate_mocked_exception
-    )
-
-    repo = mock_github3_login.return_value.repositories.return_value[1]
-    repo.create_pull.side_effect = github3.exceptions.UnprocessableEntity
-    response = gs.GithubService(
-        domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo(REPO, DOMAIN_PRS[1])
-
-    assert response == (
-        f"{REPO}: Validation Failed. No commits between main and " "new-branch.\n"
-    )
-
-
-@pytest.mark.e2e
-def test_create_pull_request_from_repo_no_commits_unpatched_exception(
-    mocker: MockerFixture,
-    domain_gh_conn_settings: list[cs.GhConnectionSettings],
-    mock_github3_login: MockerFixture,
-) -> None:
-    """It gives the message error from the exception."""
-    mocked_response = mocker.Mock()
-    mocked_response.json.return_value = {
-        "message": "Validation Failed",
-        "errors": [{"message": "No commits between main and new-branch"}],
-    }
-
-    repo = mock_github3_login.return_value.repositories.return_value[1]
-    repo.create_pull.side_effect = github3.exceptions.UnprocessableEntity(
-        mocked_response
-    )
-    response = gs.GithubService(
-        domain_gh_conn_settings[0]
-    ).create_pull_request_from_repo(REPO, DOMAIN_PRS[1])
-
-    assert response == (
-        f"{REPO}: Validation Failed. No commits between main and " "new-branch.\n"
-    )
 
 
 def test_create_pull_request_from_repo_other_error(
