@@ -26,7 +26,7 @@ Git Portfolio
    :target: https://github.com/staticdev/git-portfolio/actions?workflow=Tests
    :alt: Tests
 .. |Codecov| image:: https://codecov.io/gh/staticdev/git-portfolio/branch/main/graph/badge.svg
-   :target: https://codecov.io/gh/staticdev/git-portfolio
+   :target: https://app.codecov.io/gh/staticdev/git-portfolio
    :alt: Codecov
 .. |pre-commit| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
    :target: https://github.com/pre-commit/pre-commit
@@ -89,8 +89,8 @@ Basic usage
    $ gitp checkout -b new-branch  # checks out new branch new-branch in all projects
    $ gitp poetry version minor  # bumps minor version of all projects that have pyproject.toml version
 
-Note: by convention GitHub_ commands are always the resource name and action: eg. ``branches delete``, ``issues create`` and ``prs merge`` (for pull requests).
-This avoid conflicts with batch git_ commands, as in ``gitp branch`` (executes git command) and ``gitp branches delete`` (execute operations using GitHub_ API).
+Note: by convention GitHub commands are always the resource name and action: eg. ``branches delete``, ``issues create`` and ``prs merge`` (for pull requests).
+This avoid conflicts with batch git commands, as in ``gitp branch`` (executes git command) and ``gitp branches delete`` (execute operations using GitHub API).
 
 
 .. end-basic-usage
@@ -130,7 +130,7 @@ This project was generated from `@cjolowicz`_'s `Hypermodern Python Cookiecutter
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _git: https://git-scm.com
 .. _GitHub: https://github.com
-.. _MIT: http://opensource.org/licenses/MIT
+.. _MIT: https://opensource.org/licenses/MIT
 .. _PyPI: https://pypi.org/
 .. _Hypermodern Python Cookiecutter: https://github.com/cjolowicz/cookiecutter-hypermodern-python
 .. _file an issue: https://github.com/staticdev/git-portfolio/issues
