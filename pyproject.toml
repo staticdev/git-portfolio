@@ -48,7 +48,7 @@ pytest_mock = "^3.6.1"
 black = "^21.12b0"
 sphinx-click = "^3.0.2"
 types-PyYAML = "^6.0.3"
-coverage = {version = "6.2", extras = ["toml"]}
+coverage = {version = "6.3", extras = ["toml"]}
 pyupgrade = "^2.31.0"
 furo = ">=2021.11.12"
 
