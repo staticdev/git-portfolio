@@ -27,7 +27,7 @@ pyyaml = "^5.3.1"
 "github3.py" = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.0.0"
+pytest = "^7.0.1"
 safety = "^1.10.0"
 mypy = "^0.931"
 typeguard = "^2.13.3"
