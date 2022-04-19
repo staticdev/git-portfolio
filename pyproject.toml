@@ -46,7 +46,7 @@ reorder-python-imports = "^3.0.1"
 pre-commit-hooks = "^4.2.0"
 pytest_mock = "^3.7.0"
 black = "^22.3"
-sphinx-click = "^4.0.2"
+sphinx-click = "^4.0.3"
 types-PyYAML = "^6.0.6"
 coverage = {version = "6.3.2", extras = ["toml"]}
 pyupgrade = "^2.32.0"
