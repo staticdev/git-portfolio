@@ -620,7 +620,7 @@ python-versions = ">=2.6"
 
 [[package]]
 name = "pep8-naming"
-version = "0.13.0"
+version = "0.13.1"
 description = "Check PEP-8 naming conventions, plugin for flake8"
 category = "dev"
 optional = false
@@ -1269,7 +1269,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.0"
-content-hash = "60e8c0dc946e414f1738c38f9ec2ca6c7d5109ce9afa08927478fbd847b0ed64"
+content-hash = "6998d4ae542e0b31dc2d5f42821b68e454d71a56b0d3a1d735dc070567649010"
 
 [metadata.files]
 alabaster = [
@@ -1699,8 +1699,8 @@ pbr = [
     {file = "pbr-5.8.0.tar.gz", hash = "sha256:672d8ebee84921862110f23fcec2acea191ef58543d34dfe9ef3d9f13c31cddf"},
 ]
 pep8-naming = [
-    {file = "pep8-naming-0.13.0.tar.gz", hash = "sha256:9f38e6dcf867a1fb7ad47f5ff72c0ddae544a6cf64eb9f7600b7b3c0bb5980b5"},
-    {file = "pep8_naming-0.13.0-py3-none-any.whl", hash = "sha256:069ea20e97f073b3e6d4f789af2a57816f281ca64b86210c7d471117a4b6bfd0"},
+    {file = "pep8-naming-0.13.1.tar.gz", hash = "sha256:3af77cdaa9c7965f7c85a56cd579354553c9bbd3fdf3078a776f12db54dd6944"},
+    {file = "pep8_naming-0.13.1-py3-none-any.whl", hash = "sha256:f7867c1a464fe769be4f972ef7b79d6df1d9aff1b1f04ecf738d471963d3ab9c"},
 ]
 platformdirs = [
     {file = "platformdirs-2.4.0-py3-none-any.whl", hash = "sha256:8868bbe3c3c80d42f20156f22e7131d2fb321f5bc86a2a345375c6481a67021d"},
