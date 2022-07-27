@@ -49,7 +49,7 @@ black = "^22.6"
 sphinx-click = "^4.3.0"
 types-PyYAML = "^6.0.11"
 coverage = {version = "6.4.2", extras = ["toml"]}
-pyupgrade = "^2.37.2"
+pyupgrade = "^2.37.3"
 furo = ">=2021.11.12"
 
 [tool.poetry.scripts]
