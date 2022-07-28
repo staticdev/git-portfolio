@@ -480,7 +480,7 @@ python-versions = "*"
 
 [[package]]
 name = "inquirer"
-version = "2.9.2"
+version = "2.10.0"
 description = "Collection of common interactive command line user interfaces, based on Inquirer.js"
 category = "main"
 optional = false
@@ -489,7 +489,7 @@ python-versions = ">=3.7"
 [package.dependencies]
 blessed = ">=1.19.0"
 python-editor = ">=1.0.4"
-readchar = ">=2.0.1"
+readchar = ">=3.0.6"
 
 [[package]]
 name = "jinja2"
@@ -834,7 +834,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
 [[package]]
 name = "readchar"
-version = "2.0.1"
+version = "3.1.0"
 description = "Utilities to read single characters and key-strokes"
 category = "main"
 optional = false
@@ -1560,8 +1560,8 @@ iniconfig = [
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
 inquirer = [
-    {file = "inquirer-2.9.2-py3-none-any.whl", hash = "sha256:ea44fe074e878e74af05b6902314d7d7b8ff5d2db5259bcb37d6c5ec9b75afa6"},
-    {file = "inquirer-2.9.2.tar.gz", hash = "sha256:4a53cb9386601476e9f3241adace469ae6d1143ace2ee82f2768149e85861ab8"},
+    {file = "inquirer-2.10.0-py3-none-any.whl", hash = "sha256:e49f6e37132eedda31c860fe36b19726f34f6d45f7d1bfb9bfb87169da0826f8"},
+    {file = "inquirer-2.10.0.tar.gz", hash = "sha256:d6bef9df4d0049fb93ed4e1c1df852e48287331d21e46ed6163b8b2290fc5cb5"},
 ]
 jinja2 = [
     {file = "Jinja2-3.0.3-py3-none-any.whl", hash = "sha256:077ce6014f7b40d03b47d1f1ca4b0fc8328a692bd284016f806ed0eaca390ad8"},
@@ -1805,8 +1805,8 @@ pyyaml = [
     {file = "PyYAML-5.4.1.tar.gz", hash = "sha256:607774cbba28732bfa802b54baa7484215f530991055bb562efbed5b2f20a45e"},
 ]
 readchar = [
-    {file = "readchar-2.0.1-py2-none-any.whl", hash = "sha256:ed00b7a49bb12f345319d9fa393f289f03670310ada2beb55e8c3f017c648f1e"},
-    {file = "readchar-2.0.1-py3-none-any.whl", hash = "sha256:3ac34aab28563bc895f73233d5c08b28f951ca190d5850b8d4bec973132a8dca"},
+    {file = "readchar-3.1.0-py3-none-any.whl", hash = "sha256:16059b8beb1f525182de193fade8ca314cc4c32f62956a9a50268909103cdaa8"},
+    {file = "readchar-3.1.0.tar.gz", hash = "sha256:9023c957164e9c5a5cf7c39122a013ed78162d9360b4cb9cfdd492a3238f7634"},
 ]
 reorder-python-imports = [
     {file = "reorder_python_imports-3.8.2-py2.py3-none-any.whl", hash = "sha256:c362190fc61f28c9ed3657de0ae702694ce97f90da54617716b23d70b4d4771c"},
