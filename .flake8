@@ -1,10 +1,9 @@
 [flake8]
-select = B,B9,C,D,E,F,N,RST,S,W
+select = B,B9,C,D,E,F,N,RST,W
 ignore = E203,E501,W503
 max-line-length = 80
 max-complexity = 10
 docstring-convention = google
-per-file-ignores = tests/*:S101, S105
 rst-roles = class,const,func,meth,mod,ref
 rst-directives = deprecated
 ; darglint

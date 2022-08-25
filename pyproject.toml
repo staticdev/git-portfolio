@@ -2,7 +2,7 @@
 name = "git-portfolio"
 version = "0.20.0"
 description = "Git Portfolio"
-authors = ["staticdev <staticdev-support@protonmail.com>"]
+authors = ["staticdev <staticdev-support@proton.me>"]
 license = "MIT"
 readme = "README.rst"
 homepage = "https://github.com/staticdev/git-portfolio"
@@ -27,7 +27,9 @@ pyyaml = "^5.3.1"
 "github3.py" = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.1.2"
+bandit = ">=1.7.4"
+black = ">=22.6.0"
+coverage = {version = "6.4.4", extras = ["toml"]}
 safety = "^2.1.1"
 mypy = "^0.971"
 typeguard = "^2.13.3"
@@ -36,19 +38,17 @@ sphinx = "^4.3.2"
 sphinx-autobuild = "^2021.3.14"
 pre-commit = "^2.20.0"
 flake8 = "^4.0.1"
-flake8-bandit = "^3.0.0"
 flake8-bugbear = "^22.8.23"
 flake8-docstrings = "^1.6.0"
 flake8-rst-docstrings = "^0.2.7"
 pep8-naming = "^0.13.2"
 darglint = "^1.8.1"
-reorder-python-imports = "^3.8.2"
+pytest = "^7.1.2"
 pre-commit-hooks = "^4.3.0"
 pytest_mock = "^3.8.2"
-black = "^22.6"
+reorder-python-imports = "^3.8.2"
 sphinx-click = "^4.3.0"
 types-PyYAML = "^6.0.11"
-coverage = {version = "6.4.4", extras = ["toml"]}
 pyupgrade = "^2.37.3"
 furo = ">=2021.11.12"
 

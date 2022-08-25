@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 import pathlib
-import subprocess  # noqa: S404
+import subprocess  # nosec
 
 import git_portfolio.responses as res
 import git_portfolio.use_cases.command_checker as command_checker
@@ -34,7 +34,7 @@ class PoetryUseCase:
             folder_name = repo_name.split("/")[1]
             output = f"{folder_name}: "
             try:
-                popen = subprocess.Popen(  # noqa: S603, S607
+                popen = subprocess.Popen(  # nosec
                     # --ansi option makes output with colors
                     [command, *args, "--ansi"],
                     stdout=subprocess.PIPE,
