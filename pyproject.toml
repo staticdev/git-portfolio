@@ -9,8 +9,6 @@ homepage = "https://github.com/staticdev/git-portfolio"
 repository = "https://github.com/staticdev/git-portfolio"
 documentation = "https://git-portfolio.readthedocs.io"
 classifiers = [
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: MIT License",
@@ -20,7 +18,7 @@ classifiers = [
 Changelog = "https://github.com/staticdev/git-portfolio/releases"
 
 [tool.poetry.dependencies]
-python = "^3.7.0"
+python = "^3.9.0"
 click = ">=7,<9"
 inquirer = "^2.8.0"
 pyyaml = "^5.3.1"
