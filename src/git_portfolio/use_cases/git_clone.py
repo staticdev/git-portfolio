@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pathlib
-import subprocess  # noqa: S404
+import subprocess  # nosec
 
 import git_portfolio.github_service as ghs
 import git_portfolio.responses as res
@@ -36,7 +36,7 @@ class GitCloneUseCase:
             folder_name = repo_name.split("/")[1]
             clone_path = self.github_service.get_repo_url(repo_name)
             output = f"{folder_name}: "
-            popen = subprocess.Popen(  # noqa: S603, S607
+            popen = subprocess.Popen(  # nosec
                 ["git", "clone", clone_path],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

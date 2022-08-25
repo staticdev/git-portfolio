@@ -1,5 +1,5 @@
 """Command checker use case."""
-import subprocess  # noqa: S404
+import subprocess  # nosec
 
 
 class CommandChecker:
@@ -15,7 +15,7 @@ class CommandChecker:
             str: output message.
         """
         try:
-            popen = subprocess.Popen(  # noqa: S603, S607
+            popen = subprocess.Popen(  # nosec
                 command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE
             )
             popen.communicate()
