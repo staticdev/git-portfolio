@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "git-portfolio"
-version = "0.20.0"
+version = "1.0.0"
 description = "Git Portfolio"
 authors = ["staticdev <staticdev-support@proton.me>"]
 license = "MIT"
@@ -20,9 +20,9 @@ Changelog = "https://github.com/staticdev/git-portfolio/releases"
 [tool.poetry.dependencies]
 python = "^3.9.0"
 click = ">=7,<9"
+"github3.py" = "^3.0.0"
 inquirer = "^2.8.0"
 pyyaml = "^5.3.1"
-"github3.py" = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 bandit = ">=1.7.4"
