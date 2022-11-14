@@ -29,7 +29,7 @@ bandit = ">=1.7.4"
 black = ">=22.6.0"
 coverage = {version = "6.5.0", extras = ["toml"]}
 safety = "^2.3.1"
-mypy = "^0.990"
+mypy = "^0.991"
 typeguard = "^2.13.3"
 xdoctest = "^1.1.0"
 sphinx = "^5.1.1"
