@@ -6,6 +6,12 @@ import unittest
 import github3
 import pytest
 from pytest_mock import MockerFixture
+
+import git_portfolio.domain.gh_connection_settings as cs
+import git_portfolio.domain.issue as i
+import git_portfolio.domain.pull_request as pr
+import git_portfolio.github_service as gs
+import git_portfolio.request_objects.issue_list as il
 from tests.conftest import BRANCH_NAME
 from tests.conftest import DOMAIN_ISSUES
 from tests.conftest import DOMAIN_MPR
@@ -17,12 +23,6 @@ from tests.conftest import LABEL_ENHANCEMENT
 from tests.conftest import REPO
 from tests.conftest import REPO2
 from tests.conftest import SUCCESS_MSG
-
-import git_portfolio.domain.gh_connection_settings as cs
-import git_portfolio.domain.issue as i
-import git_portfolio.domain.pull_request as pr
-import git_portfolio.github_service as gs
-import git_portfolio.request_objects.issue_list as il
 
 
 class FakeGithubService(gs.AbstractGithubService):

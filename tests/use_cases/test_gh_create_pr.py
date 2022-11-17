@@ -3,15 +3,15 @@ from __future__ import annotations
 
 import pytest
 from pytest_mock import MockerFixture
-from tests.conftest import DOMAIN_PRS
-from tests.conftest import REPO
-from tests.conftest import SUCCESS_MSG
-from tests.test_github_service import FakeGithubService
 
 import git_portfolio.domain.config as c
 import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_create_pr as ghcp
+from tests.conftest import DOMAIN_PRS
+from tests.conftest import REPO
+from tests.conftest import SUCCESS_MSG
+from tests.test_github_service import FakeGithubService
 
 
 REQUEST_ISSUES = il.build_list_request(

@@ -2,6 +2,7 @@
 import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
 
+
 SUCCESS_VALUE = {"key": ["value1", "value2"]}
 GENERIC_RESPONSE_TYPE = "Response"
 GENERIC_RESPONSE_MESSAGE = "This is a response"

@@ -5,12 +5,12 @@ import click
 import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
-from tests.conftest import CLI_COMMAND
-from tests.conftest import REPO
 
 import git_portfolio.__main__
 import git_portfolio.github_service as gs
 import git_portfolio.responses as res
+from tests.conftest import CLI_COMMAND
+from tests.conftest import REPO
 
 
 @pytest.fixture

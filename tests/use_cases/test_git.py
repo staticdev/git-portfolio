@@ -1,12 +1,12 @@
 """Test cases for git use case."""
 import pytest
 from pytest_mock import MockerFixture
-from tests.conftest import REPO
-from tests.conftest import REPO2
-from tests.conftest import REPO_NAME
 
 import git_portfolio.responses as res
 import git_portfolio.use_cases.git as git
+from tests.conftest import REPO
+from tests.conftest import REPO2
+from tests.conftest import REPO_NAME
 
 
 @pytest.fixture

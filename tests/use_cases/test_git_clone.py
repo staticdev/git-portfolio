@@ -3,13 +3,13 @@ from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
+
+import git_portfolio.responses as res
+from git_portfolio.use_cases import git_clone as gcuc
 from tests.conftest import ERROR_MSG
 from tests.conftest import REPO
 from tests.conftest import REPO2
 from tests.conftest import REPO_NAME
-
-import git_portfolio.responses as res
-from git_portfolio.use_cases import git_clone as gcuc
 
 
 @pytest.fixture

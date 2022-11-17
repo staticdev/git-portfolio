@@ -1,8 +1,6 @@
 """Request for list of issues and/or pull requests."""
 from __future__ import annotations
 
-from collections.abc import Mapping
-
 
 class IssueListInvalidRequest:
     """Invalid request for list."""
@@ -44,10 +42,6 @@ def build_list_request(
     invalid_req = IssueListInvalidRequest()
 
     if filters is not None:
-        if not isinstance(filters, Mapping):
-            invalid_req.add_error("filters", "Is not iterable")
-            return invalid_req
-
         for key, value in filters.items():
             if key not in accepted_filters:
                 invalid_req.add_error("filters", f"Key {key} cannot be used.")
