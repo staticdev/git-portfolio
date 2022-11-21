@@ -428,11 +428,11 @@ python-versions = "*"
 
 [[package]]
 name = "inquirer"
-version = "2.10.1"
+version = "3.0.0"
 description = "Collection of common interactive command line user interfaces, based on Inquirer.js"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
 blessed = ">=1.19.0"
@@ -1228,7 +1228,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9.0"
-content-hash = "31f3ca08aa43cae13ee4e6be0da8ef30da527988609c232f5724e154a5553142"
+content-hash = "844e44db24adde59da711fad1711f62bfa9771a5fe10cbdac0c4a62a1518f2f1"
 
 [metadata.files]
 alabaster = [
@@ -1525,8 +1525,8 @@ iniconfig = [
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
 inquirer = [
-    {file = "inquirer-2.10.1-py3-none-any.whl", hash = "sha256:7a01977602214d6d86e8ddef3a1300927c4e58223eab69893e550604a0ac9477"},
-    {file = "inquirer-2.10.1.tar.gz", hash = "sha256:e9876258183e24f6e8c44136b04f6f2e18dd6684aee59b86a8057c50601a6523"},
+    {file = "inquirer-3.0.0-py3-none-any.whl", hash = "sha256:a16c93ded4f9ead42812067f386999aec74d10f131d9a2f7c9e5be131e9f9899"},
+    {file = "inquirer-3.0.0.tar.gz", hash = "sha256:528725bfd7e18b063727529d2983cfa61e0e512042365a7697d89930588cb686"},
 ]
 jinja2 = [
     {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
