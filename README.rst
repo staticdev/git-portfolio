@@ -1,7 +1,7 @@
 Git Portfolio
 =============
 
-|Status| |PyPI| |Python Version| |License|
+|PyPI| |Python Version| |License|
 
 |Read the Docs| |Tests| |Codecov|
 
