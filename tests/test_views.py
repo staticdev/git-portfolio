@@ -30,6 +30,17 @@ def test_action_with_filters() -> None:
     assert response.value == DOMAIN_ISSUES
 
 
+def test_action_handles_invalid_request(mocker: MockerFixture) -> None:
+    """It returns a paramters error."""
+    mock = mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
+    request = il.IssueListInvalidRequest()
+
+    response = views.issues(REPO, mock.return_value, request)
+
+    assert isinstance(response, res.ResponseFailure)
+    assert response.value == {"type": res.ResponseTypes.PARAMETERS_ERROR, "message": ""}
+
+
 def test_action_handles_generic_error(mocker: MockerFixture) -> None:
     """It returns a system error."""
     mock = mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
