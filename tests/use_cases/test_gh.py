@@ -3,15 +3,15 @@ from __future__ import annotations
 
 import pytest
 from pytest_mock import MockerFixture
+
+import git_portfolio.domain.config as c
+import git_portfolio.responses as res
+import git_portfolio.use_cases.gh as gh
 from tests.conftest import ERROR_MSG
 from tests.conftest import REPO
 from tests.conftest import REPO2
 from tests.conftest import SUCCESS_MSG
 from tests.test_github_service import FakeGithubService
-
-import git_portfolio.domain.config as c
-import git_portfolio.responses as res
-import git_portfolio.use_cases.gh as gh
 
 
 class FakeGhUseCase(gh.GhUseCase):

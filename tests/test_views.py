@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 from pytest_mock import MockerFixture
-from tests.conftest import DOMAIN_ISSUES
-from tests.conftest import REPO
-from tests.test_github_service import FakeGithubService
 
 import git_portfolio.request_objects.issue_list as il
 import git_portfolio.responses as res
 import git_portfolio.views as views
+from tests.conftest import DOMAIN_ISSUES
+from tests.conftest import REPO
+from tests.test_github_service import FakeGithubService
 
 
 def test_action_without_parameters() -> None:
@@ -30,6 +30,17 @@ def test_action_with_filters() -> None:
     assert response.value == DOMAIN_ISSUES
 
 
+def test_action_handles_invalid_request(mocker: MockerFixture) -> None:
+    """It returns a paramters error."""
+    mock = mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
+    request = il.IssueListInvalidRequest()
+
+    response = views.issues(REPO, mock.return_value, request)
+
+    assert isinstance(response, res.ResponseFailure)
+    assert response.value == {"type": res.ResponseTypes.PARAMETERS_ERROR, "message": ""}
+
+
 def test_action_handles_generic_error(mocker: MockerFixture) -> None:
     """It returns a system error."""
     mock = mocker.patch("git_portfolio.github_service.GithubService", autospec=True)
@@ -44,16 +55,4 @@ def test_action_handles_generic_error(mocker: MockerFixture) -> None:
     assert response.value == {
         "type": res.ResponseTypes.SYSTEM_ERROR,
         "message": "Exception: Just an error message",
-    }
-
-
-def test_action_handles_bad_request() -> None:
-    """It returns a parameters error."""
-    request = il.build_list_request(filters=5)  # type: ignore
-    response = views.issues(REPO, FakeGithubService(), request)
-
-    assert isinstance(response, res.ResponseFailure)
-    assert response.value == {
-        "type": res.ResponseTypes.PARAMETERS_ERROR,
-        "message": "filters: Is not iterable",
     }

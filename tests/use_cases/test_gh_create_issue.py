@@ -1,13 +1,13 @@
 """Test cases for the Github create issue use case."""
 import pytest
 from pytest_mock import MockerFixture
-from tests.conftest import DOMAIN_ISSUES
-from tests.conftest import REPO
-from tests.conftest import SUCCESS_MSG
 
 import git_portfolio.domain.config as c
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_create_issue as ghci
+from tests.conftest import DOMAIN_ISSUES
+from tests.conftest import REPO
+from tests.conftest import SUCCESS_MSG
 
 
 @pytest.fixture

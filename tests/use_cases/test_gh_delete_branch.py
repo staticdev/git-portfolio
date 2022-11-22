@@ -1,12 +1,12 @@
 """Test cases for the Github delete branch use case."""
 import pytest
 from pytest_mock import MockerFixture
-from tests.conftest import BRANCH_NAME
-from tests.conftest import REPO
 
 import git_portfolio.domain.config as c
 import git_portfolio.responses as res
 import git_portfolio.use_cases.gh_delete_branch as ghdb
+from tests.conftest import BRANCH_NAME
+from tests.conftest import REPO
 
 
 @pytest.fixture
