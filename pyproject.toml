@@ -47,7 +47,7 @@ pre-commit-hooks = "^4.4.0"
 pytest_mock = "^3.10.0"
 sphinx-click = "^4.3.0"
 types-PyYAML = "^6.0.12"
-pyupgrade = "^3.3.0"
+pyupgrade = "^3.3.1"
 furo = ">=2021.11.12"
 
 [tool.poetry.scripts]
