@@ -19,9 +19,8 @@ classifiers = [
 Changelog = "https://github.com/staticdev/git-portfolio/releases"
 
 [tool.poetry.dependencies]
-# <4 because of pending https://github.com/terrencepreilly/darglint/pull/190
-python = ">=3.9.0,<4"
-click = ">=7,<9"
+python = ">=3.9.0"
+click = ">=8.0.0,<9"
 "github3.py" = ">=3.2.0"
 inquirer = ">=2.10.1"
 pyyaml = ">=5.3.1"
@@ -29,26 +28,25 @@ pyyaml = ">=5.3.1"
 [tool.poetry.dev-dependencies]
 bandit = ">=1.7.4"
 black = ">=22.6.0"
-coverage = {version = "6.5.0", extras = ["toml"]}
-darglint = ">=1.8.1"
+coverage = {extras = ["toml"], version = ">=6.5.0"}
+flake8 = ">=6.0.0"
+flake8-bugbear = ">=22.12.6"
+flake8-docstrings = ">=1.6.0"
+furo = ">=2021.11.12"
 mypy = ">=0.991"
+pep8-naming = ">=0.13.2"
+pre-commit = ">=2.20.0"
+pre-commit-hooks = ">=4.4.0"
+pytest = ">=7.2.0"
+pytest_mock = ">=3.10.0"
 safety = ">=2.3.1"
 sphinx = ">=5.1.1"
 sphinx-autobuild = ">=2021.3.14"
+sphinx-click = ">=4.3.0"
 typeguard = ">=2.13.3"
-xdoctest = ">=1.1.0"
-pre-commit = "^2.20.0"
-flake8 = "^6.0.0"
-flake8-bugbear = "^22.12.6"
-flake8-docstrings = "^1.6.0"
-pep8-naming = "^0.13.2"
-pytest = "^7.2.0"
-pre-commit-hooks = "^4.4.0"
-pytest_mock = "^3.10.0"
-sphinx-click = "^4.3.0"
-types-PyYAML = "^6.0.12"
-pyupgrade = "^3.3.1"
-furo = ">=2021.11.12"
+types-PyYAML = ">=6.0.12"
+pyupgrade = ">=3.3.1"
+xdoctest = {extras = ["colors"], version = ">=1.1.0"}
 
 [tool.poetry.scripts]
 gitp = "git_portfolio.__main__:main"
