@@ -1,4 +1,6 @@
+```{eval-rst}
 .. include:: ../CONTRIBUTING.rst
    :end-before: github-only
+```
 
-.. _Code of Conduct: codeofconduct.html
+[code of conduct]: codeofconduct.html
