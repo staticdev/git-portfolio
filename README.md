@@ -90,7 +90,7 @@ please [file an issue] along with a detailed description.
 
 This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter] template.
 
-% github-only
+<!-- github-only -->
 
 [@cjolowicz]: https://github.com/cjolowicz
 [contributor guide]: https://git-portfolio.readthedocs.io/en/latest/contributing.html
