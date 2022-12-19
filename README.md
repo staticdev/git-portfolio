@@ -46,7 +46,7 @@ You can install _Git Portfolio_ via [pip] from [PyPI]:
 $ pip install git-portfolio
 ```
 
-% basic-usage
+<!-- basic-usage -->
 
 ## Basic usage
 
@@ -67,7 +67,7 @@ $ gitp poetry version minor  # bumps minor version of all projects that have pyp
 Note: by convention GitHub commands are always the resource name and action: eg. `branches delete`, `issues create` and `prs merge` (for pull requests).
 This avoid conflicts with batch git commands, as in `gitp branch` (executes git command) and `gitp branches delete` (execute operations using GitHub API).
 
-% end-basic-usage
+<!-- end-basic-usage -->
 
 Complete instructions can be found at [git-portfolio.readthedocs.io].
 
@@ -78,7 +78,7 @@ To learn more, see the [Contributor Guide].
 
 ## License
 
-Distributed under the terms of the [MIT] license,
+Distributed under the terms of the [MIT license][license],
 _Git Portfolio_ is free and open source software.
 
 ## Issues
@@ -92,6 +92,7 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 
 <!-- github-only -->
 
+[license]: https://github.com/staticdev/git-portfolio/blob/main/LICENSE
 [@cjolowicz]: https://github.com/cjolowicz
 [contributor guide]: https://git-portfolio.readthedocs.io/en/latest/contributing.html
 [cookiecutter]: https://github.com/audreyr/cookiecutter
