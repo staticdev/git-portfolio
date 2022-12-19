@@ -6,11 +6,11 @@ name: Check documentation
     - cron: "0 1 * * *" # everyday at 1am
   push:
     paths:
-      - "**.rst"
+      - "**.md"
       - "docs/**"
   pull_request:
     paths:
-      - "**.rst"
+      - "**.md"
       - "docs/**"
 
 jobs:

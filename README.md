@@ -32,7 +32,7 @@
 
 Important: safeguard your token (once created you won't be able to see it again).
 
-- Install [git] (optional) -  this is needed for all [git] commands. For colored outputs please use the configuration:
+- Install [git] (optional) - this is needed for all [git] commands. For colored outputs please use the configuration:
 
 ```console
 $ git config --global color.ui always
@@ -40,7 +40,7 @@ $ git config --global color.ui always
 
 ## Installation
 
-You can install *Git Portfolio* via [pip] from [PyPI]:
+You can install _Git Portfolio_ via [pip] from [PyPI]:
 
 ```console
 $ pip install git-portfolio
@@ -79,7 +79,7 @@ To learn more, see the [Contributor Guide].
 ## License
 
 Distributed under the terms of the [MIT] license,
-*Git Portfolio* is free and open source software.
+_Git Portfolio_ is free and open source software.
 
 ## Issues
 

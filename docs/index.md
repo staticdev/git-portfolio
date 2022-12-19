@@ -1,5 +1,5 @@
 ```{eval-rst}
-.. include:: ../README.rst
+.. include:: ../README.md
    :end-before: github-only
 ```
 

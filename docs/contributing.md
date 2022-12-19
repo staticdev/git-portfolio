@@ -1,5 +1,5 @@
 ```{eval-rst}
-.. include:: ../CONTRIBUTING.rst
+.. include:: ../CONTRIBUTING.md
    :end-before: github-only
 ```
 

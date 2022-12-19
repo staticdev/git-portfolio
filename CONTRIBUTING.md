@@ -97,7 +97,7 @@ This will allow a chance to talk it over with the owners and validate your appro
 
 % github-only
 
-[code of conduct]: CODE_OF_CONDUCT.rst
+[code of conduct]: CODE_OF_CONDUCT.md
 [documentation]: https://git-portfolio.readthedocs.io/
 [issue tracker]: https://github.com/staticdev/git-portfolio/issues
 [nox]: https://nox.thea.codes/

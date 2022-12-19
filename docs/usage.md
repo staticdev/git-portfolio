@@ -1,7 +1,7 @@
 # Usage
 
 ```{eval-rst}
-.. include:: ../README.rst
+.. include:: ../README.md
    :start-after: basic-usage
    :end-before: end-basic-usage
 
