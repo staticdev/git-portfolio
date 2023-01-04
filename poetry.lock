@@ -334,7 +334,7 @@ uritemplate = ">=3.0.0"
 
 [[package]]
 name = "gitpython"
-version = "3.1.29"
+version = "3.1.30"
 description = "GitPython is a python library used to interact with Git repositories"
 category = "dev"
 optional = false
@@ -1420,8 +1420,8 @@ github3-py = [
     {file = "github3.py-3.2.0.tar.gz", hash = "sha256:09b72be1497d346b0968cde8360a0d6af79dc206d0149a63cd3ec86c65c377cc"},
 ]
 gitpython = [
-    {file = "GitPython-3.1.29-py3-none-any.whl", hash = "sha256:41eea0deec2deea139b459ac03656f0dd28fc4a3387240ec1d3c259a2c47850f"},
-    {file = "GitPython-3.1.29.tar.gz", hash = "sha256:cc36bfc4a3f913e66805a28e84703e419d9c264c1077e537b54f0e1af85dbefd"},
+    {file = "GitPython-3.1.30-py3-none-any.whl", hash = "sha256:cd455b0000615c60e286208ba540271af9fe531fa6a87cc590a7298785ab2882"},
+    {file = "GitPython-3.1.30.tar.gz", hash = "sha256:769c2d83e13f5d938b7688479da374c4e3d49f71549aaf462b646db9602ea6f8"},
 ]
 identify = [
     {file = "identify-2.5.10-py2.py3-none-any.whl", hash = "sha256:fb7c2feaeca6976a3ffa31ec3236a6911fbc51aec9acc111de2aed99f244ade2"},
